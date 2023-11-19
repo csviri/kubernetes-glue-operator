@@ -1,5 +1,6 @@
 package io.csviri.operator.workflow.customresource;
 
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
 import java.util.List;
@@ -10,24 +11,15 @@ public class DependentResourceSpec {
     private String name;
 
     // templating, eventually with QUTE
-    private String resourceTemplate;
+//  private String resourceTemplate;
 
-    // alternative resource definition
-    // private KubernetesResource resource;
+//  alternative resource definition
+    private GenericKubernetesResource resource;
 
     private List<String> dependsOn;
 
     // the reconcile condition in JOSDK
     private Condition condition;
-
-    public String getResourceTemplate() {
-        return resourceTemplate;
-    }
-
-    public DependentResourceSpec setResourceTemplate(String resourceTemplate) {
-        this.resourceTemplate = resourceTemplate;
-        return this;
-    }
 
     public String getName() {
         return name;
@@ -53,6 +45,15 @@ public class DependentResourceSpec {
 
     public DependentResourceSpec setCondition(Condition condition) {
         this.condition = condition;
+        return this;
+    }
+
+    public GenericKubernetesResource getResource() {
+        return resource;
+    }
+
+    public DependentResourceSpec setResource(GenericKubernetesResource resource) {
+        this.resource = resource;
         return this;
     }
 }

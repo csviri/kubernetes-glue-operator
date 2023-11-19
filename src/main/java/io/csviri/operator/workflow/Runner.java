@@ -13,6 +13,6 @@ public class Runner {
         Operator operator = new Operator();
         operator.register(new WorkflowReconciler());
         operator.start();
-        log.info("Operator started.");
+        log.info("Workflow controller started.");
     }
 }

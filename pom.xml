@@ -14,11 +14,11 @@
         <java.version>11</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <josdk.version>4.5.0</josdk.version>
+        <josdk.version>4.6.0-SNAPSHOT</josdk.version>
         <slf4j.version>1.7.36</slf4j.version>
         <junit.version>5.9.2</junit.version>
         <log4j.version>2.20.0</log4j.version>
-        <fabric8-client.version>6.7.2</fabric8-client.version>
+        <fabric8-client.version>6.9.2</fabric8-client.version>
     </properties>
 
     <dependencyManagement>
@@ -37,7 +37,6 @@
         <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework</artifactId>
-            <version>${josdk.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -48,7 +47,6 @@
         <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework-junit-5</artifactId>
-            <version>${josdk.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -77,6 +75,11 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
             <version>${junit.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.javaoperatorsdk</groupId>
+            <artifactId>operator-framework-junit-5</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <build>
