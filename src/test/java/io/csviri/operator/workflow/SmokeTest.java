@@ -1,11 +1,9 @@
 package io.csviri.operator.workflow;
 
 import io.csviri.operator.workflow.customresource.DependentResourceSpec;
-import io.csviri.operator.workflow.customresource.WorkflowCustomResource;
+import io.csviri.operator.workflow.customresource.Workflow;
 import io.csviri.operator.workflow.customresource.WorkflowSpec;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import org.junit.jupiter.api.Test;
@@ -35,8 +33,8 @@ class SmokeTest {
         });
     }
 
-    WorkflowCustomResource testWorkflow() {
-        var resource = new WorkflowCustomResource();
+    Workflow testWorkflow() {
+        var resource = new Workflow();
         resource.setMetadata(new ObjectMetaBuilder()
                 .withName("test1")
                 .build());
@@ -50,7 +48,7 @@ class SmokeTest {
         try (InputStream is = SmokeTest.class.getResourceAsStream("/ConfigMap.yaml")) {
         var spec = new DependentResourceSpec();
 
-            var cm = Serialization.unmarshal(is, GenericKubernetesResource.class);
+            var cm = Serialization.unmarshal(is, HasMetadata.class);
             spec.setResource(cm);
             return spec;
         } catch (IOException e) {

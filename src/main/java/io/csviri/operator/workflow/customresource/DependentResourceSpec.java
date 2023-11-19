@@ -1,6 +1,7 @@
 package io.csviri.operator.workflow.customresource;
 
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.KubernetesResource;
 
 import java.util.List;
@@ -14,7 +15,7 @@ public class DependentResourceSpec {
 //  private String resourceTemplate;
 
 //  alternative resource definition
-    private GenericKubernetesResource resource;
+    private HasMetadata resource;
 
     private List<String> dependsOn;
 
@@ -48,11 +49,11 @@ public class DependentResourceSpec {
         return this;
     }
 
-    public GenericKubernetesResource getResource() {
+    public HasMetadata getResource() {
         return resource;
     }
 
-    public DependentResourceSpec setResource(GenericKubernetesResource resource) {
+    public DependentResourceSpec setResource(HasMetadata resource) {
         this.resource = resource;
         return this;
     }

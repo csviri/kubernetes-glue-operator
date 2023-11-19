@@ -7,5 +7,5 @@ import io.fabric8.kubernetes.model.annotation.Version;
 
 @Group("io.csviri.operator.workflow")
 @Version("v1")
-public class WorkflowCustomResource extends CustomResource<WorkflowSpec, WorkflowStatus> implements Namespaced {
+public class Workflow extends CustomResource<WorkflowSpec, WorkflowStatus> implements Namespaced {
 }
