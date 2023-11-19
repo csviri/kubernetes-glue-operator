@@ -12,8 +12,14 @@ public class WorkflowSpec {
         return resources;
     }
 
-    public WorkflowSpec setResources(List<DependentResourceSpec> resources) {
+    public void setResources(List<DependentResourceSpec> resources) {
         this.resources = resources;
-        return this;
+    }
+
+    @Override
+    public String toString() {
+        return "WorkflowSpec{" +
+                "resources=" + resources +
+                '}';
     }
 }

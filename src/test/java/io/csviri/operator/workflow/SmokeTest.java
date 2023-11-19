@@ -4,6 +4,7 @@ import io.csviri.operator.workflow.customresource.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.Workflow;
 import io.csviri.operator.workflow.customresource.WorkflowSpec;
 import io.fabric8.kubernetes.api.model.*;
+import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import org.junit.jupiter.api.Test;
