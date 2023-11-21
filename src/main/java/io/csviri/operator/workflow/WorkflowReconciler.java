@@ -53,11 +53,19 @@ public class WorkflowReconciler implements Reconciler<Workflow> {
       builder.addDependentResource(dr);
       // todo descriptive error handling
       spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
+
       var readyPostConditionDefinition = spec.getReadyPostCondition();
       if (readyPostConditionDefinition != null) {
         builder.withReadyPostcondition(toCondition(readyPostConditionDefinition));
       }
-
+      var condition = spec.getCondition();
+      if (condition != null) {
+        builder.withReconcilePrecondition(toCondition(condition));
+      }
+      var deletePostCondition = spec.getDeletePostCondition();
+      if (condition != null) {
+        builder.withDeletePostcondition(toCondition(deletePostCondition));
+      }
     });
     return builder.build();
   }
@@ -70,5 +78,5 @@ public class WorkflowReconciler implements Reconciler<Workflow> {
     throw new IllegalStateException("Unknown condition: " + readyPostConditionDefinition);
   }
 
-  // todo cleanup, deregister event sources
+  // todo cleanup, deregister event sources - smart ES management
 }
