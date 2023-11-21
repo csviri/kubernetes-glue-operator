@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow.customresource;
+package io.csviri.operator.workflow.customresource.workflow;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;

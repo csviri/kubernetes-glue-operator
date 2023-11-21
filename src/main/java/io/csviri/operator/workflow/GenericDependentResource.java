@@ -1,6 +1,6 @@
 package io.csviri.operator.workflow;
 
-import io.csviri.operator.workflow.customresource.Workflow;
+import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.javaoperatorsdk.operator.api.reconciler.Context;

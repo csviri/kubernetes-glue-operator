@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow.customresource;
+package io.csviri.operator.workflow.customresource.workflow;
 
 public class PodsReadyConditionSpec extends ConditionSpec {
 

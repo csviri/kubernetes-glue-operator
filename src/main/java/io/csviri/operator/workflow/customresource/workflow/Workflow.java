@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow.customresource;
+package io.csviri.operator.workflow.customresource.workflow;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;

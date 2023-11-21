@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
-import io.csviri.operator.workflow.customresource.ConditionSpec;
-import io.csviri.operator.workflow.customresource.PodsReadyConditionSpec;
-import io.csviri.operator.workflow.customresource.Workflow;
+import io.csviri.operator.workflow.customresource.workflow.ConditionSpec;
+import io.csviri.operator.workflow.customresource.workflow.PodsReadyConditionSpec;
+import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;

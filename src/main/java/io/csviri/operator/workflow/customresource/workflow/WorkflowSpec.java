@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow.customresource;
+package io.csviri.operator.workflow.customresource.workflow;
 
 import java.util.List;
 
