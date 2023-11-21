@@ -1,10 +1,10 @@
 package io.csviri.operator.workflow;
 
 import io.csviri.operator.workflow.customresource.DependentResourceSpec;
+import io.csviri.operator.workflow.customresource.PodsReadyConditionSpec;
 import io.csviri.operator.workflow.customresource.Workflow;
 import io.csviri.operator.workflow.customresource.WorkflowSpec;
 import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import org.junit.jupiter.api.Test;
@@ -48,7 +48,7 @@ class SmokeTest {
     private DependentResourceSpec dependentSpec() {
         try (InputStream is = SmokeTest.class.getResourceAsStream("/ConfigMap.yaml")) {
         var spec = new DependentResourceSpec();
-
+            spec.setReadyPostCondition(new PodsReadyConditionSpec());
             var cm = Serialization.unmarshal(is, HasMetadata.class);
             spec.setResource(cm);
             return spec;
