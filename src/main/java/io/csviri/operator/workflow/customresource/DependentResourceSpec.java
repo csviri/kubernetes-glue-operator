@@ -1,84 +1,83 @@
 package io.csviri.operator.workflow.customresource;
 
-import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
-import io.fabric8.kubernetes.api.model.HasMetadata;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 
 public class DependentResourceSpec {
 
-    private String name;
+  private String name;
 
-    // templating, eventually with QUTE
-//  private String resourceTemplate;
+  // templating, eventually with QUTE
+  // private String resourceTemplate;
 
-    //  alternative resource definition
-    @PreserveUnknownFields
-    private HasMetadata resource;
+  // alternative resource definition
+  @PreserveUnknownFields
+  private HasMetadata resource;
 
-    private List<String> dependsOn = new ArrayList<>();
+  private List<String> dependsOn = new ArrayList<>();
 
-    @PreserveUnknownFields
-    private ConditionSpec readyPostCondition;
+  @PreserveUnknownFields
+  private ConditionSpec readyPostCondition;
 
-    private ConditionSpec condition;
+  private ConditionSpec condition;
 
-    private ConditionSpec deletePostCondition;
+  private ConditionSpec deletePostCondition;
 
-    public String getName() {
-        return name;
-    }
+  public String getName() {
+    return name;
+  }
 
-    public DependentResourceSpec setName(String name) {
-        this.name = name;
-        return this;
-    }
+  public DependentResourceSpec setName(String name) {
+    this.name = name;
+    return this;
+  }
 
-    public List<String> getDependsOn() {
-        return dependsOn;
-    }
+  public List<String> getDependsOn() {
+    return dependsOn;
+  }
 
-    public DependentResourceSpec setDependsOn(List<String> dependsOn) {
-        this.dependsOn = dependsOn;
-        return this;
-    }
+  public DependentResourceSpec setDependsOn(List<String> dependsOn) {
+    this.dependsOn = dependsOn;
+    return this;
+  }
 
-    public ConditionSpec getReadyPostCondition() {
-        return readyPostCondition;
-    }
+  public ConditionSpec getReadyPostCondition() {
+    return readyPostCondition;
+  }
 
-    public DependentResourceSpec setReadyPostCondition(ConditionSpec readyPostConditionSpec) {
-        this.readyPostCondition = readyPostConditionSpec;
-        return this;
-    }
+  public DependentResourceSpec setReadyPostCondition(ConditionSpec readyPostConditionSpec) {
+    this.readyPostCondition = readyPostConditionSpec;
+    return this;
+  }
 
 
-    public HasMetadata getResource() {
-        return resource;
-    }
+  public HasMetadata getResource() {
+    return resource;
+  }
 
-    public DependentResourceSpec setResource(HasMetadata resource) {
-        this.resource = resource;
-        return this;
-    }
+  public DependentResourceSpec setResource(HasMetadata resource) {
+    this.resource = resource;
+    return this;
+  }
 
-    public ConditionSpec getCondition() {
-        return condition;
-    }
+  public ConditionSpec getCondition() {
+    return condition;
+  }
 
-    public DependentResourceSpec setCondition(ConditionSpec conditionSpec) {
-        this.condition = conditionSpec;
-        return this;
-    }
+  public DependentResourceSpec setCondition(ConditionSpec conditionSpec) {
+    this.condition = conditionSpec;
+    return this;
+  }
 
-    public ConditionSpec getDeletePostCondition() {
-        return deletePostCondition;
-    }
+  public ConditionSpec getDeletePostCondition() {
+    return deletePostCondition;
+  }
 
-    public DependentResourceSpec setDeletePostCondition(ConditionSpec deletePostConditionSpec) {
-        this.deletePostCondition = deletePostConditionSpec;
-        return this;
-    }
+  public DependentResourceSpec setDeletePostCondition(ConditionSpec deletePostConditionSpec) {
+    this.deletePostCondition = deletePostConditionSpec;
+    return this;
+  }
 }
