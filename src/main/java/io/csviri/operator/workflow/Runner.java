@@ -14,5 +14,6 @@ public class Runner {
     operator.register(new WorkflowReconciler());
     operator.start();
     log.info("Workflow controller started.");
+
   }
 }
