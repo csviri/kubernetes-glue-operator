@@ -1,5 +1,5 @@
 apiVersion: io.csviri.operator.workflow/v1
-kind: WorkflowOperatorCustomResource
+kind: Workflow
 metadata:
   name: test1
 spec:

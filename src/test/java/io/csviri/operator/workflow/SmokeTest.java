@@ -20,6 +20,8 @@ import static org.awaitility.Awaitility.await;
 
 class SmokeTest {
 
+  public static final String RESOURCE_NAME = "test1";
+
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder().withReconciler(new WorkflowReconciler())
@@ -27,11 +29,18 @@ class SmokeTest {
 
   @Test
   void smokeTest() {
-    extension.create(testWorkflow());
+    var w = extension.create(testWorkflow());
 
     await().untilAsserted(() -> {
       var cm = extension.get(ConfigMap.class, "test1");
       assertThat(cm).isNotNull();
+    });
+
+    extension.delete(w);
+
+    await().untilAsserted(() -> {
+      var cm = extension.get(ConfigMap.class, RESOURCE_NAME);
+      assertThat(cm).isNull();
     });
   }
 

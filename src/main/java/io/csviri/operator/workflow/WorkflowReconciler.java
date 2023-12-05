@@ -35,9 +35,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       GenericDependentResource genericDependentResource = (GenericDependentResource) dr;
-      context.eventSourceRetriever().dynamicallyRegisterEventSource(genericDependentResource.getGroupVersionKind().toString(),
+      context.eventSourceRetriever().dynamicallyRegisterEventSource(
+          genericDependentResource.getGroupVersionKind().toString(),
           (EventSource) dr.eventSource(esc).orElseThrow());
-      markEventSource(genericDependentResource,primary);
+      markEventSource(genericDependentResource, primary);
     });
 
     actualWorkflow.reconcile(primary, context);
@@ -90,26 +91,28 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
     // todo handle race condition between registration and deregistration
     var actualWorkflow = buildWorkflow(primary);
-    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n,dr)->{
-        var genericDependentResource = (GenericDependentResource) dr;
-        var lastForGVK = unmarkEventSource(genericDependentResource,primary);
-        if (lastForGVK) {
-          context.eventSourceRetriever().dynamicallyDeRegisterEventSource(genericDependentResource
-                  .getGroupVersionKind().toString());
-        }
+    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
+      var genericDependentResource = (GenericDependentResource) dr;
+      var lastForGVK = unmarkEventSource(genericDependentResource, primary);
+      if (lastForGVK) {
+        context.eventSourceRetriever().dynamicallyDeRegisterEventSource(genericDependentResource
+            .getGroupVersionKind().toString());
+      }
     });
     return DeleteControl.defaultDelete();
   }
 
-  private synchronized void markEventSource(GenericDependentResource genericDependentResource, Workflow workflow) {
+  private synchronized void markEventSource(GenericDependentResource genericDependentResource,
+      Workflow workflow) {
     var key = genericDependentResource.getGroupVersionKind().toString();
-    registeredEventSources.merge(key,new HashSet<>(Set.of(workflowId(workflow))),(s1,s2)->{
-       s1.addAll(s2);
-       return s1;
+    registeredEventSources.merge(key, new HashSet<>(Set.of(workflowId(workflow))), (s1, s2) -> {
+      s1.addAll(s2);
+      return s1;
     });
   }
 
-  private synchronized boolean unmarkEventSource(GenericDependentResource genericDependentResource, Workflow workflow) {
+  private synchronized boolean unmarkEventSource(GenericDependentResource genericDependentResource,
+      Workflow workflow) {
     var key = genericDependentResource.getGroupVersionKind().toString();
     var es = registeredEventSources.get(key);
     es.remove(workflowId(workflow));
@@ -117,7 +120,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   }
 
   private String workflowId(Workflow workflow) {
-    return workflow.getMetadata().getName()+"#"+workflow.getMetadata().getNamespace();
+    return workflow.getMetadata().getName() + "#" + workflow.getMetadata().getNamespace();
   }
 
 }
