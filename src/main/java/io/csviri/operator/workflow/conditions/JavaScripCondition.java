@@ -8,9 +8,13 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
 public class JavaScripCondition<R extends HasMetadata> implements Condition<R, Workflow> {
 
+  private String condition;
+
   @Override
   public boolean isMet(DependentResource<R, Workflow> dependentResource, Workflow workflow,
       Context<Workflow> context) {
+
+
     return false;
   }
 

@@ -18,7 +18,7 @@ import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class SmokeTest {
+class WorkflowSmokeTest {
 
   public static final String RESOURCE_NAME = "test1";
 
@@ -56,7 +56,7 @@ class SmokeTest {
   }
 
   private DependentResourceSpec dependentSpec() {
-    try (InputStream is = SmokeTest.class.getResourceAsStream("/ConfigMap.yaml")) {
+    try (InputStream is = WorkflowSmokeTest.class.getResourceAsStream("/ConfigMap.yaml")) {
       var spec = new DependentResourceSpec();
       spec.setReadyPostCondition(new PodsReadyConditionSpec());
       var cm = Serialization.unmarshal(is, GenericKubernetesResource.class);
