@@ -13,7 +13,6 @@ public class DependentResourceSpec {
   // templating, eventually with QUTE
   // private String resourceTemplate;
 
-  // alternative resource definition
   @PreserveUnknownFields
   private GenericKubernetesResource resource;
 
@@ -22,8 +21,10 @@ public class DependentResourceSpec {
   @PreserveUnknownFields
   private ConditionSpec readyPostCondition;
 
+  @PreserveUnknownFields
   private ConditionSpec condition;
 
+  @PreserveUnknownFields
   private ConditionSpec deletePostCondition;
 
   public String getName() {
