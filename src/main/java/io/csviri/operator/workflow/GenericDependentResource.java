@@ -32,4 +32,9 @@ public class GenericDependentResource
     }
     return desired;
   }
+
+  @Override
+  public Result<GenericKubernetesResource> match(GenericKubernetesResource actualResource, Workflow primary, Context<Workflow> context) {
+    return Result.nonComputed(false);
+  }
 }
