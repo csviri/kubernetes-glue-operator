@@ -50,7 +50,7 @@ class SmokeTest {
     try (InputStream is = SmokeTest.class.getResourceAsStream("/ConfigMap.yaml")) {
       var spec = new DependentResourceSpec();
       spec.setReadyPostCondition(new PodsReadyConditionSpec());
-      var cm = Serialization.unmarshal(is, HasMetadata.class);
+      var cm = Serialization.unmarshal(is, GenericKubernetesResource.class);
       spec.setResource(cm);
       return spec;
     } catch (IOException e) {

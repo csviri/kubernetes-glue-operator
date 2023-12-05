@@ -21,7 +21,6 @@ public class WorkflowReconciler implements Reconciler<Workflow> {
 
     var workflow = buildWorkflow(primary);
 
-
     var esc = new EventSourceContext<>(null, // todo fix this null?
         context.getControllerConfiguration(),
         context.getClient());
@@ -44,7 +43,7 @@ public class WorkflowReconciler implements Reconciler<Workflow> {
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
 
     primary.getSpec().getResources().forEach(spec -> {
-      var dr = new GenericDependentResource(spec.getResource().getClass(), spec.getResource());
+      var dr = new GenericDependentResource(spec.getResource());
       String name = spec.getName() == null || spec.getName().isBlank()
           ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
           : spec.getName();

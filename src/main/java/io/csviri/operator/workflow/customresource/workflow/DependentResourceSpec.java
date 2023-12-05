@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
-import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 
 public class DependentResourceSpec {
 
@@ -15,7 +15,7 @@ public class DependentResourceSpec {
 
   // alternative resource definition
   @PreserveUnknownFields
-  private HasMetadata resource;
+  private GenericKubernetesResource resource;
 
   private List<String> dependsOn = new ArrayList<>();
 
@@ -54,11 +54,11 @@ public class DependentResourceSpec {
   }
 
 
-  public HasMetadata getResource() {
+  public GenericKubernetesResource getResource() {
     return resource;
   }
 
-  public DependentResourceSpec setResource(HasMetadata resource) {
+  public DependentResourceSpec setResource(GenericKubernetesResource resource) {
     this.resource = resource;
     return this;
   }
