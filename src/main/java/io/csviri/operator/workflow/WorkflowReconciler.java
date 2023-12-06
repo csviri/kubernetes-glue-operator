@@ -12,6 +12,7 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
@@ -29,19 +30,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
-    var actualWorkflow = buildWorkflow(primary);
-
-    var esc = new EventSourceContext<>(null, // todo fix this null?
-        context.getControllerConfiguration(),
-        context.getClient());
-
-    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
-      GenericDependentResource genericDependentResource = (GenericDependentResource) dr;
-      context.eventSourceRetriever().dynamicallyRegisterEventSource(
-          genericDependentResource.getGroupVersionKind().toString(),
-          (EventSource) dr.eventSource(esc).orElseThrow());
-      markEventSource(genericDependentResource, primary);
-    });
+    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
 
     actualWorkflow.reconcile(primary, context);
 
@@ -49,16 +38,38 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
-  private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflow(
-      Workflow primary) {
+  private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterEventSources(
+      Workflow primary, Context<Workflow> context) {
     var builder = new WorkflowBuilder<Workflow>();
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
+
+    var esc = new EventSourceContext<>(null, // todo fix this null?
+        context.getControllerConfiguration(),
+        context.getClient());
 
     primary.getSpec().getResources().forEach(spec -> {
       var dr = new GenericDependentResource(spec.getResource());
       String name = spec.getName() == null || spec.getName().isBlank()
           ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
           : spec.getName();
+
+      var gvk = dr.getGroupVersionKind().toString();
+
+      EventSource es = null;
+      try {
+        es = context.eventSourceRetriever()
+            .getResourceEventSourceFor(GenericKubernetesResource.class, gvk);
+      } catch (IllegalArgumentException e) {
+        // was not able to find es
+      }
+      if (es == null) {
+        // todo race condition?
+        context.eventSourceRetriever().dynamicallyRegisterEventSource(
+            name, dr.eventSource(esc).orElseThrow());
+        markEventSource(dr, primary);
+      } else {
+        dr.useEventSourceWithName(gvk);
+      }
 
       genericDependentResourceMap.put(name, dr);
       builder.addDependentResource(dr);
@@ -94,7 +105,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   @Override
   public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
     // todo handle race condition between registration and deregistration
-    var actualWorkflow = buildWorkflow(primary);
+    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
       var lastForGVK = unmarkEventSource(genericDependentResource, primary);
@@ -108,6 +119,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
   private synchronized void markEventSource(GenericDependentResource genericDependentResource,
       Workflow workflow) {
+
     var key = genericDependentResource.getGroupVersionKind().toString();
     registeredEventSources.merge(key, new HashSet<>(Set.of(workflowId(workflow))), (s1, s2) -> {
       s1.addAll(s2);
