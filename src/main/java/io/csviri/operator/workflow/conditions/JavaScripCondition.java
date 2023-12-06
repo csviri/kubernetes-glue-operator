@@ -40,7 +40,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
       StringBuilder finalScript = new StringBuilder();
       var target = dependentResource.getSecondaryResource(workflow, context);
-      target.ifPresent(t->{
+      target.ifPresent(t -> {
         engine.put("targetStr", Serialization.asJson(t));
         finalScript.append("const target = JSON.parse(targetStr);\n");
       });

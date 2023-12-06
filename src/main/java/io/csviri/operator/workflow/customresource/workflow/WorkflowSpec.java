@@ -18,7 +18,7 @@ public class WorkflowSpec {
   @Override
   public String toString() {
     return "WorkflowSpec{" +
-            "resources=" + resources +
-            '}';
+        "resources=" + resources +
+        '}';
   }
 }

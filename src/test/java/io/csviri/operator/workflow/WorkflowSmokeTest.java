@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
+import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
 import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;

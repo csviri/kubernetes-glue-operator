@@ -8,10 +8,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
+import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
-import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
