@@ -3,6 +3,7 @@ package io.csviri.operator.workflow.customresource.workflow;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 

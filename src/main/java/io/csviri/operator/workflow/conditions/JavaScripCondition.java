@@ -38,10 +38,12 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       ScriptEngineManager manager = new ScriptEngineManager();
       ScriptEngine engine = manager.getEngineByName("js");
 
-      var actual = dependentResource.getSecondaryResource(workflow, context).orElseThrow();
-      engine.put("targetStr", Serialization.asJson(actual));
-
-      StringBuilder finalScript = new StringBuilder("const target = JSON.parse(targetStr);\n");
+      StringBuilder finalScript = new StringBuilder();
+      var target = dependentResource.getSecondaryResource(workflow, context);
+      target.ifPresent(t->{
+        engine.put("targetStr", Serialization.asJson(t));
+        finalScript.append("const target = JSON.parse(targetStr);\n");
+      });
 
       Map<String, String> namedSecondaryResources = nameAndSerializeSecondaryResources(
           context.getSecondaryResources(GenericKubernetesResource.class), workflow);

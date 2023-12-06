@@ -6,9 +6,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.csviri.operator.workflow.conditions.JavaScripCondition;
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
-import io.csviri.operator.workflow.customresource.workflow.ConditionSpec;
-import io.csviri.operator.workflow.customresource.workflow.PodsReadyConditionSpec;
+import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
+import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptConditionSpec;
+import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
@@ -63,28 +65,30 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       // todo descriptive error handling
       spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
 
-      var readyPostConditionDefinition = spec.getReadyPostCondition();
-      if (readyPostConditionDefinition != null) {
-        builder.withReadyPostcondition(toCondition(readyPostConditionDefinition));
+      var condition = spec.getReadyPostCondition();
+      if (condition != null) {
+        builder.withReadyPostcondition(toCondition(condition));
       }
-      var condition = spec.getCondition();
+      condition = spec.getCondition();
       if (condition != null) {
         builder.withReconcilePrecondition(toCondition(condition));
       }
-      var deletePostCondition = spec.getDeletePostCondition();
+      condition = spec.getDeletePostCondition();
       if (condition != null) {
-        builder.withDeletePostcondition(toCondition(deletePostCondition));
+        builder.withDeletePostcondition(toCondition(condition));
       }
     });
     return builder.build();
   }
 
-  private Condition toCondition(ConditionSpec readyPostConditionDefinition) {
-    if (readyPostConditionDefinition instanceof PodsReadyConditionSpec) {
-      PodsReadyConditionSpec conditionSpec = (PodsReadyConditionSpec) readyPostConditionDefinition;
+  private Condition toCondition(ConditionSpec condition) {
+    if (condition instanceof PodsReadyConditionSpec) {
+      PodsReadyConditionSpec conditionSpec = (PodsReadyConditionSpec) condition;
       return new PodsReadyCondition(conditionSpec.isNegated());
+    } else if (condition instanceof JavaScriptConditionSpec) {
+      return new JavaScripCondition(((JavaScriptConditionSpec) condition).getScript());
     }
-    throw new IllegalStateException("Unknown condition: " + readyPostConditionDefinition);
+    throw new IllegalStateException("Unknown condition: " + condition);
   }
 
   @Override

@@ -9,18 +9,22 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: configMap1
+          name: configmap1
         data:
           createOther: "false"
     - name: configMap2
+      dependsOn:
+        - configMap1
       resource:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: configMap2
+          name: configmap2
         data:
           key: value
       condition:
         type: JSCondition
+        script: |
+          configMap1.data.createOther == "true";
 
 
