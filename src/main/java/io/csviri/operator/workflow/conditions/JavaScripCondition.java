@@ -31,7 +31,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       engine.put("secondary", resources);
 
       var actual = dependentResource.getSecondaryResource(workflow, context).orElseThrow();
-      engine.put("actual", Serialization.asJson(actual));
+      engine.put("target", Serialization.asJson(actual));
 
       CompiledScript script = ((Compilable) engine).compile(condition);
       return (boolean) script.eval();

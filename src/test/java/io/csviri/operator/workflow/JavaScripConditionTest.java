@@ -27,14 +27,10 @@ class JavaScripConditionTest {
   @Test
   void javaScriptSimpleConditionTest() {
 
-    var condition = new JavaScripCondition(
-        "x = 1;\n" +
-            "x<2;");
-
-    // var condition = new JavaScripCondition("""
-    // x = 1;
-    // x<2;
-    // """);
+    var condition = new JavaScripCondition("""
+        x = 1;
+        x<2;
+        """);
 
     when(mockContext.getSecondaryResources(any())).thenReturn(Set.of());
     when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(configMap()));
@@ -48,16 +44,11 @@ class JavaScripConditionTest {
         when(mockContext.getSecondaryResources(any())).thenReturn(Set.of());
         when(dr.getSecondaryResource(any(),any())).thenReturn(Optional.of(configMap()));
 
-      var condition = new JavaScripCondition(
-            "console.log(actual);\n"+
-            "const actualObj = JSON.parse(actual);\n"+
-            "actualObj.data.key1 == \"val1\"");
-
-//        var condition = new JavaScripCondition("""
-//            console.log(actual);
-//            const actualObj = JSON.parse(actual);
-//            actualObj.data.key1 == "val1";
-//        """);
+        var condition = new JavaScripCondition("""
+            console.log(actual);
+            const actualObj = JSON.parse(actual);
+            actualObj.data.key1 == "val1";
+        """);
 
         var res = condition.isMet(dr,null ,mockContext);
         assertThat(res).isTrue();
