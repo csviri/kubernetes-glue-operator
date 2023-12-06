@@ -17,8 +17,6 @@ public class WorkflowOperatorReconciler
   public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
       Context<WorkflowOperator> context) {
 
-
-
     return UpdateControl.noUpdate();
   }
 
