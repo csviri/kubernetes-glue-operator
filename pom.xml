@@ -23,6 +23,8 @@
         <directory-maven-plugin.version>1.0</directory-maven-plugin.version>
         <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
+        <graalvm.version>23.0.2</graalvm.version>
+        <mokito.version>5.8.0</mokito.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +91,23 @@
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework-junit-5</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mokito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js-scriptengine</artifactId>
+            <version>${graalvm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.graalvm.js</groupId>
+            <artifactId>js</artifactId>
+            <version>${graalvm.version}</version>
+            <scope>runtime</scope>
         </dependency>
     </dependencies>
 
