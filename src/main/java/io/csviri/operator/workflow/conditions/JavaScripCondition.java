@@ -24,10 +24,10 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
   private final String STR_SUFFIX = "Str";
 
-  private String condition;
+  private String script;
 
-  public JavaScripCondition(String condition) {
-    this.condition = condition;
+  public JavaScripCondition(String script) {
+    this.script = script;
   }
 
   @Override
@@ -41,22 +41,22 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       var actual = dependentResource.getSecondaryResource(workflow, context).orElseThrow();
       engine.put("targetStr", Serialization.asJson(actual));
 
-      StringBuilder finalCondition = new StringBuilder("const target = JSON.parse(targetStr);\n");
+      StringBuilder finalScript = new StringBuilder("const target = JSON.parse(targetStr);\n");
 
       Map<String, String> namedSecondaryResources = nameAndSerializeSecondaryResources(
           context.getSecondaryResources(GenericKubernetesResource.class), workflow);
       namedSecondaryResources.forEach((k, v) -> {
         var stringKey = k + STR_SUFFIX;
         engine.put(stringKey, v);
-        finalCondition.append("const ").append(k).append("= JSON.parse(").append(stringKey)
+        finalScript.append("const ").append(k).append("= JSON.parse(").append(stringKey)
             .append(");\n");
       });
 
-      finalCondition.append("\n").append(condition);
+      finalScript.append("\n").append(script);
 
-      LOG.debug("Final Condition JS:\n{}", finalCondition);
+      LOG.debug("Final Condition JS:\n{}", finalScript);
 
-      CompiledScript script = ((Compilable) engine).compile(finalCondition.toString());
+      CompiledScript script = ((Compilable) engine).compile(finalScript.toString());
       return (boolean) script.eval();
 
     } catch (ScriptException e) {

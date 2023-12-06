@@ -2,14 +2,14 @@ package io.csviri.operator.workflow.customresource.workflow;
 
 public class JavaScriptConditionSpec extends ConditionSpec {
 
-  private String condition;
+  private String script;
 
-  public String getCondition() {
-    return condition;
+  public String getScript() {
+    return script;
   }
 
-  public JavaScriptConditionSpec setCondition(String condition) {
-    this.condition = condition;
+  public JavaScriptConditionSpec setScript(String script) {
+    this.script = script;
     return this;
   }
 }
