@@ -28,7 +28,7 @@ public class WorkflowOperatorReconciler
 
     var targetCREventSource = getOrRegisterEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-
+      // todo manage workflows for CRs
     });
 
     return UpdateControl.noUpdate();
