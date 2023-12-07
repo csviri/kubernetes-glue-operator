@@ -46,10 +46,6 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     var builder = new WorkflowBuilder<Workflow>();
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
 
-    var esc = new EventSourceContext<>(null, // todo fix this null?
-        context.getControllerConfiguration(),
-        context.getClient());
-
     primary.getSpec().getResources().forEach(spec -> {
       var dr = new GenericDependentResource(spec.getResource());
       String name = spec.getName() == null || spec.getName().isBlank()
@@ -71,7 +67,9 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       if (es == null) {
         // todo race condition?
         context.eventSourceRetriever().dynamicallyRegisterEventSource(
-            gvk, dr.eventSource(esc).orElseThrow());
+            gvk,
+            dr.eventSource(context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
+                .orElseThrow());
         markEventSource(dr, primary);
       } else {
         dr.configureWith((InformerEventSource<GenericKubernetesResource, Workflow>) es);
