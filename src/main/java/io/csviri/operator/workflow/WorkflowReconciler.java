@@ -12,12 +12,15 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptConditionSpec;
 import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
+import io.csviri.operator.workflow.dependent.GenericDependentResource;
+import io.csviri.operator.workflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
+import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 @ControllerConfiguration()
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
@@ -52,8 +55,11 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       String name = spec.getName() == null || spec.getName().isBlank()
           ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
           : spec.getName();
-
       var gvk = dr.getGroupVersionKind().toString();
+
+      dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
+          spec.getResource().getMetadata().getName(),
+          spec.getResource().getMetadata().getNamespace()));
 
       EventSource es = null;
       try {
@@ -65,10 +71,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       if (es == null) {
         // todo race condition?
         context.eventSourceRetriever().dynamicallyRegisterEventSource(
-            name, dr.eventSource(esc).orElseThrow());
+            gvk, dr.eventSource(esc).orElseThrow());
         markEventSource(dr, primary);
       } else {
-        dr.useEventSourceWithName(gvk);
+        dr.configureWith((InformerEventSource<GenericKubernetesResource, Workflow>) es);
       }
 
       genericDependentResourceMap.put(name, dr);
