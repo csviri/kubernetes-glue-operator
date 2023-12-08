@@ -1,11 +1,15 @@
 package io.csviri.operator.workflow;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperator;
+import io.csviri.operator.workflow.customresource.operator.WorkflowOperatorSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
+import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
@@ -19,6 +23,13 @@ public class WorkflowOperatorReconciler
 
   public static final String WORKFLOW_LABEL_KEY = "foroperator";
   public static final String WORKFLOW_LABEL_VALUE = "true";
+  public static final String WATCH_PREFIX = "workflow-operator-watch-cr/";
+
+  public static final String WATCH_GROUP = WATCH_PREFIX + "group";
+  public static final String WATCH_VERSION = WATCH_PREFIX + "version";
+  public static final String WATCH_KIND = WATCH_PREFIX + "kind";
+  public static final String WATCH_NAME = WATCH_PREFIX + "name";
+  public static final String WATCH_NAMESPACE = WATCH_PREFIX + "namespace";
 
   private InformerEventSource<Workflow, WorkflowOperator> workflowEventSource;
 
@@ -28,10 +39,42 @@ public class WorkflowOperatorReconciler
 
     var targetCREventSource = getOrRegisterEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      // todo manage workflows for CRs
+      var workFlow = workflowEventSource.get(new ResourceID(cr.getMetadata().getName()));
+      // todo match / update
+      if (workFlow.isEmpty()) {
+        context.getClient().resource(createWorkflow(cr, workflowOperator)).create();
+      }
     });
 
     return UpdateControl.noUpdate();
+  }
+
+  // todo cluster scope support
+  private Workflow createWorkflow(GenericKubernetesResource cr, WorkflowOperator workflowOperator) {
+    var res = new Workflow();
+    Map<String, String> annotation = new HashMap<>();
+    GroupVersionKind gvk = new GroupVersionKind(cr.getApiVersion(), cr.getKind());
+    annotation.put(WATCH_GROUP, gvk.getGroup());
+    annotation.put(WATCH_VERSION, gvk.getVersion());
+    annotation.put(WATCH_KIND, gvk.getKind());
+    annotation.put(WATCH_NAME, cr.getMetadata().getName());
+    annotation.put(WATCH_NAMESPACE, cr.getMetadata().getNamespace());
+
+    res.setMetadata(new ObjectMetaBuilder()
+        // todo proper naming based on resource name
+        .withAnnotations(annotation)
+        .withName(cr.getMetadata().getName())
+        .withNamespace(workflowOperator.getMetadata().getNamespace())
+        .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
+        .build());
+    res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
+    return res;
+  }
+
+  private WorkflowSpec toWorkflowSpec(WorkflowOperatorSpec spec) {
+    var res = new WorkflowSpec();
+    res.setResources(spec.getResources());
+    return res;
   }
 
   private InformerEventSource<GenericKubernetesResource, WorkflowOperator> getOrRegisterEventSource(
@@ -56,8 +99,6 @@ public class WorkflowOperatorReconciler
     }
     return es;
   }
-
-
 
   @Override
   public Map<String, EventSource> prepareEventSources(

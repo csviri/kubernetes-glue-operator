@@ -2,6 +2,7 @@ package io.csviri.operator.workflow.customresource.workflow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
@@ -81,5 +82,25 @@ public class DependentResourceSpec {
   public DependentResourceSpec setDeletePostCondition(ConditionSpec deletePostConditionSpec) {
     this.deletePostCondition = deletePostConditionSpec;
     return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    DependentResourceSpec that = (DependentResourceSpec) o;
+    return Objects.equals(name, that.name) && Objects.equals(resource, that.resource)
+        && Objects.equals(dependsOn, that.dependsOn)
+        && Objects.equals(readyPostCondition, that.readyPostCondition)
+        && Objects.equals(condition, that.condition)
+        && Objects.equals(deletePostCondition, that.deletePostCondition);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, resource, dependsOn, readyPostCondition, condition,
+        deletePostCondition);
   }
 }
