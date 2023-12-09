@@ -33,6 +33,9 @@ public class WorkflowOperatorReconciler
 
   private InformerEventSource<Workflow, WorkflowOperator> workflowEventSource;
 
+  // todo customizable
+  public final static String WORKFLOW_TARGET_NAMESPACE = "default";
+
   @Override
   public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
       Context<WorkflowOperator> context) {
@@ -64,10 +67,15 @@ public class WorkflowOperatorReconciler
         // todo proper naming based on resource name
         .withAnnotations(annotation)
         .withName(cr.getMetadata().getName())
-        .withNamespace(workflowOperator.getMetadata().getNamespace())
+        // these workflows are either in a static namespace or in the same namespace as CR-s, or
+        // same as WO
+        // for now for sake of simplicity is static will, eventually best would be to have it in
+        // same as WO
+        .withNamespace(WORKFLOW_TARGET_NAMESPACE)
         .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
     res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
+    res.addOwnerReference(workflowOperator);
     return res;
   }
 
@@ -81,13 +89,13 @@ public class WorkflowOperatorReconciler
       WorkflowOperator workflowOperator, Context<WorkflowOperator> context) {
     var spec = workflowOperator.getSpec();
     var gvk = new GroupVersionKind(spec.getGroup(), spec.getVersion(), spec.getKind());
-    InformerEventSource<GenericKubernetesResource, WorkflowOperator> es = null;
+    InformerEventSource<GenericKubernetesResource, WorkflowOperator> es;
+    // note that this allows just one operator per gvk (what is limitation but ok for now)
     try {
       es = (InformerEventSource<GenericKubernetesResource, WorkflowOperator>) context
           .eventSourceRetriever()
           .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
     } catch (IllegalArgumentException e) {
-
       es = new InformerEventSource<>(InformerConfiguration.from(gvk,
           context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
           .withSecondaryToPrimaryMapper(
