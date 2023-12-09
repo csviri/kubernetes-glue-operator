@@ -9,7 +9,7 @@ import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 public class WorkflowOperatorTest {
 
   @RegisterExtension
-  LocallyRunOperatorExtension extension =
+  static LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
           .withReconciler(new WorkflowReconciler())
           .withReconciler(new WorkflowOperatorReconciler())

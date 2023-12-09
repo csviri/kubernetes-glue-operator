@@ -17,7 +17,7 @@ import static org.awaitility.Awaitility.await;
 class WorkflowTest {
 
   @RegisterExtension
-  LocallyRunOperatorExtension extension =
+  static LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder().withReconciler(new WorkflowReconciler())
           .build();
 
