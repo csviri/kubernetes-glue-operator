@@ -9,7 +9,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 public class Utils {
 
   public static Workflow loadWorkflow(String path) {
-    try (InputStream is = WorkflowSmokeTest.class.getResourceAsStream(path)) {
+    try (InputStream is = Utils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, Workflow.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
