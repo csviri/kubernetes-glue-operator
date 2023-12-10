@@ -42,7 +42,8 @@ public class WorkflowOperatorReconciler
 
     var targetCREventSource = getOrRegisterEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      var workFlow = workflowEventSource.get(new ResourceID(cr.getMetadata().getName(),cr.getMetadata().getNamespace()));
+      var workFlow = workflowEventSource
+          .get(new ResourceID(cr.getMetadata().getName(), cr.getMetadata().getNamespace()));
       // todo match / update
       if (workFlow.isEmpty()) {
         context.getClient().resource(createWorkflow(cr, workflowOperator)).create();
@@ -74,7 +75,7 @@ public class WorkflowOperatorReconciler
         // for now for sake of simplicity is static will, eventually best would be to have it in
         // same as WO
         .withNamespace(cr.getMetadata().getNamespace())
-//        .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
+        // .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
     res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
     res.addOwnerReference(workflowOperator);
@@ -113,7 +114,7 @@ public class WorkflowOperatorReconciler
       EventSourceContext<WorkflowOperator> eventSourceContext) {
     workflowEventSource = new InformerEventSource<>(
         InformerConfiguration.from(Workflow.class, eventSourceContext)
-//            .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
+            // .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
             .build(),
         eventSourceContext);
     return EventSourceInitializer.nameEventSources(workflowEventSource);
