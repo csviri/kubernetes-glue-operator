@@ -40,9 +40,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       Context<Workflow> context) {
 
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
-
     actualWorkflow.reconcile(primary, context);
-
     return UpdateControl.noUpdate();
   }
 

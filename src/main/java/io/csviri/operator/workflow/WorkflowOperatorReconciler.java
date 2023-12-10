@@ -42,7 +42,7 @@ public class WorkflowOperatorReconciler
 
     var targetCREventSource = getOrRegisterEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      var workFlow = workflowEventSource.get(new ResourceID(cr.getMetadata().getName()));
+      var workFlow = workflowEventSource.get(new ResourceID(cr.getMetadata().getName(),cr.getMetadata().getNamespace()));
       // todo match / update
       if (workFlow.isEmpty()) {
         context.getClient().resource(createWorkflow(cr, workflowOperator)).create();
@@ -63,6 +63,8 @@ public class WorkflowOperatorReconciler
     annotation.put(WATCH_NAME, cr.getMetadata().getName());
     annotation.put(WATCH_NAMESPACE, cr.getMetadata().getNamespace());
 
+
+
     res.setMetadata(new ObjectMetaBuilder()
         // todo proper naming based on resource name
         .withAnnotations(annotation)
@@ -71,8 +73,8 @@ public class WorkflowOperatorReconciler
         // same as WO
         // for now for sake of simplicity is static will, eventually best would be to have it in
         // same as WO
-        .withNamespace(WORKFLOW_TARGET_NAMESPACE)
-        .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
+        .withNamespace(cr.getMetadata().getNamespace())
+//        .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
     res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
     res.addOwnerReference(workflowOperator);
@@ -100,9 +102,7 @@ public class WorkflowOperatorReconciler
           context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
           .withSecondaryToPrimaryMapper(
               resource -> Set.of(ResourceID.fromResource(workflowOperator)))
-          .build(),
-
-          context.eventSourceRetriever().eventSourceContexForDynamicRegistration());
+          .build(), context.eventSourceRetriever().eventSourceContexForDynamicRegistration());
       context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(), es);
     }
     return es;
@@ -113,7 +113,7 @@ public class WorkflowOperatorReconciler
       EventSourceContext<WorkflowOperator> eventSourceContext) {
     workflowEventSource = new InformerEventSource<>(
         InformerConfiguration.from(Workflow.class, eventSourceContext)
-            .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
+//            .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
             .build(),
         eventSourceContext);
     return EventSourceInitializer.nameEventSources(workflowEventSource);
