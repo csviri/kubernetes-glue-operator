@@ -97,6 +97,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
+
     var dr = new GenericDependentResource(spec.getResource());
     String name = spec.getName() == null || spec.getName().isBlank()
         ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())

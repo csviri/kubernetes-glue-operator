@@ -26,6 +26,7 @@
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <graalvm.version>23.0.2</graalvm.version>
         <mokito.version>5.8.0</mokito.version>
+        <mustache.version>0.9.10</mustache.version>
     </properties>
 
     <dependencyManagement>
@@ -109,6 +110,11 @@
             <artifactId>js</artifactId>
             <version>${graalvm.version}</version>
             <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.spullara.mustache.java</groupId>
+            <artifactId>compiler</artifactId>
+            <version>${mustache.version}</version>
         </dependency>
     </dependencies>
 

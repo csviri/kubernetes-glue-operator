@@ -9,12 +9,16 @@ import io.javaoperatorsdk.operator.processing.dependent.Creator;
 import io.javaoperatorsdk.operator.processing.dependent.Updater;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.GenericKubernetesDependentResource;
 
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.MustacheFactory;
+
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<Workflow> implements GarbageCollected<Workflow>,
     Updater<GenericKubernetesResource, Workflow>,
     Creator<GenericKubernetesResource, Workflow> {
 
   private GenericKubernetesResource desired;
+  private MustacheFactory mustacheFactory = new DefaultMustacheFactory();
 
   public GenericDependentResource(GenericKubernetesResource desired) {
     super(new GroupVersionKind(desired.getApiVersion(), desired.getKind()));
@@ -30,6 +34,14 @@ public class GenericDependentResource
     if (desired.getMetadata().getNamespace() == null) {
       desired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
     }
+
+    // this can be precompiled
+    // var mustache = mustacheFactory.compile(Serialization.asYaml(desired));
+    // Map<String, Object> mustacheContext = new HashMap<>(); // add all relevant resources
+    // var res = mustache.execute(new StringWriter(),mustacheContext);
+    // var resultDesired = Serialization.unmarshal(res.toString(),GenericKubernetesResource.class);
+    // return resultDesired;
+
     return desired;
   }
 
