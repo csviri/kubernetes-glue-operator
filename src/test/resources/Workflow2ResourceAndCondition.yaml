@@ -13,8 +13,6 @@ spec:
         data:
           createOther: "false"
     - name: configMap2
-      dependsOn:
-        - configMap1
       resource:
         apiVersion: v1
         kind: ConfigMap
@@ -22,6 +20,8 @@ spec:
           name: configmap2
         data:
           key: value
+      dependsOn:
+        - configMap1
       condition:
         type: JSCondition
         script: |
