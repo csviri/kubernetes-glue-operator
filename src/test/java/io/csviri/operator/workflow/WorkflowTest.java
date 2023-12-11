@@ -10,7 +10,6 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 
-import static io.csviri.operator.workflow.Utils.loadWorkflow;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -24,7 +23,7 @@ class WorkflowTest {
   @SuppressWarnings("unchecked")
   @Test
   void testJavaScriptCondition() {
-    Workflow workflow = loadWorkflow("/Workflow2ResourceAndCondition.yaml");
+    Workflow workflow = TestUtils.loadWorkflow("/Workflow2ResourceAndCondition.yaml");
     workflow = extension.create(workflow);
 
     await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {

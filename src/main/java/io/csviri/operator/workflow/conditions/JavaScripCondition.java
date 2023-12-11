@@ -18,6 +18,8 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
+import static io.csviri.operator.workflow.Utils.nameResource;
+
 public class JavaScripCondition implements Condition<GenericKubernetesResource, Workflow> {
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaScripCondition.class);
@@ -84,14 +86,6 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       res.put(name, Serialization.asJson(sr));
     });
     return res;
-  }
-
-  private String nameResource(GenericKubernetesResource resource) {
-    return resource.getApiVersion() + "#"
-        + resource.getKind() + "#"
-        + resource.getMetadata().getName()
-        + (resource.getMetadata().getNamespace() == null ? ""
-            : ("#" + resource.getMetadata().getNamespace()));
   }
 
 }

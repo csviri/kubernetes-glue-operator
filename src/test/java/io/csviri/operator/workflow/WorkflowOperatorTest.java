@@ -72,7 +72,7 @@ class WorkflowOperatorTest {
     spec.setResources(new ArrayList<>());
     DependentResourceSpec drs = new DependentResourceSpec();
     spec.getResources().add(drs);
-    drs.setResource(Utils.load("/ConfigMap.yaml"));
+    drs.setResource(TestUtils.load("/ConfigMap.yaml"));
     drs.setName("configMap1");
     return wo;
   }

@@ -7,10 +7,10 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 
-public class Utils {
+public class TestUtils {
 
   public static Workflow loadWorkflow(String path) {
-    try (InputStream is = Utils.class.getResourceAsStream(path)) {
+    try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, Workflow.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -18,7 +18,7 @@ public class Utils {
   }
 
   public static GenericKubernetesResource load(String path) {
-    try (InputStream is = Utils.class.getResourceAsStream(path)) {
+    try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, GenericKubernetesResource.class);
     } catch (IOException e) {
       throw new RuntimeException(e);
