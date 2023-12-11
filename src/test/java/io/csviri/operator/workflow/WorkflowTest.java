@@ -16,13 +16,13 @@ import static org.awaitility.Awaitility.await;
 class WorkflowTest {
 
   @RegisterExtension
-  static LocallyRunOperatorExtension extension =
+  LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder().withReconciler(new WorkflowReconciler())
           .build();
 
   @SuppressWarnings("unchecked")
   @Test
-  void testJavaScriptCondition() {
+  void javaScriptCondition() {
     Workflow workflow = TestUtils.loadWorkflow("/Workflow2ResourceAndCondition.yaml");
     workflow = extension.create(workflow);
 
@@ -53,5 +53,30 @@ class WorkflowTest {
       assertThat(cm2).isNull();
     });
   }
+
+  @Test
+  void templating() {
+    Workflow workflow = TestUtils.loadWorkflow("/WorkflowTemplating.yaml");
+    workflow = extension.create(workflow);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
+
+    extension.delete(workflow);
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
+
+
 
 }
