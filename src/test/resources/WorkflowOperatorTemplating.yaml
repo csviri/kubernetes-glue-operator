@@ -1,0 +1,17 @@
+apiVersion: io.csviri.operator.workflow/v1beta1
+kind: WorkflowOperator
+metadata:
+  name: wo-templating-sample
+spec:
+  group: io.csviri.operator.workflow
+  kind: TestCustomResource
+  version: v1
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap-wo-templated
+        data:
+          key: "{{primary.spec.value}}"

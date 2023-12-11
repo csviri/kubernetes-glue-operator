@@ -1,6 +1,5 @@
 package io.csviri.operator.workflow.customresource;
 
-
 public class TestCustomResourceSpec {
 
   private String value;

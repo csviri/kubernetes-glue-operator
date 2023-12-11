@@ -15,10 +15,14 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.Creator;
 import io.javaoperatorsdk.operator.processing.dependent.Updater;
 import io.javaoperatorsdk.operator.processing.dependent.kubernetes.GenericKubernetesDependentResource;
+import io.javaoperatorsdk.operator.processing.event.ResourceID;
+import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
+
+import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
 
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<Workflow> implements GarbageCollected<Workflow>,
@@ -53,12 +57,53 @@ public class GenericDependentResource
     var actualResourcesByName = Utils.getActualResourcesByName(context, primary);
     var mustacheContext = actualResourcesByName.entrySet().stream().collect(Collectors
         .toMap(Map.Entry::getKey, e -> objectMapper.convertValue(e.getValue(), Map.class)));
+    addPrimaryResourceOfOperatorIfAvailable(context, primary, mustacheContext);
+
     var res = mustache.execute(new StringWriter(), mustacheContext);
 
     var resultDesired = Serialization.unmarshal(res.toString(), GenericKubernetesResource.class);
     return resultDesired;
 
     // return desired;
+  }
+
+  private void addPrimaryResourceOfOperatorIfAvailable(Context<Workflow> context,
+      Workflow primary,
+      Map<String, Map> mustacheContext) {
+    var annotations = primary.getMetadata().getAnnotations();
+    if (!annotations.containsKey(WATCH_GROUP)) {
+      return;
+    }
+
+    GroupVersionKind gvk =
+        new GroupVersionKind(annotations.get(WATCH_GROUP),
+            annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
+
+    InformerEventSource<GenericKubernetesResource, Workflow> is = null;
+    try {
+      is = (InformerEventSource<GenericKubernetesResource, Workflow>) context.eventSourceRetriever()
+          .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
+    } catch (IllegalArgumentException e) {
+      // was not able to find es
+    }
+    if (is != null) {
+      var resource =
+          is.get(new ResourceID(annotations.get(WATCH_NAME), annotations.get(WATCH_NAMESPACE)));
+      resource.ifPresent(r -> {
+        mustacheContext.put("primary", objectMapper.convertValue(r, Map.class));
+      });
+
+      // GroupVersionKind gvk =
+      // new GroupVersionKind(annotations.get(WATCH_GROUP),
+      // annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
+      // var secondaryResources = context.getSecondaryResources(GenericKubernetesResource.class);
+      // var target = secondaryResources.stream().filter(r ->
+      // r.getApiVersion().equals(gvk.apiVersion())
+      // && r.getKind().equals(gvk.getKind())
+      // && Objects.equals(r.getMetadata().getName(), annotations.get(WATCH_NAME))
+      // && Objects.equals(r.getMetadata().getNamespace(), annotations.get(WATCH_NAMESPACE)))
+      // .findFirst();
+    }
   }
 
   @Override

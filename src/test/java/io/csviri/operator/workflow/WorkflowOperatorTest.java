@@ -21,8 +21,9 @@ import static org.awaitility.Awaitility.await;
 
 class WorkflowOperatorTest {
 
+  public static final String TEST_RESOURCE_VALUE = "val1";
   @RegisterExtension
-  static LocallyRunOperatorExtension extension =
+  LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
           .withReconciler(new WorkflowReconciler())
           .withReconciler(new WorkflowOperatorReconciler())
@@ -48,13 +49,35 @@ class WorkflowOperatorTest {
     });
   }
 
+
+  @Test
+  void templating() {
+    var wo = TestUtils.loadWorkflowOperator("/WorkflowOperatorTemplating.yaml");
+    wo = extension.create(wo);
+    var cr = extension.create(testCustomResource());
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
+      assertThat(cm1).isNotNull();
+      assertThat(cm1.getData()).containsEntry("key", TEST_RESOURCE_VALUE);
+    });
+
+    extension.delete(wo);
+
+    await().timeout(Duration.ofSeconds(5)).untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
+      assertThat(cm1).isNull();
+    });
+  }
+
+
   TestCustomResource testCustomResource() {
     var res = new TestCustomResource();
     res.setMetadata(new ObjectMetaBuilder()
         .withName("testcr1")
         .build());
     res.setSpec(new TestCustomResourceSpec());
-    res.getSpec().setValue("val1");
+    res.getSpec().setValue(TEST_RESOURCE_VALUE);
     return res;
   }
 
