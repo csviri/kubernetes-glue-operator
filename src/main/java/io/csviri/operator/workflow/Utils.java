@@ -2,7 +2,6 @@ package io.csviri.operator.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
@@ -23,9 +22,10 @@ public class Utils {
           .filter(r -> r.getResource().getApiVersion().equals(sr.getApiVersion())
               && r.getResource().getKind().equals(sr.getKind())
               && r.getResource().getMetadata().getName().equals(sr.getMetadata().getName())
-              && Objects.equals(r.getResource().getMetadata().getNamespace(),
-                  sr.getMetadata().getNamespace()))
-          .findFirst();
+      // todo handle namespaces properly
+      // && Objects.equals(r.getResource().getMetadata().getNamespace(),
+      // sr.getMetadata().getNamespace()))
+      ).findFirst();
       var name = drSpec.map(DependentResourceSpec::getName).orElseGet(() -> nameResource(sr));
       res.put(name, sr);
     });
@@ -38,6 +38,22 @@ public class Utils {
         + resource.getMetadata().getName()
         + (resource.getMetadata().getNamespace() == null ? ""
             : ("#" + resource.getMetadata().getNamespace()));
+  }
+
+  public static String getApiVersionFromTemplate(String resourceTemplate) {
+    return getPropertyValueFromTemplate(resourceTemplate, "apiVersion");
+  }
+
+  public static String getKindFromTemplate(String resourceTemplate) {
+    return getPropertyValueFromTemplate(resourceTemplate, "kind");
+  }
+
+  private static String getPropertyValueFromTemplate(String resourceTemplate, String property) {
+    var finalProp = property + ":";
+    var targetLine = resourceTemplate.lines().filter(l -> l.contains(finalProp)).findFirst();
+    return targetLine.map(l -> l.replace(property, "").trim())
+        .orElseThrow(() -> new IllegalArgumentException(
+            "Resource Template does not contain apiVersion:\n" + resourceTemplate));
   }
 
 }

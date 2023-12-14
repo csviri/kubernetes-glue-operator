@@ -50,9 +50,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     var builder = new WorkflowBuilder<Workflow>();
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
 
-    primary.getSpec().getResources().forEach(spec -> {
-      createAndAddDependentToWorkflow(primary, context, spec, genericDependentResourceMap, builder);
-    });
+    primary.getSpec().getResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
+        context, spec, genericDependentResourceMap, builder));
 
     // todo remove on cleanup
     addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
@@ -98,7 +97,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
 
-    var dr = new GenericDependentResource(spec.getResource());
+    // todo better validation of "oneOf"
+    var dr = spec.getResourceTemplate() != null
+        ? new GenericDependentResource(spec.getResourceTemplate())
+        : new GenericDependentResource(spec.getResource());
     String name = spec.getName() == null || spec.getName().isBlank()
         ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
         : spec.getName();

@@ -32,26 +32,28 @@ public class GenericDependentResource
   private static ObjectMapper objectMapper = new ObjectMapper();
   private static MustacheFactory mustacheFactory = new DefaultMustacheFactory();
 
-  private GenericKubernetesResource desired;
+  private final GenericKubernetesResource desired;
+  private final String desiredTemplate;
 
   public GenericDependentResource(GenericKubernetesResource desired) {
     super(new GroupVersionKind(desired.getApiVersion(), desired.getKind()));
     this.desired = desired;
+    this.desiredTemplate = null;
+  }
+
+  public GenericDependentResource(String desiredTemplate) {
+    super(new GroupVersionKind(Utils.getApiVersionFromTemplate(desiredTemplate),
+        Utils.getKindFromTemplate(desiredTemplate)));
+    this.desiredTemplate = desiredTemplate;
+    this.desired = null;
   }
 
   @Override
   protected GenericKubernetesResource desired(Workflow primary,
       Context<Workflow> context) {
 
-    // todo how do I know if a resource is namespaced or not => explicit flag / and check fabric8
-
-    if (desired.getMetadata().getNamespace() == null) {
-      desired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
-    }
-
-
-    var template = Serialization.asYaml(desired);
-    // this can be precompiled
+    var template = desired == null ? desiredTemplate : Serialization.asYaml(desired);
+    // this can be precompiled?
     var mustache = mustacheFactory.compile(new StringReader(template), "desired");
     // convert GKR to Map for better access ?
     var actualResourcesByName = Utils.getActualResourcesByName(context, primary);
@@ -62,9 +64,12 @@ public class GenericDependentResource
     var res = mustache.execute(new StringWriter(), mustacheContext);
 
     var resultDesired = Serialization.unmarshal(res.toString(), GenericKubernetesResource.class);
-    return resultDesired;
 
-    // return desired;
+    // todo how do I know if a resource is namespaced or not => explicit flag / and check fabric8
+    if (resultDesired.getMetadata().getNamespace() == null) {
+      resultDesired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
+    }
+    return resultDesired;
   }
 
   private void addPrimaryResourceOfOperatorIfAvailable(Context<Workflow> context,

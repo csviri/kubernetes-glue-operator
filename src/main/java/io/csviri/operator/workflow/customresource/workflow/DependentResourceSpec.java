@@ -12,8 +12,7 @@ public class DependentResourceSpec {
 
   private String name;
 
-  // templating, eventually with QUTE
-  // private String resourceTemplate;
+  private String resourceTemplate;
 
   @PreserveUnknownFields
   private GenericKubernetesResource resource;
@@ -84,6 +83,15 @@ public class DependentResourceSpec {
     return this;
   }
 
+  public String getResourceTemplate() {
+    return resourceTemplate;
+  }
+
+  public DependentResourceSpec setResourceTemplate(String resourceTemplate) {
+    this.resourceTemplate = resourceTemplate;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -91,8 +99,9 @@ public class DependentResourceSpec {
     if (o == null || getClass() != o.getClass())
       return false;
     DependentResourceSpec that = (DependentResourceSpec) o;
-    return Objects.equals(name, that.name) && Objects.equals(resource, that.resource)
-        && Objects.equals(dependsOn, that.dependsOn)
+    return Objects.equals(name, that.name)
+        && Objects.equals(resourceTemplate, that.resourceTemplate)
+        && Objects.equals(resource, that.resource) && Objects.equals(dependsOn, that.dependsOn)
         && Objects.equals(readyPostCondition, that.readyPostCondition)
         && Objects.equals(condition, that.condition)
         && Objects.equals(deletePostCondition, that.deletePostCondition);
@@ -100,7 +109,7 @@ public class DependentResourceSpec {
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, resource, dependsOn, readyPostCondition, condition,
+    return Objects.hash(name, resourceTemplate, resource, dependsOn, readyPostCondition, condition,
         deletePostCondition);
   }
 }
