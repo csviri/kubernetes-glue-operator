@@ -21,7 +21,7 @@ public class Utils {
     secondaryResources.forEach(sr -> {
       var drSpec = workflow.getSpec().getResources().stream()
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
-              && Utils.getApiVersion(r).equals(sr.getKind())
+              && Utils.getKind(r).equals(sr.getKind())
               && Utils.getName(r).equals(sr.getMetadata().getName())
       // todo handle namespaces properly
       // && Objects.equals(r.getResource().getMetadata().getNamespace(),
