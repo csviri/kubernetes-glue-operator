@@ -1,1 +1,1 @@
-# workflow-operator-operator
+# resource-workflow-operator
