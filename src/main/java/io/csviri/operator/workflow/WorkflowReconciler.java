@@ -31,25 +31,24 @@ import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
 @ControllerConfiguration()
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
 
-  // GVK -> Workflows
-  private final Map<String, Set<String>> registeredEventSources = new ConcurrentHashMap<>();
+  private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
 
-  // todo workflow resource removal? caching workflow in memory
+  // caching workflow in memory?
 
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
+
     return UpdateControl.noUpdate();
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
   private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterEventSources(
       Workflow primary, Context<Workflow> context) {
     var builder = new WorkflowBuilder<Workflow>();
-    Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
 
+    Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
     primary.getSpec().getResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
         context, spec, genericDependentResourceMap, builder));
 
@@ -69,18 +68,11 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         new GroupVersionKind(annotations.get(WATCH_GROUP),
             annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
 
-    EventSource es = null;
-    try {
-      es = context.eventSourceRetriever()
-          .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
-    } catch (IllegalArgumentException e) {
-      // was not able to find es
-    }
-    if (es == null) {
+    var ies = Utils.getInformerEventSource(context, gvk);
+    if (ies.isEmpty()) {
       // todo race condition?
       context.eventSourceRetriever().dynamicallyRegisterEventSource(
           gvk.toString(), new InformerEventSource<>(
-              // todo indexed
               InformerConfiguration
                   .from(gvk,
                       context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
@@ -92,12 +84,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     }
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   private void createAndAddDependentToWorkflow(Workflow primary, Context<Workflow> context,
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
 
-    // todo better validation of "oneOf"
     var dr = spec.getResourceTemplate() != null
         ? new GenericDependentResource(spec.getResourceTemplate())
         : new GenericDependentResource(spec.getResource());
@@ -147,12 +139,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     }
   }
 
+  @SuppressWarnings({"rawtypes"})
   private Condition toCondition(ConditionSpec condition) {
-    if (condition instanceof PodsReadyConditionSpec) {
-      PodsReadyConditionSpec conditionSpec = (PodsReadyConditionSpec) condition;
-      return new PodsReadyCondition(conditionSpec.isNegated());
-    } else if (condition instanceof JavaScriptConditionSpec) {
-      return new JavaScripCondition(((JavaScriptConditionSpec) condition).getScript());
+    if (condition instanceof PodsReadyConditionSpec readyConditionSpec) {
+      return new PodsReadyCondition(readyConditionSpec.isNegated());
+    } else if (condition instanceof JavaScriptConditionSpec jsCondition) {
+      return new JavaScripCondition(jsCondition.getScript());
     }
     throw new IllegalStateException("Unknown condition: " + condition);
   }
@@ -174,18 +166,18 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
   private synchronized void markEventSource(GenericDependentResource genericDependentResource,
       Workflow workflow) {
-
     var key = genericDependentResource.getGroupVersionKind().toString();
-    registeredEventSources.merge(key, new HashSet<>(Set.of(workflowId(workflow))), (s1, s2) -> {
-      s1.addAll(s2);
-      return s1;
-    });
+    registeredEventSourcesForGVK.merge(key, new HashSet<>(Set.of(workflowId(workflow))),
+        (s1, s2) -> {
+          s1.addAll(s2);
+          return s1;
+        });
   }
 
   private synchronized boolean unmarkEventSource(GenericDependentResource genericDependentResource,
       Workflow workflow) {
     var key = genericDependentResource.getGroupVersionKind().toString();
-    var es = registeredEventSources.get(key);
+    var es = registeredEventSourcesForGVK.get(key);
     es.remove(workflowId(workflow));
     return es.isEmpty();
   }

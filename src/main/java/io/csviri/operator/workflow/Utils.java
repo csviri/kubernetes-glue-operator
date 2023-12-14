@@ -7,7 +7,10 @@ import java.util.Optional;
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.processing.GroupVersionKind;
+import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 public class Utils {
 
@@ -92,6 +95,17 @@ public class Utils {
     return getOptionalPropertyValueFromTemplate(resourceTemplate, property)
         .orElseThrow(() -> new IllegalArgumentException(
             "Template does not contain property. " + resourceTemplate));
+  }
+
+  public static <P extends HasMetadata> Optional<InformerEventSource<GenericKubernetesResource, P>> getInformerEventSource(
+      Context<P> context, GroupVersionKind gvk) {
+    try {
+      return Optional
+          .of((InformerEventSource<GenericKubernetesResource, P>) context.eventSourceRetriever()
+              .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString()));
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();
+    }
   }
 
 }

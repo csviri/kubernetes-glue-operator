@@ -34,7 +34,7 @@ public class WorkflowOperatorReconciler
   private InformerEventSource<Workflow, WorkflowOperator> workflowEventSource;
 
   // todo customizable
-  public final static String WORKFLOW_TARGET_NAMESPACE = "default";
+  public static final String WORKFLOW_TARGET_NAMESPACE = "default";
 
   @Override
   public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
@@ -53,7 +53,6 @@ public class WorkflowOperatorReconciler
     return UpdateControl.noUpdate();
   }
 
-  // todo cluster scope support
   private Workflow createWorkflow(GenericKubernetesResource cr, WorkflowOperator workflowOperator) {
     var res = new Workflow();
     Map<String, String> annotation = new HashMap<>();
