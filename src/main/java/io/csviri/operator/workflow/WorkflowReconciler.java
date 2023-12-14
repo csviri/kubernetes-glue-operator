@@ -107,8 +107,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     var gvk = dr.getGroupVersionKind().toString();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
-        spec.getResource().getMetadata().getName(),
-        spec.getResource().getMetadata().getNamespace()));
+        Utils.getName(spec),
+        Utils.getNamespace(spec).orElse(null)));
 
     EventSource es = null;
     try {

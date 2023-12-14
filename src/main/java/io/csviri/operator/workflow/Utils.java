@@ -2,6 +2,7 @@ package io.csviri.operator.workflow;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
@@ -19,9 +20,9 @@ public class Utils {
     Map<String, GenericKubernetesResource> res = new HashMap<>();
     secondaryResources.forEach(sr -> {
       var drSpec = workflow.getSpec().getResources().stream()
-          .filter(r -> r.getResource().getApiVersion().equals(sr.getApiVersion())
-              && r.getResource().getKind().equals(sr.getKind())
-              && r.getResource().getMetadata().getName().equals(sr.getMetadata().getName())
+          .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
+              && Utils.getApiVersion(r).equals(sr.getKind())
+              && Utils.getName(r).equals(sr.getMetadata().getName())
       // todo handle namespaces properly
       // && Objects.equals(r.getResource().getMetadata().getNamespace(),
       // sr.getMetadata().getNamespace()))
@@ -40,6 +41,38 @@ public class Utils {
             : ("#" + resource.getMetadata().getNamespace()));
   }
 
+  public static String getName(DependentResourceSpec spec) {
+    if (spec.getResource() != null) {
+      return spec.getResource().getMetadata().getName();
+    } else {
+      return getPropertyValueFromTemplate(spec.getResourceTemplate(), "name");
+    }
+  }
+
+  public static String getApiVersion(DependentResourceSpec spec) {
+    if (spec.getResource() != null) {
+      return spec.getResource().getApiVersion();
+    } else {
+      return getPropertyValueFromTemplate(spec.getResourceTemplate(), "apiVersion");
+    }
+  }
+
+  public static String getKind(DependentResourceSpec spec) {
+    if (spec.getResource() != null) {
+      return spec.getResource().getKind();
+    } else {
+      return getPropertyValueFromTemplate(spec.getResourceTemplate(), "kind");
+    }
+  }
+
+  public static Optional<String> getNamespace(DependentResourceSpec spec) {
+    if (spec.getResource() != null) {
+      return Optional.ofNullable(spec.getResource().getMetadata().getNamespace());
+    } else {
+      return getOptionalPropertyValueFromTemplate(spec.getResourceTemplate(), "namespace");
+    }
+  }
+
   public static String getApiVersionFromTemplate(String resourceTemplate) {
     return getPropertyValueFromTemplate(resourceTemplate, "apiVersion");
   }
@@ -48,12 +81,17 @@ public class Utils {
     return getPropertyValueFromTemplate(resourceTemplate, "kind");
   }
 
-  private static String getPropertyValueFromTemplate(String resourceTemplate, String property) {
+  private static Optional<String> getOptionalPropertyValueFromTemplate(String resourceTemplate,
+      String property) {
     var finalProp = property + ":";
     var targetLine = resourceTemplate.lines().filter(l -> l.contains(finalProp)).findFirst();
-    return targetLine.map(l -> l.replace(property, "").trim())
+    return targetLine.map(l -> l.replace(finalProp, "").trim());
+  }
+
+  private static String getPropertyValueFromTemplate(String resourceTemplate, String property) {
+    return getOptionalPropertyValueFromTemplate(resourceTemplate, property)
         .orElseThrow(() -> new IllegalArgumentException(
-            "Resource Template does not contain apiVersion:\n" + resourceTemplate));
+            "Template does not contain property. " + resourceTemplate));
   }
 
 }

@@ -94,9 +94,8 @@ public class GenericDependentResource
     if (is != null) {
       var resource =
           is.get(new ResourceID(annotations.get(WATCH_NAME), annotations.get(WATCH_NAMESPACE)));
-      resource.ifPresent(r -> {
-        mustacheContext.put("primary", objectMapper.convertValue(r, Map.class));
-      });
+      resource
+          .ifPresent(r -> mustacheContext.put("primary", objectMapper.convertValue(r, Map.class)));
 
       // GroupVersionKind gvk =
       // new GroupVersionKind(annotations.get(WATCH_GROUP),

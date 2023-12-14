@@ -55,11 +55,35 @@ class WorkflowTest {
   }
 
   @Test
-  void templating() {
+  void templatingObject() {
     Workflow workflow = TestUtils.loadWorkflow("/WorkflowTemplating.yaml");
     workflow = extension.create(workflow);
 
     await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
+
+    extension.delete(workflow);
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
+
+  @Test
+  void stringTemplate() {
+    Workflow workflow = TestUtils.loadWorkflow("/WorkflowWithResourceTemplate.yaml");
+
+    workflow = extension.create(workflow);
+
+    await().timeout(Duration.ofSeconds(120)).untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
       var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
       assertThat(cm1).isNotNull();
