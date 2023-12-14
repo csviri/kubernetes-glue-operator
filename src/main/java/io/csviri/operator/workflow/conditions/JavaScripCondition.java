@@ -2,7 +2,6 @@ package io.csviri.operator.workflow.conditions;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import javax.script.*;
@@ -78,8 +77,10 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
           .filter(r -> r.getResource().getApiVersion().equals(sr.getApiVersion())
               && r.getResource().getKind().equals(sr.getKind())
               && r.getResource().getMetadata().getName().equals(sr.getMetadata().getName())
-              && Objects.equals(r.getResource().getMetadata().getNamespace(),
-                  sr.getMetadata().getNamespace()))
+      // todo unify with other mathing in utils
+      // && Objects.equals(r.getResource().getMetadata().getNamespace(),
+      // sr.getMetadata().getNamespace())
+      )
           .findFirst();
       var name = drSpec.map(s -> s.getName()).orElseGet(() -> nameResource(sr));
 
