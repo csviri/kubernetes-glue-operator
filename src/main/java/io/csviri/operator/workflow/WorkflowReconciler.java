@@ -1,9 +1,6 @@
 package io.csviri.operator.workflow;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
@@ -15,7 +12,6 @@ import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptC
 import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
 import io.csviri.operator.workflow.dependent.GenericDependentResource;
 import io.csviri.operator.workflow.dependent.GenericResourceDiscriminator;
-import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
@@ -23,7 +19,6 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
-import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
@@ -75,12 +70,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
           gvk.toString(), new InformerEventSource<>(
               InformerConfiguration
                   .from(gvk,
-                      context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
+                      context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
                   .withSecondaryToPrimaryMapper(
                       resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
                           WORKFLOW_TARGET_NAMESPACE)))
                   .build(),
-              context.eventSourceRetriever().eventSourceContexForDynamicRegistration()));
+              context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
     }
   }
 
@@ -96,47 +91,31 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     String name = spec.getName() == null || spec.getName().isBlank()
         ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
         : spec.getName();
-    var gvk = dr.getGroupVersionKind().toString();
+    var gvk = dr.getGroupVersionKind();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
         Utils.getName(spec),
         Utils.getNamespace(spec).orElse(null)));
 
-    EventSource es = null;
-    try {
-      es = context.eventSourceRetriever()
-          .getResourceEventSourceFor(GenericKubernetesResource.class, gvk);
-    } catch (IllegalArgumentException e) {
-      // was not able to find es
-    }
-    if (es == null) {
-      // todo race condition?
+    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(dr::configureWith, () -> {
       context.eventSourceRetriever().dynamicallyRegisterEventSource(
-          gvk,
-          dr.eventSource(context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
+          gvk.toString(),
+          dr.eventSource(context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
               .orElseThrow());
       markEventSource(dr, primary);
-    } else {
-      dr.configureWith((InformerEventSource<GenericKubernetesResource, Workflow>) es);
-    }
+    });
 
     genericDependentResourceMap.put(name, dr);
     builder.addDependentResource(dr);
-    // todo descriptive error handling
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
 
-    var condition = spec.getReadyPostCondition();
-    if (condition != null) {
-      builder.withReadyPostcondition(toCondition(condition));
-    }
-    condition = spec.getCondition();
-    if (condition != null) {
-      builder.withReconcilePrecondition(toCondition(condition));
-    }
-    condition = spec.getDeletePostCondition();
-    if (condition != null) {
-      builder.withDeletePostcondition(toCondition(condition));
-    }
+    Optional.ofNullable(spec.getReadyPostCondition())
+        .ifPresent(c -> builder.withReadyPostcondition(toCondition(c)));
+    Optional.ofNullable(spec.getCondition())
+        .ifPresent(c -> builder.withReconcilePrecondition(toCondition(c)));
+    Optional.ofNullable(spec.getDeletePostCondition())
+        .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
+
   }
 
   @SuppressWarnings({"rawtypes"})

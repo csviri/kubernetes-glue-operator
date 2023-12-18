@@ -97,10 +97,10 @@ public class WorkflowOperatorReconciler
           .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
     } catch (IllegalArgumentException e) {
       es = new InformerEventSource<>(InformerConfiguration.from(gvk,
-          context.eventSourceRetriever().eventSourceContexForDynamicRegistration())
+          context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
           .withSecondaryToPrimaryMapper(
               resource -> Set.of(ResourceID.fromResource(workflowOperator)))
-          .build(), context.eventSourceRetriever().eventSourceContexForDynamicRegistration());
+          .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
       context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(), es);
     }
     return es;
