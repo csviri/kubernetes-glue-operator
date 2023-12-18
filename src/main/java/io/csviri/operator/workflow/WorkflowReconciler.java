@@ -77,37 +77,33 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
                   .build(),
               context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
     }
+    markEventSource(gvk, primary);
+
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   private void createAndAddDependentToWorkflow(Workflow primary, Context<Workflow> context,
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
 
-    var dr = spec.getResourceTemplate() != null
-        ? new GenericDependentResource(spec.getResourceTemplate())
-        : new GenericDependentResource(spec.getResource());
-    String name = spec.getName() == null || spec.getName().isBlank()
-        ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
-        : spec.getName();
+    var dr = createDependentResource(spec);
     var gvk = dr.getGroupVersionKind();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
         Utils.getName(spec),
         Utils.getNamespace(spec).orElse(null)));
 
-    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(dr::configureWith, () -> {
-      context.eventSourceRetriever().dynamicallyRegisterEventSource(
-          gvk.toString(),
-          dr.eventSource(context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
-              .orElseThrow());
-      markEventSource(dr, primary);
-    });
+    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(dr::configureWith,
+        () -> context.eventSourceRetriever().dynamicallyRegisterEventSource(
+            gvk.toString(),
+            dr.eventSource(
+                context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
+                .orElseThrow()));
+    markEventSource(gvk, primary);
 
-    genericDependentResourceMap.put(name, dr);
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
+    genericDependentResourceMap.put(dependentName(spec), dr);
 
     Optional.ofNullable(spec.getReadyPostCondition())
         .ifPresent(c -> builder.withReadyPostcondition(toCondition(c)));
@@ -115,7 +111,18 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         .ifPresent(c -> builder.withReconcilePrecondition(toCondition(c)));
     Optional.ofNullable(spec.getDeletePostCondition())
         .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
+  }
 
+  private static String dependentName(DependentResourceSpec spec) {
+    return spec.getName() == null || spec.getName().isBlank()
+        ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
+        : spec.getName();
+  }
+
+  private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
+    return spec.getResourceTemplate() != null
+        ? new GenericDependentResource(spec.getResourceTemplate())
+        : new GenericDependentResource(spec.getResource());
   }
 
   @SuppressWarnings({"rawtypes"})
@@ -143,10 +150,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     return DeleteControl.defaultDelete();
   }
 
-  private synchronized void markEventSource(GenericDependentResource genericDependentResource,
+  // this should be idempotent
+  private synchronized void markEventSource(GroupVersionKind gvk,
       Workflow workflow) {
-    var key = genericDependentResource.getGroupVersionKind().toString();
-    registeredEventSourcesForGVK.merge(key, new HashSet<>(Set.of(workflowId(workflow))),
+    registeredEventSourcesForGVK.merge(gvk.toString(), new HashSet<>(Set.of(workflowId(workflow))),
         (s1, s2) -> {
           s1.addAll(s2);
           return s1;
