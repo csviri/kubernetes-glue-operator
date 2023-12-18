@@ -2,6 +2,7 @@ package io.csviri.operator.workflow;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
@@ -12,6 +13,7 @@ import io.csviri.operator.workflow.customresource.workflow.condition.JavaScriptC
 import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyConditionSpec;
 import io.csviri.operator.workflow.dependent.GenericDependentResource;
 import io.csviri.operator.workflow.dependent.GenericResourceDiscriminator;
+import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
@@ -26,17 +28,30 @@ import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
 @ControllerConfiguration()
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
 
-  private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
+  public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
 
-  // caching workflow in memory?
+  private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
 
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
+    var operatorPrimaryGVK = addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
-
+    // cleanupRemovedResourcesFromWorkflow(context, actualWorkflow, primary,
+    // operatorPrimaryGVK.orElse(null));
     return UpdateControl.noUpdate();
+  }
+
+  private void cleanupRemovedResourcesFromWorkflow(Context<Workflow> context,
+      io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> actualWorkflow,
+      Workflow primary, GroupVersionKind operatorPrimaryGVK) {
+    var actualResources = context.getSecondaryResources(GenericKubernetesResource.class);
+    var resourcesToDelete = actualResources.stream().filter(r -> {
+      // todo
+      return true;
+    }).collect(Collectors.toList());
+
   }
 
   private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterEventSources(
@@ -48,16 +63,17 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         context, spec, genericDependentResourceMap, builder));
 
     // todo remove on cleanup
-    addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
+
 
     return builder.build();
   }
 
-  private void addWorkflowOperatorPrimaryInformerIfApplies(Context<Workflow> context,
+  private Optional<GroupVersionKind> addWorkflowOperatorPrimaryInformerIfApplies(
+      Context<Workflow> context,
       Workflow primary) {
     var annotations = primary.getMetadata().getAnnotations();
     if (!annotations.containsKey(WATCH_GROUP)) {
-      return;
+      return Optional.empty();
     }
     GroupVersionKind gvk =
         new GroupVersionKind(annotations.get(WATCH_GROUP),
@@ -78,7 +94,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
               context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
     }
     markEventSource(gvk, primary);
-
+    return Optional.of(gvk);
   }
 
   private void createAndAddDependentToWorkflow(Workflow primary, Context<Workflow> context,
@@ -86,7 +102,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
 
-    var dr = createDependentResource(spec);
+    var name = dependentName(spec);
+    var dr = createDependentResource(spec, name);
     var gvk = dr.getGroupVersionKind();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
@@ -103,7 +120,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
-    genericDependentResourceMap.put(dependentName(spec), dr);
+    genericDependentResourceMap.put(name, dr);
 
     Optional.ofNullable(spec.getReadyPostCondition())
         .ifPresent(c -> builder.withReadyPostcondition(toCondition(c)));
@@ -119,10 +136,11 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         : spec.getName();
   }
 
-  private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
+  private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
+      String name) {
     return spec.getResourceTemplate() != null
-        ? new GenericDependentResource(spec.getResourceTemplate())
-        : new GenericDependentResource(spec.getResource());
+        ? new GenericDependentResource(spec.getResourceTemplate(), name)
+        : new GenericDependentResource(spec.getResource(), name);
   }
 
   @SuppressWarnings({"rawtypes"})

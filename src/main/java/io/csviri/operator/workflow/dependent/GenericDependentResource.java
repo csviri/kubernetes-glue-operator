@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.csviri.operator.workflow.Utils;
+import io.csviri.operator.workflow.WorkflowReconciler;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -29,21 +30,24 @@ public class GenericDependentResource
     Updater<GenericKubernetesResource, Workflow>,
     Creator<GenericKubernetesResource, Workflow> {
 
-  private static ObjectMapper objectMapper = new ObjectMapper();
-  private static MustacheFactory mustacheFactory = new DefaultMustacheFactory();
+  private static final ObjectMapper objectMapper = new ObjectMapper();
+  private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
 
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
+  private final String name;
 
-  public GenericDependentResource(GenericKubernetesResource desired) {
+  public GenericDependentResource(GenericKubernetesResource desired, String name) {
     super(new GroupVersionKind(desired.getApiVersion(), desired.getKind()));
     this.desired = desired;
     this.desiredTemplate = null;
+    this.name = name;
   }
 
-  public GenericDependentResource(String desiredTemplate) {
+  public GenericDependentResource(String desiredTemplate, String name) {
     super(new GroupVersionKind(Utils.getApiVersionFromTemplate(desiredTemplate),
         Utils.getKindFromTemplate(desiredTemplate)));
+    this.name = name;
     this.desiredTemplate = desiredTemplate;
     this.desired = null;
   }
@@ -65,6 +69,8 @@ public class GenericDependentResource
 
     var resultDesired = Serialization.unmarshal(res.toString(), GenericKubernetesResource.class);
 
+    resultDesired.getMetadata().getAnnotations()
+        .put(WorkflowReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
     // todo how do I know if a resource is namespaced or not => explicit flag / and check fabric8
     if (resultDesired.getMetadata().getNamespace() == null) {
       resultDesired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
