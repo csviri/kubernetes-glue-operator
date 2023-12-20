@@ -75,7 +75,7 @@ public class WorkflowOperatorReconciler
         .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
     res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
-    res.addOwnerReference(workflowOperator);
+    res.addOwnerReference(cr);
     return res;
   }
 

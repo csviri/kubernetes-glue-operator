@@ -41,7 +41,7 @@ class WorkflowOperatorTest {
       assertThat(cm1).isNotNull();
     });
 
-    extension.delete(wo);
+    extension.delete(cr);
 
     await().timeout(Duration.ofSeconds(5)).untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "test1");
@@ -62,7 +62,7 @@ class WorkflowOperatorTest {
       assertThat(cm1.getData()).containsEntry("key", TEST_RESOURCE_VALUE);
     });
 
-    extension.delete(wo);
+    extension.delete(cr);
 
     await().timeout(Duration.ofSeconds(5)).untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");

@@ -2,7 +2,9 @@ package io.csviri.operator.workflow;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
@@ -14,6 +16,7 @@ import io.csviri.operator.workflow.customresource.workflow.condition.PodsReadyCo
 import io.csviri.operator.workflow.dependent.GenericDependentResource;
 import io.csviri.operator.workflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
@@ -28,6 +31,8 @@ import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
 @ControllerConfiguration()
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
 
+  private static final Logger log = LoggerFactory.getLogger(WorkflowReconciler.class);
+
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
 
   private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
@@ -35,23 +40,28 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
-    var operatorPrimaryGVK = addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
+    var primaryGVK = addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
-    // cleanupRemovedResourcesFromWorkflow(context, actualWorkflow, primary,
-    // operatorPrimaryGVK.orElse(null));
+    cleanupRemovedResourcesFromWorkflow(context, primary);
     return UpdateControl.noUpdate();
   }
 
+  // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Workflow> context,
-      io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> actualWorkflow,
-      Workflow primary, GroupVersionKind operatorPrimaryGVK) {
-    var actualResources = context.getSecondaryResources(GenericKubernetesResource.class);
-    var resourcesToDelete = actualResources.stream().filter(r -> {
-      // todo
-      return true;
-    }).collect(Collectors.toList());
-
+      Workflow primary) {
+    context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
+      String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
+      if (primary.getSpec().getResources().stream()
+          .filter(pr -> pr.getName().equals(dependentName)).findAny().isEmpty()) {
+        try {
+          context.getClient().resource(r).delete();
+        } catch (KubernetesClientException e) {
+          // can happen that already deleted, just in cache.
+          log.warn("Error during deleting resource on workflow change", e);
+        }
+      }
+    });
   }
 
   private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterEventSources(
@@ -61,9 +71,6 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
     primary.getSpec().getResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
         context, spec, genericDependentResourceMap, builder));
-
-    // todo remove on cleanup
-
 
     return builder.build();
   }
