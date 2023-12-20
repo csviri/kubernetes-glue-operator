@@ -25,6 +25,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
+import io.javaoperatorsdk.operator.processing.event.source.informer.ManagedInformerEventSource;
 
 import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
 
@@ -87,19 +88,20 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
             annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
 
     var ies = Utils.getInformerEventSource(context, gvk);
-    if (ies.isEmpty()) {
-      // todo race condition?
-      context.eventSourceRetriever().dynamicallyRegisterEventSource(
-          gvk.toString(), new InformerEventSource<>(
-              InformerConfiguration
-                  .from(gvk,
-                      context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
-                  .withSecondaryToPrimaryMapper(
-                      resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
-                          WORKFLOW_TARGET_NAMESPACE)))
-                  .build(),
-              context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
-    }
+    ies.ifPresentOrElse(
+        ManagedInformerEventSource::start, () -> context.eventSourceRetriever()
+            .dynamicallyRegisterEventSource(
+                gvk.toString(), new InformerEventSource<>(
+                    InformerConfiguration
+                        .from(gvk,
+                            context.eventSourceRetriever()
+                                .eventSourceContextForDynamicRegistration())
+                        .withSecondaryToPrimaryMapper(
+                            resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
+                                WORKFLOW_TARGET_NAMESPACE)))
+                        .build(),
+                    context.eventSourceRetriever().eventSourceContextForDynamicRegistration())));
+
     markEventSource(gvk, primary);
     return Optional.of(gvk);
   }
@@ -117,7 +119,11 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         Utils.getName(spec),
         Utils.getNamespace(spec).orElse(null)));
 
-    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(dr::configureWith,
+    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
+      // make sure it is already started up (thus synced)
+      es.start();
+      dr.configureWith(es);
+    },
         () -> context.eventSourceRetriever().dynamicallyRegisterEventSource(
             gvk.toString(),
             dr.eventSource(

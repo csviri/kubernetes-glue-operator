@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperator;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperatorSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
@@ -20,6 +23,8 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 @ControllerConfiguration
 public class WorkflowOperatorReconciler
     implements Reconciler<WorkflowOperator>, EventSourceInitializer<WorkflowOperator> {
+
+  private static final Logger log = LoggerFactory.getLogger(WorkflowOperatorReconciler.class);
 
   public static final String WORKFLOW_LABEL_KEY = "foroperator";
   public static final String WORKFLOW_LABEL_VALUE = "true";
@@ -40,7 +45,10 @@ public class WorkflowOperatorReconciler
   public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
       Context<WorkflowOperator> context) {
 
-    var targetCREventSource = getOrRegisterEventSource(workflowOperator, context);
+    log.debug("Reconciling: {} in namespace: {}", workflowOperator.getMetadata().getName(),
+        workflowOperator.getMetadata().getNamespace());
+
+    var targetCREventSource = getOrRegisterCustomResourceEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
       var workFlow = workflowEventSource
           .get(new ResourceID(cr.getMetadata().getName(), cr.getMetadata().getNamespace()));
@@ -85,7 +93,7 @@ public class WorkflowOperatorReconciler
     return res;
   }
 
-  private InformerEventSource<GenericKubernetesResource, WorkflowOperator> getOrRegisterEventSource(
+  private InformerEventSource<GenericKubernetesResource, WorkflowOperator> getOrRegisterCustomResourceEventSource(
       WorkflowOperator workflowOperator, Context<WorkflowOperator> context) {
     var spec = workflowOperator.getSpec();
     var gvk = new GroupVersionKind(spec.getGroup(), spec.getVersion(), spec.getKind());
@@ -95,6 +103,7 @@ public class WorkflowOperatorReconciler
       es = (InformerEventSource<GenericKubernetesResource, WorkflowOperator>) context
           .eventSourceRetriever()
           .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
+      es.start();
     } catch (IllegalArgumentException e) {
       es = new InformerEventSource<>(InformerConfiguration.from(gvk,
           context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
