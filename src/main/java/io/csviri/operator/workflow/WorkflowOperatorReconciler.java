@@ -75,6 +75,7 @@ public class WorkflowOperatorReconciler
         // todo proper naming based on resource name
         .withAnnotations(annotation)
         .withName(cr.getMetadata().getName())
+        // probably should be same NS as resource operator
         // these workflows are either in a static namespace or in the same namespace as CR-s, or
         // same as WO
         // for now for sake of simplicity is static will, eventually best would be to have it in

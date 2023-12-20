@@ -41,11 +41,28 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
-    var primaryGVK = addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
+    addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
     return UpdateControl.noUpdate();
+  }
+
+  // todo handle race condition between registration and deregistration
+  @Override
+  public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
+
+    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
+
+    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
+      var genericDependentResource = (GenericDependentResource) dr;
+      deRegisterEventSource(genericDependentResource.getGroupVersionKind(), primary, context);
+    });
+
+    var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
+    optionalGVK.ifPresent(gvk -> deRegisterEventSource(gvk, primary, context));
+
+    return DeleteControl.defaultDelete();
   }
 
   // todo test
@@ -79,13 +96,13 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   private Optional<GroupVersionKind> addWorkflowOperatorPrimaryInformerIfApplies(
       Context<Workflow> context,
       Workflow primary) {
-    var annotations = primary.getMetadata().getAnnotations();
-    if (!annotations.containsKey(WATCH_GROUP)) {
+
+    var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
+    if (optionalGVK.isEmpty()) {
       return Optional.empty();
     }
-    GroupVersionKind gvk =
-        new GroupVersionKind(annotations.get(WATCH_GROUP),
-            annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
+
+    GroupVersionKind gvk = optionalGVK.orElseThrow();
 
     var ies = Utils.getInformerEventSource(context, gvk);
     ies.ifPresentOrElse(
@@ -103,7 +120,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
                     context.eventSourceRetriever().eventSourceContextForDynamicRegistration())));
 
     markEventSource(gvk, primary);
-    return Optional.of(gvk);
+    return optionalGVK;
   }
 
   private void createAndAddDependentToWorkflow(Workflow primary, Context<Workflow> context,
@@ -166,21 +183,6 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     throw new IllegalStateException("Unknown condition: " + condition);
   }
 
-  @Override
-  public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
-    // todo handle race condition between registration and deregistration
-    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
-    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
-      var genericDependentResource = (GenericDependentResource) dr;
-      var lastForGVK = unmarkEventSource(genericDependentResource, primary);
-      if (lastForGVK) {
-        context.eventSourceRetriever().dynamicallyDeRegisterEventSource(genericDependentResource
-            .getGroupVersionKind().toString());
-      }
-    });
-    return DeleteControl.defaultDelete();
-  }
-
   // this should be idempotent
   private synchronized void markEventSource(GroupVersionKind gvk,
       Workflow workflow) {
@@ -191,9 +193,17 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         });
   }
 
-  private synchronized boolean unmarkEventSource(GenericDependentResource genericDependentResource,
+  void deRegisterEventSource(GroupVersionKind groupVersionKind, Workflow primary,
+      Context<Workflow> context) {
+    var lastForGVK = unmarkEventSource(groupVersionKind, primary);
+    if (lastForGVK) {
+      context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
+    }
+  }
+
+  private synchronized boolean unmarkEventSource(GroupVersionKind gvk,
       Workflow workflow) {
-    var key = genericDependentResource.getGroupVersionKind().toString();
+    var key = gvk.toString();
     var es = registeredEventSourcesForGVK.get(key);
     es.remove(workflowId(workflow));
     return es.isEmpty();
@@ -201,6 +211,14 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
   private String workflowId(Workflow workflow) {
     return workflow.getMetadata().getName() + "#" + workflow.getMetadata().getNamespace();
+  }
+
+  private Optional<GroupVersionKind> gvkFromAnnotationForOperator(Map<String, String> annotations) {
+    if (!annotations.containsKey(WATCH_GROUP)) {
+      return Optional.empty();
+    }
+    return Optional.of(new GroupVersionKind(annotations.get(WATCH_GROUP),
+        annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND)));
   }
 
 }
