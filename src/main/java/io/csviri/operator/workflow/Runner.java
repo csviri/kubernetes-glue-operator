@@ -3,6 +3,8 @@ package io.csviri.operator.workflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler;
+import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.javaoperatorsdk.operator.Operator;
 
 public class Runner {

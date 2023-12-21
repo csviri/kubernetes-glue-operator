@@ -17,7 +17,7 @@ public class Utils {
   private Utils() {}
 
   // todo optimize? cache name by uid?
-  public static Map<String, GenericKubernetesResource> getActualResourcesByName(
+  public static Map<String, GenericKubernetesResource> getActualResourcesByNameInWorkflow(
       Context<Workflow> context, Workflow workflow) {
     var secondaryResources = context.getSecondaryResources(GenericKubernetesResource.class);
     Map<String, GenericKubernetesResource> res = new HashMap<>();

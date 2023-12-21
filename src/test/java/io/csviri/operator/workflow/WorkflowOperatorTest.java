@@ -11,6 +11,8 @@ import io.csviri.operator.workflow.customresource.TestCustomResourceSpec;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperator;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperatorSpec;
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
+import io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler;
+import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;

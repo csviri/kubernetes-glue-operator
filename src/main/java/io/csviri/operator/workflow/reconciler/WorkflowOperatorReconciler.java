@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow;
+package io.csviri.operator.workflow.reconciler;
 
 import java.util.HashMap;
 import java.util.Map;

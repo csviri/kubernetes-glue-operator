@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
+import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 

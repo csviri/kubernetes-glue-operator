@@ -1,4 +1,4 @@
-package io.csviri.operator.workflow;
+package io.csviri.operator.workflow.reconciler;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.workflow.Utils;
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
 import io.csviri.operator.workflow.conditions.PodsReadyCondition;
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
@@ -27,7 +28,7 @@ import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.ManagedInformerEventSource;
 
-import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
+import static io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler.*;
 
 @ControllerConfiguration()
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
@@ -36,6 +37,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
 
+  // todo extract to be testable separatelly
   private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
 
   public UpdateControl<Workflow> reconcile(Workflow primary,
@@ -104,6 +106,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     GroupVersionKind gvk = optionalGVK.orElseThrow();
 
+    markEventSource(gvk, primary);
     var ies = Utils.getInformerEventSource(context, gvk);
     ies.ifPresentOrElse(
         ManagedInformerEventSource::start, () -> context.eventSourceRetriever()
@@ -119,7 +122,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
                         .build(),
                     context.eventSourceRetriever().eventSourceContextForDynamicRegistration())));
 
-    markEventSource(gvk, primary);
+
     return optionalGVK;
   }
 

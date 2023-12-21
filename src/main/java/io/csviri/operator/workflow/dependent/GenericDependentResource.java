@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.csviri.operator.workflow.Utils;
-import io.csviri.operator.workflow.WorkflowReconciler;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
+import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
 
-import static io.csviri.operator.workflow.WorkflowOperatorReconciler.*;
+import static io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler.*;
 
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<Workflow> implements GarbageCollected<Workflow>,
@@ -60,7 +60,7 @@ public class GenericDependentResource
     // this can be precompiled?
     var mustache = mustacheFactory.compile(new StringReader(template), "desired");
     // convert GKR to Map for better access ?
-    var actualResourcesByName = Utils.getActualResourcesByName(context, primary);
+    var actualResourcesByName = Utils.getActualResourcesByNameInWorkflow(context, primary);
     var mustacheContext = actualResourcesByName.entrySet().stream().collect(Collectors
         .toMap(Map.Entry::getKey, e -> objectMapper.convertValue(e.getValue(), Map.class)));
     addPrimaryResourceOfOperatorIfAvailable(context, primary, mustacheContext);
