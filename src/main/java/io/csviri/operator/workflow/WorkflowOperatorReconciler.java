@@ -52,13 +52,20 @@ public class WorkflowOperatorReconciler
     targetCREventSource.list().forEach(cr -> {
       var workFlow = workflowEventSource
           .get(new ResourceID(cr.getMetadata().getName(), cr.getMetadata().getNamespace()));
-      // todo match / update
+      var targetWorkflow = createWorkflow(cr, workflowOperator);
       if (workFlow.isEmpty()) {
-        context.getClient().resource(createWorkflow(cr, workflowOperator)).create();
+        context.getClient().resource(targetWorkflow).create();
+      } else if (!match(workFlow.orElseThrow(), targetWorkflow)) {
+        context.getClient().resource(targetWorkflow).update();
       }
     });
 
     return UpdateControl.noUpdate();
+  }
+
+  private boolean match(Workflow actualWorkflow, Workflow targetWorkflow) {
+    // for now cannot change watched resource, coming with related resources
+    return actualWorkflow.getSpec().equals(targetWorkflow.getSpec());
   }
 
   private Workflow createWorkflow(GenericKubernetesResource cr, WorkflowOperator workflowOperator) {
