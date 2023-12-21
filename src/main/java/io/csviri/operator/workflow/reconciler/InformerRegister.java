@@ -27,12 +27,18 @@ class InformerRegister {
     // mark is synchronized, even if the deRegistration happens instantly after mark it won't
     // deregister the informer since an additional is marked. This, makes sure that start - possibly
     // long blocking operation - not happens in a synchronized block
-    markEventSource(gvk, workflow);
-    getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
+    Optional<InformerEventSource<GenericKubernetesResource, Workflow>> es;
+    synchronized (this) {
+      markEventSource(gvk, workflow);
+      // todo is this correct? own list of event sources? / whole synced
+      es = getInformerEventSource(context, gvk);
+    }
+
+    es.ifPresentOrElse(e -> {
       // make sure it is already started up (thus synced)
-      es.start();
+      e.start();
       if (existingInformerConsumer != null) {
-        existingInformerConsumer.accept(es);
+        existingInformerConsumer.accept(e);
       }
     },
         () -> context.eventSourceRetriever()
