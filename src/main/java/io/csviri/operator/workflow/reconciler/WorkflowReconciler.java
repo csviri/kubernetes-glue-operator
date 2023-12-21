@@ -36,6 +36,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
   private final InformerRegister informerRegister = new InformerRegister();
 
+  @Override
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
@@ -46,7 +47,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     return UpdateControl.noUpdate();
   }
 
-  // todo handle race condition between registration and deregistration
+
   @Override
   public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
 

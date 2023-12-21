@@ -4,6 +4,7 @@ import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
 
 public class WorkflowOperatorSpec extends WorkflowSpec {
 
+  // todo use apiVersion in parent
   private String group;
   private String version;
   private String kind;

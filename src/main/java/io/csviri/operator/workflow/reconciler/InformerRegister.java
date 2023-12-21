@@ -1,22 +1,19 @@
 package io.csviri.operator.workflow.reconciler;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import io.csviri.operator.workflow.Utils;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 class InformerRegister {
 
-  private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
+  private final Map<String, Set<String>> registeredEventSourcesForGVK = new HashMap<>();
 
   public void registerInformer(Context<Workflow> context, Workflow workflow, GroupVersionKind gvk,
       Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSource) {
@@ -27,7 +24,11 @@ class InformerRegister {
       Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSource,
       Consumer<InformerEventSource<GenericKubernetesResource, Workflow>> existingInformerConsumer) {
 
-    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
+    // mark is synchronized, even if the deRegistration happens instantly after mark it won't
+    // deregister the informer since an additional is marked. This, makes sure that start - possibly
+    // long blocking operation - not happens in a synchronized block
+    markEventSource(gvk, workflow);
+    getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
       // make sure it is already started up (thus synced)
       es.start();
       if (existingInformerConsumer != null) {
@@ -36,10 +37,11 @@ class InformerRegister {
     },
         () -> context.eventSourceRetriever()
             .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get()));
-    markEventSource(gvk, workflow);
+
   }
 
-  public void deRegisterEventSource(GroupVersionKind groupVersionKind, Workflow primary,
+  public synchronized void deRegisterEventSource(GroupVersionKind groupVersionKind,
+      Workflow primary,
       Context<Workflow> context) {
     var lastForGVK = unmarkEventSource(groupVersionKind, primary);
     if (lastForGVK) {
@@ -47,7 +49,6 @@ class InformerRegister {
     }
   }
 
-  // this should be idempotent
   private synchronized void markEventSource(GroupVersionKind gvk,
       Workflow workflow) {
     registeredEventSourcesForGVK.merge(gvk.toString(), new HashSet<>(Set.of(workflowId(workflow))),
@@ -57,7 +58,7 @@ class InformerRegister {
         });
   }
 
-  private synchronized boolean unmarkEventSource(GroupVersionKind gvk,
+  private boolean unmarkEventSource(GroupVersionKind gvk,
       Workflow workflow) {
     var key = gvk.toString();
     var es = registeredEventSourcesForGVK.get(key);
@@ -67,6 +68,17 @@ class InformerRegister {
 
   private String workflowId(Workflow workflow) {
     return workflow.getMetadata().getName() + "#" + workflow.getMetadata().getNamespace();
+  }
+
+  private static <P extends HasMetadata> Optional<InformerEventSource<GenericKubernetesResource, P>> getInformerEventSource(
+      Context<P> context, GroupVersionKind gvk) {
+    try {
+      return Optional
+          .of((InformerEventSource<GenericKubernetesResource, P>) context.eventSourceRetriever()
+              .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString()));
+    } catch (IllegalArgumentException e) {
+      return Optional.empty();
+    }
   }
 
 }
