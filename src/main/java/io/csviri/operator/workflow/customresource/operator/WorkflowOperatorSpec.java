@@ -4,6 +4,8 @@ import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
 
 public class WorkflowOperatorSpec extends WorkflowSpec {
 
+  // todo cleanup workflows on delete flag
+
   // todo use apiVersion in parent
   private String group;
   private String version;

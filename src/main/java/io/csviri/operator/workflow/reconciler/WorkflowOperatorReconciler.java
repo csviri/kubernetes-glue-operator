@@ -22,7 +22,8 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 
 @ControllerConfiguration
 public class WorkflowOperatorReconciler
-    implements Reconciler<WorkflowOperator>, EventSourceInitializer<WorkflowOperator> {
+    implements Reconciler<WorkflowOperator>, EventSourceInitializer<WorkflowOperator>,
+    Cleaner<WorkflowOperator> {
 
   private static final Logger log = LoggerFactory.getLogger(WorkflowOperatorReconciler.class);
 
@@ -79,7 +80,7 @@ public class WorkflowOperatorReconciler
     annotation.put(WATCH_NAMESPACE, cr.getMetadata().getNamespace());
 
     res.setMetadata(new ObjectMetaBuilder()
-        // todo proper naming based on resource name
+        // todo proper naming based on resource name / namespace support
         .withAnnotations(annotation)
         .withName(cr.getMetadata().getName())
         // probably should be same NS as resource operator
@@ -132,5 +133,14 @@ public class WorkflowOperatorReconciler
             .build(),
         eventSourceContext);
     return EventSourceInitializer.nameEventSources(workflowEventSource);
+  }
+
+  @Override
+  public DeleteControl cleanup(WorkflowOperator workflowOperator,
+      Context<WorkflowOperator> context) {
+    var spec = workflowOperator.getSpec();
+    var gvk = new GroupVersionKind(spec.getGroup(), spec.getVersion(), spec.getKind());
+    context.eventSourceRetriever().dynamicallyDeRegisterEventSource(gvk.toString());
+    return DeleteControl.defaultDelete();
   }
 }
