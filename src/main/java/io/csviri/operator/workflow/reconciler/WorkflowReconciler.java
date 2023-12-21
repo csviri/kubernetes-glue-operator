@@ -1,7 +1,6 @@
 package io.csviri.operator.workflow.reconciler;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +25,6 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
-import io.javaoperatorsdk.operator.processing.event.source.informer.ManagedInformerEventSource;
 
 import static io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler.*;
 
@@ -34,11 +32,9 @@ import static io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler.
 public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflow> {
 
   private static final Logger log = LoggerFactory.getLogger(WorkflowReconciler.class);
-
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
 
-  // todo extract to be testable separatelly
-  private final Map<String, Set<String>> registeredEventSourcesForGVK = new ConcurrentHashMap<>();
+  private final InformerRegister informerRegister = new InformerRegister();
 
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
@@ -58,11 +54,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
-      deRegisterEventSource(genericDependentResource.getGroupVersionKind(), primary, context);
+      informerRegister.deRegisterEventSource(genericDependentResource.getGroupVersionKind(),
+          primary, context);
     });
 
     var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
-    optionalGVK.ifPresent(gvk -> deRegisterEventSource(gvk, primary, context));
+    optionalGVK.ifPresent(gvk -> informerRegister.deRegisterEventSource(gvk, primary, context));
 
     return DeleteControl.defaultDelete();
   }
@@ -106,22 +103,16 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     GroupVersionKind gvk = optionalGVK.orElseThrow();
 
-    markEventSource(gvk, primary);
-    var ies = Utils.getInformerEventSource(context, gvk);
-    ies.ifPresentOrElse(
-        ManagedInformerEventSource::start, () -> context.eventSourceRetriever()
-            .dynamicallyRegisterEventSource(
-                gvk.toString(), new InformerEventSource<>(
-                    InformerConfiguration
-                        .from(gvk,
-                            context.eventSourceRetriever()
-                                .eventSourceContextForDynamicRegistration())
-                        .withSecondaryToPrimaryMapper(
-                            resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
-                                WORKFLOW_TARGET_NAMESPACE)))
-                        .build(),
-                    context.eventSourceRetriever().eventSourceContextForDynamicRegistration())));
-
+    informerRegister.registerInformer(context, primary, gvk, () -> new InformerEventSource<>(
+        InformerConfiguration
+            .from(gvk,
+                context.eventSourceRetriever()
+                    .eventSourceContextForDynamicRegistration())
+            .withSecondaryToPrimaryMapper(
+                resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
+                    WORKFLOW_TARGET_NAMESPACE)))
+            .build(),
+        context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
 
     return optionalGVK;
   }
@@ -139,17 +130,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         Utils.getName(spec),
         Utils.getNamespace(spec).orElse(null)));
 
-    Utils.getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
-      // make sure it is already started up (thus synced)
-      es.start();
-      dr.configureWith(es);
-    },
-        () -> context.eventSourceRetriever().dynamicallyRegisterEventSource(
-            gvk.toString(),
-            dr.eventSource(
-                context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
-                .orElseThrow()));
-    markEventSource(gvk, primary);
+    informerRegister.registerInformer(context, primary, gvk,
+        () -> dr.eventSource(context.eventSourceRetriever()
+            .eventSourceContextForDynamicRegistration()).orElseThrow(),
+        dr::configureWith);
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
@@ -184,36 +168,6 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       return new JavaScripCondition(jsCondition.getScript());
     }
     throw new IllegalStateException("Unknown condition: " + condition);
-  }
-
-  // this should be idempotent
-  private synchronized void markEventSource(GroupVersionKind gvk,
-      Workflow workflow) {
-    registeredEventSourcesForGVK.merge(gvk.toString(), new HashSet<>(Set.of(workflowId(workflow))),
-        (s1, s2) -> {
-          s1.addAll(s2);
-          return s1;
-        });
-  }
-
-  void deRegisterEventSource(GroupVersionKind groupVersionKind, Workflow primary,
-      Context<Workflow> context) {
-    var lastForGVK = unmarkEventSource(groupVersionKind, primary);
-    if (lastForGVK) {
-      context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
-    }
-  }
-
-  private synchronized boolean unmarkEventSource(GroupVersionKind gvk,
-      Workflow workflow) {
-    var key = gvk.toString();
-    var es = registeredEventSourcesForGVK.get(key);
-    es.remove(workflowId(workflow));
-    return es.isEmpty();
-  }
-
-  private String workflowId(Workflow workflow) {
-    return workflow.getMetadata().getName() + "#" + workflow.getMetadata().getNamespace();
   }
 
   private Optional<GroupVersionKind> gvkFromAnnotationForOperator(Map<String, String> annotations) {
