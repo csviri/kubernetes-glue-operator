@@ -25,6 +25,7 @@ class InformerRegister {
     registerInformer(context, workflow, gvk, newEventSource, null);
   }
 
+  @SuppressWarnings("unchecked")
   public void registerInformer(Context<Workflow> context, Workflow workflow, GroupVersionKind gvk,
       Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSource,
       Consumer<InformerEventSource<GenericKubernetesResource, Workflow>> existingInformerConsumer) {
@@ -32,21 +33,23 @@ class InformerRegister {
     // mark is synchronized, even if the deRegistration happens instantly after mark it won't
     // deregister the informer since an additional is marked. This, makes sure that start - possibly
     // long blocking operation - not happens in a synchronized block
-    markEventSource(gvk, workflow);
-    getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
-      log.debug("Found event source for: {}", gvk);
-      // make sure it is already started up (thus synced)
-      es.start();
-      log.debug("Event source started");
-      if (existingInformerConsumer != null) {
-        existingInformerConsumer.accept(es);
-      }
-    }, () -> {
-      log.debug("Adding new event source for: {}", gvk);
-      context.eventSourceRetriever()
-          .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get());
-    });
-
+    InformerEventSource<GenericKubernetesResource, Workflow> es;
+    synchronized (this) {
+      markEventSource(gvk, workflow);
+      es = getInformerEventSource(context, gvk).map(e -> {
+        log.debug("Found event source for: {}", gvk);
+        if (existingInformerConsumer != null) {
+          existingInformerConsumer.accept(e);
+        }
+        return e;
+      }).orElseGet(() -> {
+        log.debug("Adding new event source for: {}", gvk);
+        return (InformerEventSource<GenericKubernetesResource, Workflow>) context
+            .eventSourceRetriever()
+            .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get(), false);
+      });
+    }
+    es.start();
   }
 
   public synchronized void deRegisterEventSource(GroupVersionKind groupVersionKind,
