@@ -4,6 +4,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -12,6 +15,8 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 class InformerRegister {
+
+  private static final Logger log = LoggerFactory.getLogger(InformerRegister.class);
 
   private final Map<String, Set<String>> registeredEventSourcesForGVK = new HashMap<>();
 
@@ -28,16 +33,19 @@ class InformerRegister {
     // deregister the informer since an additional is marked. This, makes sure that start - possibly
     // long blocking operation - not happens in a synchronized block
     markEventSource(gvk, workflow);
-    // todo proper debug info
     getInformerEventSource(context, gvk).ifPresentOrElse(es -> {
+      log.debug("Found event source for: {}", gvk);
       // make sure it is already started up (thus synced)
       es.start();
+      log.debug("Event source started");
       if (existingInformerConsumer != null) {
         existingInformerConsumer.accept(es);
       }
-    },
-        () -> context.eventSourceRetriever()
-            .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get()));
+    }, () -> {
+      log.debug("Adding new event source for: {}", gvk);
+      context.eventSourceRetriever()
+          .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get());
+    });
 
   }
 

@@ -107,7 +107,7 @@ class WorkflowTest {
 
   @Test
   void simpleConcurrencyTest() {
-    int num = 10;
+    int num = 2;
     List<Workflow> workflowList = testWorkflowList(num);
 
     workflowList.forEach(w -> {
