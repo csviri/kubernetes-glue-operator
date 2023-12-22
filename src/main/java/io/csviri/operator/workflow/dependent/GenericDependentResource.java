@@ -63,6 +63,9 @@ public class GenericDependentResource
     var actualResourcesByName = Utils.getActualResourcesByNameInWorkflow(context, primary);
     var mustacheContext = actualResourcesByName.entrySet().stream().collect(Collectors
         .toMap(Map.Entry::getKey, e -> objectMapper.convertValue(e.getValue(), Map.class)));
+    mustacheContext.put("workflowMetadata",
+        objectMapper.convertValue(primary.getMetadata(), Map.class));
+
     addPrimaryResourceOfOperatorIfAvailable(context, primary, mustacheContext);
 
     var res = mustache.execute(new StringWriter(), mustacheContext);

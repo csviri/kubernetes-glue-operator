@@ -1,7 +1,10 @@
 package io.csviri.operator.workflow;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -102,6 +105,42 @@ class WorkflowTest {
     });
   }
 
+  @Test
+  void simpleConcurrencyTest() {
+    int num = 10;
+    List<Workflow> workflowList = testWorkflowList(num);
 
+    workflowList.forEach(w -> {
+      extension.create(w);
+    });
+
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+      var w = extension.get(Workflow.class, "testworkflow" + index);
+      assertThat(w).isNotNull();
+      var cm1 = extension.get(ConfigMap.class, "testworkflow" + index + "-1");
+      var cm2 = extension.get(ConfigMap.class, "testworkflow" + index + "-2");
+
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+    }));
+
+    workflowList.forEach(w -> {
+      extension.delete(w);
+    });
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+      var w = extension.get(Workflow.class, "testworkflow" + index);
+      assertThat(w).isNull();
+    }));
+  }
+
+  private List<Workflow> testWorkflowList(int num) {
+    List<Workflow> res = new ArrayList<>();
+    IntStream.range(0, num).forEach(index -> {
+      Workflow w = TestUtils.loadWorkflow("/WorkflowTemplateForConcurrency.yaml");
+      w.getMetadata().setName(w.getMetadata().getName() + index);
+      res.add(w);
+    });
+    return res;
+  }
 
 }
