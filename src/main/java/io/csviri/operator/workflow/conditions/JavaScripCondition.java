@@ -23,9 +23,9 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaScripCondition.class);
 
-  private final String STR_SUFFIX = "Str";
+  private final String RESOURCE_AS_STRING_NAME_SUFFIX = "Str";
 
-  private String script;
+  private final String script;
 
   public JavaScripCondition(String script) {
     this.script = script;
@@ -49,7 +49,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       Map<String, String> namedSecondaryResources = nameAndSerializeSecondaryResources(
           context.getSecondaryResources(GenericKubernetesResource.class), workflow);
       namedSecondaryResources.forEach((k, v) -> {
-        var stringKey = k + STR_SUFFIX;
+        var stringKey = k + RESOURCE_AS_STRING_NAME_SUFFIX;
         engine.put(stringKey, v);
         finalScript.append("const ").append(k).append("= JSON.parse(").append(stringKey)
             .append(");\n");
