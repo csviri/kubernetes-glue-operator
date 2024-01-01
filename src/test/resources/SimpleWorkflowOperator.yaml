@@ -3,9 +3,9 @@ kind: WorkflowOperator
 metadata:
   name: wo1
 spec:
-  group: io.csviri.operator.workflow
-  kind: TestCustomResource
-  version: v1
+  parent:
+    apiVersion: io.csviri.operator.workflow/v1
+    kind: TestCustomResource
   resources:
     - dependsOn: [ ]
       name: configMap1

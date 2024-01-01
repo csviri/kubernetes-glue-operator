@@ -3,9 +3,9 @@ kind: WorkflowOperator
 metadata:
   name: wo-templating-sample
 spec:
-  group: io.csviri.operator.workflow
-  kind: TestCustomResource
-  version: v1
+  parent:
+    apiVersion: io.csviri.operator.workflow/v1
+    kind: TestCustomResource
   resources:
     - name: configMap1
       resource:

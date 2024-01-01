@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.workflow.customresource.TestCustomResource;
 import io.csviri.operator.workflow.customresource.TestCustomResourceSpec;
+import io.csviri.operator.workflow.customresource.operator.Parent;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperator;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperatorSpec;
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
@@ -88,9 +89,7 @@ class WorkflowOperatorTest {
         .build());
     var spec = new WorkflowOperatorSpec();
     wo.setSpec(spec);
-    spec.setGroup(CR_GROUP);
-    spec.setVersion("v1");
-    spec.setKind(TestCustomResource.class.getSimpleName());
+    spec.setParent(new Parent(CR_GROUP + "/v1", TestCustomResource.class.getSimpleName()));
 
     spec.setResources(new ArrayList<>());
     DependentResourceSpec drs = new DependentResourceSpec();

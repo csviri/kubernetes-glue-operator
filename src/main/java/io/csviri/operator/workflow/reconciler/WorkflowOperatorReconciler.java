@@ -105,7 +105,7 @@ public class WorkflowOperatorReconciler
   private InformerEventSource<GenericKubernetesResource, WorkflowOperator> getOrRegisterCustomResourceEventSource(
       WorkflowOperator workflowOperator, Context<WorkflowOperator> context) {
     var spec = workflowOperator.getSpec();
-    var gvk = new GroupVersionKind(spec.getGroup(), spec.getVersion(), spec.getKind());
+    var gvk = new GroupVersionKind(spec.getParent().getApiVersion(), spec.getParent().getKind());
     InformerEventSource<GenericKubernetesResource, WorkflowOperator> es;
     // note that this allows just one operator per gvk (what is limitation but ok for now)
     try {
@@ -139,7 +139,7 @@ public class WorkflowOperatorReconciler
   public DeleteControl cleanup(WorkflowOperator workflowOperator,
       Context<WorkflowOperator> context) {
     var spec = workflowOperator.getSpec();
-    var gvk = new GroupVersionKind(spec.getGroup(), spec.getVersion(), spec.getKind());
+    var gvk = new GroupVersionKind(spec.getParent().getApiVersion(), spec.getParent().getKind());
     context.eventSourceRetriever().dynamicallyDeRegisterEventSource(gvk.toString());
     return DeleteControl.defaultDelete();
   }

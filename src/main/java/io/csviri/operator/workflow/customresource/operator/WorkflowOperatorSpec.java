@@ -1,40 +1,39 @@
 package io.csviri.operator.workflow.customresource.operator;
 
+import java.util.Objects;
+
 import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
 
 public class WorkflowOperatorSpec extends WorkflowSpec {
 
   // todo cleanup workflows on delete flag
 
-  // todo use apiVersion in parent
-  private String group;
-  private String version;
-  private String kind;
+  private Parent parent;
 
-  public String getGroup() {
-    return group;
+  public Parent getParent() {
+    return parent;
   }
 
-  public WorkflowOperatorSpec setGroup(String group) {
-    this.group = group;
+  public WorkflowOperatorSpec setParent(Parent parent) {
+    this.parent = parent;
     return this;
   }
 
-  public String getVersion() {
-    return version;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    if (!super.equals(o))
+      return false;
+    WorkflowOperatorSpec that = (WorkflowOperatorSpec) o;
+    return Objects.equals(parent, that.parent);
   }
 
-  public WorkflowOperatorSpec setVersion(String version) {
-    this.version = version;
-    return this;
+  @Override
+  public int hashCode() {
+    return Objects.hash(super.hashCode(), parent);
   }
 
-  public String getKind() {
-    return kind;
-  }
-
-  public WorkflowOperatorSpec setKind(String kind) {
-    this.kind = kind;
-    return this;
-  }
 }
