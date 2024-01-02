@@ -45,6 +45,7 @@
         <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework</artifactId>
+            <version>${josdk.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -60,6 +61,7 @@
         <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework-junit-5</artifactId>
+            <version>${josdk.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -88,11 +90,6 @@
             <artifactId>junit-jupiter-engine</artifactId>
             <scope>test</scope>
             <version>${junit.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>operator-framework-junit-5</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
