@@ -111,7 +111,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
                     .eventSourceContextForDynamicRegistration())
             .withSecondaryToPrimaryMapper(
                 resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
-                    WORKFLOW_TARGET_NAMESPACE)))
+                    resource.getMetadata().getNamespace())))
             .build(),
         context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
 

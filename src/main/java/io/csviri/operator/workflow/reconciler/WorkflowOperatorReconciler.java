@@ -13,6 +13,7 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
@@ -35,12 +36,8 @@ public class WorkflowOperatorReconciler
   public static final String WATCH_VERSION = WATCH_PREFIX + "version";
   public static final String WATCH_KIND = WATCH_PREFIX + "kind";
   public static final String WATCH_NAME = WATCH_PREFIX + "name";
-  public static final String WATCH_NAMESPACE = WATCH_PREFIX + "namespace";
 
   private InformerEventSource<Workflow, WorkflowOperator> workflowEventSource;
-
-  // todo customizable
-  public static final String WORKFLOW_TARGET_NAMESPACE = "default";
 
   @Override
   public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
@@ -52,7 +49,7 @@ public class WorkflowOperatorReconciler
     var targetCREventSource = getOrRegisterCustomResourceEventSource(workflowOperator, context);
     targetCREventSource.list().forEach(cr -> {
       var workFlow = workflowEventSource
-          .get(new ResourceID(cr.getMetadata().getName(), cr.getMetadata().getNamespace()));
+          .get(new ResourceID(workflowName(cr), cr.getMetadata().getNamespace()));
       var targetWorkflow = createWorkflow(cr, workflowOperator);
       if (workFlow.isEmpty()) {
         context.getClient().resource(targetWorkflow).create();
@@ -77,17 +74,10 @@ public class WorkflowOperatorReconciler
     annotation.put(WATCH_VERSION, gvk.getVersion());
     annotation.put(WATCH_KIND, gvk.getKind());
     annotation.put(WATCH_NAME, cr.getMetadata().getName());
-    annotation.put(WATCH_NAMESPACE, cr.getMetadata().getNamespace());
 
     res.setMetadata(new ObjectMetaBuilder()
-        // todo proper naming based on resource name / namespace support
         .withAnnotations(annotation)
-        .withName(cr.getMetadata().getName())
-        // probably should be same NS as resource operator
-        // these workflows are either in a static namespace or in the same namespace as CR-s, or
-        // same as WO
-        // for now for sake of simplicity is static will, eventually best would be to have it in
-        // same as WO
+        .withName(workflowName(cr))
         .withNamespace(cr.getMetadata().getNamespace())
         .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
@@ -143,4 +133,9 @@ public class WorkflowOperatorReconciler
     context.eventSourceRetriever().dynamicallyDeRegisterEventSource(gvk.toString());
     return DeleteControl.defaultDelete();
   }
+
+  private String workflowName(GenericKubernetesResource cr) {
+    return KubernetesResourceUtil.sanitizeName(cr.getMetadata().getName() + "-" + cr.getKind());
+  }
+
 }

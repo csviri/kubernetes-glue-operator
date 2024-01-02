@@ -23,7 +23,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
   private static final Logger LOG = LoggerFactory.getLogger(JavaScripCondition.class);
 
-  private final String RESOURCE_AS_STRING_NAME_SUFFIX = "Str";
+  private static final String RESOURCE_AS_STRING_NAME_SUFFIX = "Str";
 
   private final String script;
 

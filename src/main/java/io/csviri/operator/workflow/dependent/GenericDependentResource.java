@@ -102,7 +102,7 @@ public class GenericDependentResource
     }
     if (is != null) {
       var resource =
-          is.get(new ResourceID(annotations.get(WATCH_NAME), annotations.get(WATCH_NAMESPACE)));
+          is.get(new ResourceID(annotations.get(WATCH_NAME), primary.getMetadata().getNamespace()));
       resource
           .ifPresent(r -> mustacheContext.put("primary", objectMapper.convertValue(r, Map.class)));
 
