@@ -17,7 +17,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <josdk.version>4.7.0-SNAPSHOT</josdk.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <slf4j.version>2.0.10</slf4j.version>
         <junit.version>5.9.2</junit.version>
         <log4j.version>2.20.0</log4j.version>
         <fabric8-client.version>6.9.2</fabric8-client.version>
