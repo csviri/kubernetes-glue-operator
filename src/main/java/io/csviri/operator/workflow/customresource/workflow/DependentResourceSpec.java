@@ -6,10 +6,12 @@ import java.util.Objects;
 
 import io.csviri.operator.workflow.customresource.workflow.condition.ConditionSpec;
 import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
+import io.fabric8.generator.annotation.Required;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 
 public class DependentResourceSpec {
 
+  @Required
   private String name;
 
   private String resourceTemplate;

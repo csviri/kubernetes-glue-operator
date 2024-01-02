@@ -13,32 +13,21 @@ public class Utils {
 
   private Utils() {}
 
-  // todo optimize? cache name by uid?
   public static Map<String, GenericKubernetesResource> getActualResourcesByNameInWorkflow(
       Context<Workflow> context, Workflow workflow) {
     var secondaryResources = context.getSecondaryResources(GenericKubernetesResource.class);
     Map<String, GenericKubernetesResource> res = new HashMap<>();
     secondaryResources.forEach(sr -> {
-      var drSpec = workflow.getSpec().getResources().stream()
+      var dependentSpec = workflow.getSpec().getResources().stream()
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
               && Utils.getName(r).equals(sr.getMetadata().getName())
-      // todo handle namespaces properly
-      // && Objects.equals(r.getResource().getMetadata().getNamespace(),
-      // sr.getMetadata().getNamespace()))
+      // namespace not compared here, it should be done it is just not trivial, now it is limited to
+      // have one kind of resource in the workflow with the same resource name
       ).findFirst();
-      var name = drSpec.map(DependentResourceSpec::getName).orElseGet(() -> nameResource(sr));
-      res.put(name, sr);
+      dependentSpec.ifPresent(spec -> res.put(spec.getName(), sr));
     });
     return res;
-  }
-
-  public static String nameResource(GenericKubernetesResource resource) {
-    return resource.getApiVersion() + "#"
-        + resource.getKind() + "#"
-        + resource.getMetadata().getName()
-        + (resource.getMetadata().getNamespace() == null ? ""
-            : ("#" + resource.getMetadata().getNamespace()));
   }
 
   public static String getName(DependentResourceSpec spec) {

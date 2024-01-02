@@ -1,14 +1,14 @@
 package io.csviri.operator.workflow.conditions;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.script.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.workflow.Utils;
 import io.csviri.operator.workflow.WorkflowException;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -16,8 +16,6 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
-
-import static io.csviri.operator.workflow.Utils.nameResource;
 
 public class JavaScripCondition implements Condition<GenericKubernetesResource, Workflow> {
 
@@ -46,8 +44,8 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
         finalScript.append("const target = JSON.parse(targetStr);\n");
       });
 
-      Map<String, String> namedSecondaryResources = nameAndSerializeSecondaryResources(
-          context.getSecondaryResources(GenericKubernetesResource.class), workflow);
+      Map<String, String> namedSecondaryResources =
+          nameAndSerializeSecondaryResources(context, workflow);
       namedSecondaryResources.forEach((k, v) -> {
         var stringKey = k + RESOURCE_AS_STRING_NAME_SUFFIX;
         engine.put(stringKey, v);
@@ -67,26 +65,10 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
     }
   }
 
-  // optimize? cache name by uid?
   private Map<String, String> nameAndSerializeSecondaryResources(
-      Set<GenericKubernetesResource> secondaryResources,
-      Workflow workflow) {
-    Map<String, String> res = new HashMap<>();
-    secondaryResources.forEach(sr -> {
-      var drSpec = workflow.getSpec().getResources().stream()
-          .filter(r -> r.getResource().getApiVersion().equals(sr.getApiVersion())
-              && r.getResource().getKind().equals(sr.getKind())
-              && r.getResource().getMetadata().getName().equals(sr.getMetadata().getName())
-      // todo unify with other mathing in utils
-      // && Objects.equals(r.getResource().getMetadata().getNamespace(),
-      // sr.getMetadata().getNamespace())
-      )
-          .findFirst();
-      var name = drSpec.map(s -> s.getName()).orElseGet(() -> nameResource(sr));
-
-      res.put(name, Serialization.asJson(sr));
-    });
-    return res;
+      Context<Workflow> context, Workflow workflow) {
+    return Utils.getActualResourcesByNameInWorkflow(context, workflow).entrySet().stream()
+        .collect(Collectors.toMap(Map.Entry::getKey, e -> Serialization.asJson(e.getValue())));
   }
 
 }

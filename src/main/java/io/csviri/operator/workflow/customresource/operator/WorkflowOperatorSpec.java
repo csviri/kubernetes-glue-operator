@@ -3,11 +3,11 @@ package io.csviri.operator.workflow.customresource.operator;
 import java.util.Objects;
 
 import io.csviri.operator.workflow.customresource.workflow.WorkflowSpec;
+import io.fabric8.generator.annotation.Required;
 
 public class WorkflowOperatorSpec extends WorkflowSpec {
 
-  // todo cleanup workflows on delete flag
-
+  @Required
   private Parent parent;
 
   public Parent getParent() {
