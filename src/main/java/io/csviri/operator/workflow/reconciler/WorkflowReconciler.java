@@ -47,10 +47,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     return UpdateControl.noUpdate();
   }
 
-
   @Override
   public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
-
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {

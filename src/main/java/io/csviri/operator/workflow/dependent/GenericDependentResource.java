@@ -74,7 +74,8 @@ public class GenericDependentResource
 
     resultDesired.getMetadata().getAnnotations()
         .put(WorkflowReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
-    // todo how do I know if a resource is namespaced or not => explicit flag / and check fabric8
+
+    // set only for cluster scoped when detection is ready
     if (resultDesired.getMetadata().getNamespace() == null) {
       resultDesired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
     }
@@ -105,17 +106,6 @@ public class GenericDependentResource
           is.get(new ResourceID(annotations.get(WATCH_NAME), primary.getMetadata().getNamespace()));
       resource
           .ifPresent(r -> mustacheContext.put("primary", objectMapper.convertValue(r, Map.class)));
-
-      // GroupVersionKind gvk =
-      // new GroupVersionKind(annotations.get(WATCH_GROUP),
-      // annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND));
-      // var secondaryResources = context.getSecondaryResources(GenericKubernetesResource.class);
-      // var target = secondaryResources.stream().filter(r ->
-      // r.getApiVersion().equals(gvk.apiVersion())
-      // && r.getKind().equals(gvk.getKind())
-      // && Objects.equals(r.getMetadata().getName(), annotations.get(WATCH_NAME))
-      // && Objects.equals(r.getMetadata().getNamespace(), annotations.get(WATCH_NAMESPACE)))
-      // .findFirst();
     }
   }
 

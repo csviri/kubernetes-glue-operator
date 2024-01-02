@@ -9,6 +9,7 @@ import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import io.csviri.operator.workflow.customresource.ClusterScopeTestCustomResource;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
@@ -21,7 +22,9 @@ class WorkflowTest {
 
   @RegisterExtension
   LocallyRunOperatorExtension extension =
-      LocallyRunOperatorExtension.builder().withReconciler(new WorkflowReconciler())
+      LocallyRunOperatorExtension.builder()
+          .withReconciler(new WorkflowReconciler())
+          .withAdditionalCustomResourceDefinition(ClusterScopeTestCustomResource.class)
           .build();
 
   @SuppressWarnings("unchecked")
@@ -131,6 +134,34 @@ class WorkflowTest {
       var w = extension.get(Workflow.class, "testworkflow" + index);
       assertThat(w).isNull();
     }));
+  }
+
+  @Test
+  void handlingClusterScopeDependents() {
+
+    final var clusterScopedResourceName = "test-resource-1";
+    var w = TestUtils.loadWorkflow("/WorkflowClusterScopeResource.yaml");
+    w = extension.create(w);
+
+
+    await().untilAsserted(() -> {
+      var clusterScopedResource =
+          extension.get(ClusterScopeTestCustomResource.class, clusterScopedResourceName);
+      assertThat(clusterScopedResource).isNotNull();
+    });
+
+
+    // Deletion not working with owner references since Workflow is not cluster scoped.
+    // https://github.com/csviri/resource-workflow-operator/issues/4
+    //
+    // extension.delete(w);
+    //
+    // await().untilAsserted(() -> {
+    // var clusterScopedResource =
+    // extension.get(ClusterScopeTestCustomResource.class, clusterScopedResourceName);
+    // assertThat(clusterScopedResource).isNull();
+    // });
+
   }
 
   private List<Workflow> testWorkflowList(int num) {
