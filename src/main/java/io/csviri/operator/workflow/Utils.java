@@ -8,6 +8,7 @@ import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
+import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 
 public class Utils {
 
@@ -28,6 +29,10 @@ public class Utils {
       dependentSpec.ifPresent(spec -> res.put(spec.getName(), sr));
     });
     return res;
+  }
+
+  public static GroupVersionKind getGVK(DependentResourceSpec spec) {
+    return new GroupVersionKind(getApiVersion(spec), getKind(spec));
   }
 
   public static String getName(DependentResourceSpec spec) {

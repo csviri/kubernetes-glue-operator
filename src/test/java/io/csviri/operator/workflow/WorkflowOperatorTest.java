@@ -2,6 +2,8 @@ package io.csviri.operator.workflow;
 
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -24,7 +26,8 @@ import static org.awaitility.Awaitility.await;
 
 class WorkflowOperatorTest {
 
-  public static final String TEST_RESOURCE_VALUE = "val1";
+  public static final String TEST_RESOURCE_VALUE = "val";
+  public static final String TEST_RESOURCE_PREFIX = "testcr";
 
   @RegisterExtension
   LocallyRunOperatorExtension extension =
@@ -61,7 +64,7 @@ class WorkflowOperatorTest {
     await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
       assertThat(cm1).isNotNull();
-      assertThat(cm1.getData()).containsEntry("key", TEST_RESOURCE_VALUE);
+      assertThat(cm1.getData()).containsEntry("key", cr.getSpec().getValue());
     });
 
     extension.delete(cr);
@@ -74,15 +77,47 @@ class WorkflowOperatorTest {
 
   @Test
   void simpleConcurrencyTest() {
+    int num = 10;
+    var wo = TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml");
+    extension.create(wo);
+    var resources =
+        IntStream.range(0, num).mapToObj(this::testCustomResource).collect(Collectors.toList());
+    resources.forEach(r -> extension.create(r));
+
+    await().untilAsserted(() -> {
+      IntStream.range(0, num).forEach(n -> {
+        var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+        assertThat(cm).isNotNull();
+        assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
+      });
+    });
+
+    resources.forEach(r -> extension.delete(r));
+
+    await().untilAsserted(() -> {
+      IntStream.range(0, num).forEach(n -> {
+        var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+        assertThat(cm).isNull();
+      });
+    });
+  }
+
+  @Test
+  void simpleConcurrencyForMultipleOperatorTest() {
+
   }
 
   TestCustomResource testCustomResource() {
+    return testCustomResource(1);
+  }
+
+  TestCustomResource testCustomResource(int index) {
     var res = new TestCustomResource();
     res.setMetadata(new ObjectMetaBuilder()
-        .withName("testcr1")
+        .withName(TEST_RESOURCE_PREFIX + index)
         .build());
     res.setSpec(new TestCustomResourceSpec());
-    res.getSpec().setValue(TEST_RESOURCE_VALUE);
+    res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
     return res;
   }
 

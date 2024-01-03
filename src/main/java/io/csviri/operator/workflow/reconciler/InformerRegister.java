@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.workflow.Utils;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -28,7 +29,7 @@ class InformerRegister {
     var registeredGVKSet =
         new HashSet<>(workflowToInformerGVK.get(primary.getMetadata().getName()));
     var currentGVKSet = primary.getSpec().getResources().stream()
-        .map(r -> new GroupVersionKind(r.getResource().getApiVersion(), r.getResource().getKind()))
+        .map(Utils::getGVK)
         .collect(Collectors.toSet());
     registeredGVKSet.removeAll(currentGVKSet);
     registeredGVKSet.forEach(gvk -> {

@@ -5,13 +5,13 @@ metadata:
 spec:
   parent:
     apiVersion: io.csviri.operator.workflow/v1
-    kind: TestCustomResource
+    kind: TestCustomResource2
   resources:
     - name: configMap1
       resource:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "prefix-{{parent.metadata.name}}"
         data:
           key: "{{parent.spec.value}}"
