@@ -2,13 +2,13 @@ package io.csviri.operator.workflow;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.workflow.customresource.TestCustomResource;
+import io.csviri.operator.workflow.customresource.TestCustomResource2;
 import io.csviri.operator.workflow.customresource.TestCustomResourceSpec;
 import io.csviri.operator.workflow.customresource.operator.Parent;
 import io.csviri.operator.workflow.customresource.operator.WorkflowOperator;
@@ -28,6 +28,7 @@ class WorkflowOperatorTest {
 
   public static final String TEST_RESOURCE_VALUE = "val";
   public static final String TEST_RESOURCE_PREFIX = "testcr";
+  public static final String TEST_RESOURCE2_PREFIX = "testcr2";
 
   @RegisterExtension
   LocallyRunOperatorExtension extension =
@@ -35,6 +36,7 @@ class WorkflowOperatorTest {
           .withReconciler(new WorkflowReconciler())
           .withReconciler(new WorkflowOperatorReconciler())
           .withAdditionalCustomResourceDefinition(TestCustomResource.class)
+          .withAdditionalCustomResourceDefinition(TestCustomResource2.class)
           .build();
 
   @Test
@@ -78,33 +80,57 @@ class WorkflowOperatorTest {
   @Test
   void simpleConcurrencyTest() {
     int num = 10;
-    var wo = TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml");
-    extension.create(wo);
-    var resources =
-        IntStream.range(0, num).mapToObj(this::testCustomResource).collect(Collectors.toList());
-    resources.forEach(r -> extension.create(r));
+    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml"));
 
-    await().untilAsserted(() -> {
-      IntStream.range(0, num).forEach(n -> {
-        var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
-        assertThat(cm).isNotNull();
-        assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
-      });
-    });
+    var resources =
+        IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
+
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+      var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+      assertThat(cm).isNotNull();
+      assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
+    }));
 
     resources.forEach(r -> extension.delete(r));
+
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+      var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+      assertThat(cm).isNull();
+    }));
+  }
+
+  @Test
+  void simpleConcurrencyForMultipleOperatorTest() {
+    int num = 10;
+    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml"));
+    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency2.yaml"));
+
+    var crs =
+        IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
+    var cr2s =
+        IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource2(n))).toList();
+
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+      var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+      assertThat(cm).isNotNull();
+      assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
+
+      var cm2 = extension.get(ConfigMap.class, TEST_RESOURCE2_PREFIX + n);
+      assertThat(cm2).isNotNull();
+      assertThat(cm2.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
+    }));
+
+    crs.forEach(r -> extension.delete(r));
+    cr2s.forEach(r -> extension.delete(r));
 
     await().untilAsserted(() -> {
       IntStream.range(0, num).forEach(n -> {
         var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
         assertThat(cm).isNull();
+        var cm2 = extension.get(ConfigMap.class, TEST_RESOURCE2_PREFIX + n);
+        assertThat(cm2).isNull();
       });
     });
-  }
-
-  @Test
-  void simpleConcurrencyForMultipleOperatorTest() {
-
   }
 
   TestCustomResource testCustomResource() {
@@ -115,6 +141,20 @@ class WorkflowOperatorTest {
     var res = new TestCustomResource();
     res.setMetadata(new ObjectMetaBuilder()
         .withName(TEST_RESOURCE_PREFIX + index)
+        .build());
+    res.setSpec(new TestCustomResourceSpec());
+    res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
+    return res;
+  }
+
+  TestCustomResource2 testCustomResource2() {
+    return testCustomResource2(1);
+  }
+
+  TestCustomResource2 testCustomResource2(int index) {
+    var res = new TestCustomResource2();
+    res.setMetadata(new ObjectMetaBuilder()
+        .withName(TEST_RESOURCE2_PREFIX + index)
         .build());
     res.setSpec(new TestCustomResourceSpec());
     res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
