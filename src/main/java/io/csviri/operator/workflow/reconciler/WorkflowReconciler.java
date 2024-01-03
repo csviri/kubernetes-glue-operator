@@ -44,7 +44,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
-    // todo deregister event source if needed
+    informerRegister.deRegisterInformerOnWorkflowChange(context, primary);
     return UpdateControl.noUpdate();
   }
 
@@ -63,6 +63,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     return DeleteControl.defaultDelete();
   }
+
+
 
   // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Workflow> context,

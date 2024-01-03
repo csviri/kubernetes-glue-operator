@@ -3,6 +3,7 @@ package io.csviri.operator.workflow.reconciler;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,23 @@ class InformerRegister {
 
   private static final Logger log = LoggerFactory.getLogger(InformerRegister.class);
 
-  private final Map<String, Set<String>> registeredEventSourcesForGVK = new HashMap<>();
+  private final Map<GroupVersionKind, Set<String>> gvkOfInformerToWorkflow = new HashMap<>();
+  private final Map<String, Set<GroupVersionKind>> workflowToInformerGVK = new HashMap<>();
+
+  public synchronized void deRegisterInformerOnWorkflowChange(Context<Workflow> context,
+      Workflow primary) {
+    var registeredGVKSet =
+        new HashSet<>(workflowToInformerGVK.get(primary.getMetadata().getName()));
+    var currentGVKSet = primary.getSpec().getResources().stream()
+        .map(r -> new GroupVersionKind(r.getResource().getApiVersion(), r.getResource().getKind()))
+        .collect(Collectors.toSet());
+    registeredGVKSet.removeAll(currentGVKSet);
+    registeredGVKSet.forEach(gvk -> {
+      log.debug("De-registering Informer on Workflow change for workflow: {} gvk: {}", primary,
+          gvk);
+      deRegisterEventSource(gvk, primary, context);
+    });
+  }
 
   public void registerInformer(Context<Workflow> context, Workflow workflow, GroupVersionKind gvk,
       Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSource) {
@@ -64,7 +81,13 @@ class InformerRegister {
 
   private synchronized void markEventSource(GroupVersionKind gvk,
       Workflow workflow) {
-    registeredEventSourcesForGVK.merge(gvk.toString(), new HashSet<>(Set.of(workflowId(workflow))),
+
+    gvkOfInformerToWorkflow.merge(gvk, new HashSet<>(Set.of(workflowId(workflow))),
+        (s1, s2) -> {
+          s1.addAll(s2);
+          return s1;
+        });
+    workflowToInformerGVK.merge(workflow.getMetadata().getName(), new HashSet<>(Set.of(gvk)),
         (s1, s2) -> {
           s1.addAll(s2);
           return s1;
@@ -73,8 +96,10 @@ class InformerRegister {
 
   private boolean unmarkEventSource(GroupVersionKind gvk,
       Workflow workflow) {
-    var key = gvk.toString();
-    var es = registeredEventSourcesForGVK.get(key);
+
+    var gvkSet = workflowToInformerGVK.get(workflow.getMetadata().getName());
+    gvkSet.remove(gvk);
+    var es = gvkOfInformerToWorkflow.get(gvk);
     es.remove(workflowId(workflow));
     return es.isEmpty();
   }
