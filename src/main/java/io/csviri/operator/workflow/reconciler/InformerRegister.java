@@ -14,6 +14,7 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
+// todo test
 class InformerRegister {
 
   private static final Logger log = LoggerFactory.getLogger(InformerRegister.class);

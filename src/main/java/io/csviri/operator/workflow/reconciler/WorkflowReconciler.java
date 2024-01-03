@@ -44,6 +44,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
     actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
+    // todo deregister event source if needed
     return UpdateControl.noUpdate();
   }
 
@@ -66,11 +67,13 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Workflow> context,
       Workflow primary) {
+
     context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
       String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
       if (primary.getSpec().getResources().stream()
           .filter(pr -> pr.getName().equals(dependentName)).findAny().isEmpty()) {
         try {
+          log.debug("Deleting resource with name: {}", dependentName);
           context.getClient().resource(r).delete();
         } catch (KubernetesClientException e) {
           // can happen that already deleted, just in cache.

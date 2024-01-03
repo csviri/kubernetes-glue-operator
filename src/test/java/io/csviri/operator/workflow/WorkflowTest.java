@@ -10,9 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.workflow.customresource.ClusterScopeTestCustomResource;
+import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.csviri.operator.workflow.reconciler.WorkflowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -143,13 +145,11 @@ class WorkflowTest {
     var w = TestUtils.loadWorkflow("/WorkflowClusterScopeResource.yaml");
     w = extension.create(w);
 
-
     await().untilAsserted(() -> {
       var clusterScopedResource =
           extension.get(ClusterScopeTestCustomResource.class, clusterScopedResourceName);
       assertThat(clusterScopedResource).isNotNull();
     });
-
 
     // Deletion not working with owner references since Workflow is not cluster scoped.
     // https://github.com/csviri/resource-workflow-operator/issues/4
@@ -162,6 +162,42 @@ class WorkflowTest {
     // assertThat(clusterScopedResource).isNull();
     // });
 
+  }
+
+  @Test
+  void changingWorkflow() {
+    Workflow w = extension.create(TestUtils.loadWorkflow("/WorkflowToChange.yaml"));
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "configmap1");
+      var cm2 = extension.get(ConfigMap.class, "configmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+    });
+
+    w.getSpec().getResources().remove(1);
+    w.getSpec().getResources().add(new DependentResourceSpec()
+        .setName("secret")
+        .setResource(TestUtils.load("/Secret.yaml")));
+    w = extension.replace(w);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "configmap1");
+      var cm2 = extension.get(ConfigMap.class, "configmap2");
+      var s = extension.get(Secret.class, "secret1");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNull();
+      assertThat(s).isNotNull();
+    });
+
+    extension.delete(w);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "configmap1");
+      var s = extension.get(Secret.class, "secret1");
+      assertThat(cm1).isNull();
+      assertThat(s).isNull();
+    });
   }
 
   private List<Workflow> testWorkflowList(int num) {

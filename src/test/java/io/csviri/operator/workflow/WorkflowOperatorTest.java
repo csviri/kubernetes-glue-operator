@@ -72,6 +72,11 @@ class WorkflowOperatorTest {
     });
   }
 
+  @Test
+  void simpleConcurrencyTest() {
+    // todo
+  }
+
   TestCustomResource testCustomResource() {
     var res = new TestCustomResource();
     res.setMetadata(new ObjectMetaBuilder()
