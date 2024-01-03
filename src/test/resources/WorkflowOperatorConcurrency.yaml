@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.workflow/v1beta1
 kind: WorkflowOperator
 metadata:
-  name: wo-templating-sample
+  name: wo
 spec:
   parent:
     apiVersion: io.csviri.operator.workflow/v1
@@ -12,6 +12,6 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: configmap-wo-templated
+          name: {{parent.metadata.name}}
         data:
           key: "{{parent.spec.value}}"

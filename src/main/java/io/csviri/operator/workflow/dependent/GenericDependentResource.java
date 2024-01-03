@@ -32,6 +32,7 @@ public class GenericDependentResource
 
   private static final ObjectMapper objectMapper = new ObjectMapper();
   private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
+  private static final String KEY_TO_ACCESS_PARENT = "parent";
 
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
@@ -105,7 +106,8 @@ public class GenericDependentResource
       var resource =
           is.get(new ResourceID(annotations.get(WATCH_NAME), primary.getMetadata().getNamespace()));
       resource
-          .ifPresent(r -> mustacheContext.put("primary", objectMapper.convertValue(r, Map.class)));
+          .ifPresent(r -> mustacheContext.put(KEY_TO_ACCESS_PARENT,
+              objectMapper.convertValue(r, Map.class)));
     }
   }
 

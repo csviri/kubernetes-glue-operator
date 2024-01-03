@@ -74,7 +74,6 @@ class WorkflowOperatorTest {
 
   @Test
   void simpleConcurrencyTest() {
-    // todo
   }
 
   TestCustomResource testCustomResource() {
