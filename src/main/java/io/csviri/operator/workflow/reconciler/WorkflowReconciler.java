@@ -54,12 +54,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
-      informerRegister.deRegisterEventSource(genericDependentResource.getGroupVersionKind(),
+      informerRegister.deRegisterInformer(genericDependentResource.getGroupVersionKind(),
           primary, context);
     });
 
     var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
-    optionalGVK.ifPresent(gvk -> informerRegister.deRegisterEventSource(gvk, primary, context));
+    optionalGVK.ifPresent(gvk -> informerRegister.deRegisterInformer(gvk, primary, context));
 
     return DeleteControl.defaultDelete();
   }

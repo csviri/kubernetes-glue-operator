@@ -35,7 +35,7 @@ class InformerRegister {
     registeredGVKSet.forEach(gvk -> {
       log.debug("De-registering Informer on Workflow change for workflow: {} gvk: {}", primary,
           gvk);
-      deRegisterEventSource(gvk, primary, context);
+      deRegisterInformer(gvk, primary, context);
     });
   }
 
@@ -46,7 +46,7 @@ class InformerRegister {
 
   @SuppressWarnings("unchecked")
   public void registerInformer(Context<Workflow> context, Workflow workflow, GroupVersionKind gvk,
-      Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSource,
+      Supplier<InformerEventSource<GenericKubernetesResource, Workflow>> newEventSourceSupplier,
       Consumer<InformerEventSource<GenericKubernetesResource, Workflow>> existingInformerConsumer) {
 
     // mark is synchronized, even if the deRegistration happens instantly after mark it won't
@@ -61,19 +61,24 @@ class InformerRegister {
           existingInformerConsumer.accept(e);
         }
         return e;
-      }).orElseGet(() -> {
-        log.debug("Adding new event source for: {}", gvk);
-        return (InformerEventSource<GenericKubernetesResource, Workflow>) context
-            .eventSourceRetriever()
-            .dynamicallyRegisterEventSource(gvk.toString(), newEventSource.get(), false);
-      });
+      }).orElse(null);
     }
-    es.start();
+    if (es == null) {
+      log.debug("Adding new event source for: {}", gvk);
+      var newEventSource = newEventSourceSupplier.get();
+      var resultEventSource =
+          context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(),
+              newEventSource);
+      if (resultEventSource != newEventSource) {
+        existingInformerConsumer
+            .accept((InformerEventSource<GenericKubernetesResource, Workflow>) resultEventSource);
+      }
+    }
   }
 
-  public synchronized void deRegisterEventSource(GroupVersionKind groupVersionKind,
-      Workflow primary,
-      Context<Workflow> context) {
+  public synchronized void deRegisterInformer(GroupVersionKind groupVersionKind,
+                                              Workflow primary,
+                                              Context<Workflow> context) {
     var lastForGVK = unmarkEventSource(groupVersionKind, primary);
     if (lastForGVK) {
       context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
