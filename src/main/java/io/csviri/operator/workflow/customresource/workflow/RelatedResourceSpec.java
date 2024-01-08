@@ -4,9 +4,12 @@ import java.util.Objects;
 
 public class RelatedResourceSpec {
 
+  // name for referencing the resource from templates and conditions (not name from object metadata)
+  private String name;
+
   private String apiVersion;
   private String kind;
-  private String name;
+  private String resourceName;
 
   public String getApiVersion() {
     return apiVersion;
@@ -32,6 +35,15 @@ public class RelatedResourceSpec {
 
   public RelatedResourceSpec setName(String name) {
     this.name = name;
+    return this;
+  }
+
+  public String getResourceName() {
+    return resourceName;
+  }
+
+  public RelatedResourceSpec setResourceName(String resourceName) {
+    this.resourceName = resourceName;
     return this;
   }
 
