@@ -77,8 +77,8 @@ class InformerRegister {
   }
 
   public synchronized void deRegisterInformer(GroupVersionKind groupVersionKind,
-                                              Workflow primary,
-                                              Context<Workflow> context) {
+      Workflow primary,
+      Context<Workflow> context) {
     var lastForGVK = unmarkEventSource(groupVersionKind, primary);
     if (lastForGVK) {
       context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
