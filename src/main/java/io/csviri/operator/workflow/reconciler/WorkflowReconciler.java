@@ -40,17 +40,25 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   public UpdateControl<Workflow> reconcile(Workflow primary,
       Context<Workflow> context) {
 
-    addWorkflowOperatorPrimaryInformerIfApplies(context, primary);
-    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
+    registerWorkflowOperatorPrimaryInformerIfApplies(context, primary);
+    registerRelatedResourceInformers(context, primary);
+    var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
     informerRegister.deRegisterInformerOnWorkflowChange(context, primary);
     return UpdateControl.noUpdate();
   }
 
+  private void registerRelatedResourceInformers(Context<Workflow> context, Workflow workflow) {
+    workflow.getSpec().getRelatedResources().forEach(r -> {
+      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      // informerRegister.registerInformer(context,workflow, gvk,);
+    });
+  }
+
   @Override
   public DeleteControl cleanup(Workflow primary, Context<Workflow> context) {
-    var actualWorkflow = buildWorkflowAndRegisterEventSources(primary, context);
+    var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
@@ -63,8 +71,6 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     return DeleteControl.defaultDelete();
   }
-
-
 
   // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Workflow> context,
@@ -85,7 +91,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     });
   }
 
-  private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterEventSources(
+  private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterInformers(
       Workflow primary, Context<Workflow> context) {
     var builder = new WorkflowBuilder<Workflow>();
 
@@ -96,7 +102,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     return builder.build();
   }
 
-  private Optional<GroupVersionKind> addWorkflowOperatorPrimaryInformerIfApplies(
+  private Optional<GroupVersionKind> registerWorkflowOperatorPrimaryInformerIfApplies(
       Context<Workflow> context,
       Workflow primary) {
 

@@ -1,13 +1,14 @@
 package io.csviri.operator.workflow.customresource.workflow;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class WorkflowSpec {
 
-  private List<DependentResourceSpec> resources;
+  private List<DependentResourceSpec> resources = new ArrayList<>();
 
-  private List<RelatedResourceSpec> relatedResources;
+  private List<RelatedResourceSpec> relatedResources = new ArrayList<>();
 
   public List<DependentResourceSpec> getResources() {
     return resources;
