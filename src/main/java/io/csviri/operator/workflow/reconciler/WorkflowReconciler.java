@@ -49,10 +49,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     return UpdateControl.noUpdate();
   }
 
+  // todo deregister
   private void registerRelatedResourceInformers(Context<Workflow> context, Workflow workflow) {
     workflow.getSpec().getRelatedResources().forEach(r -> {
       var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
-      // informerRegister.registerInformer(context,workflow, gvk,);
+      informerRegister.registerInformerForRelatedResource(context, workflow, gvk, r.getNamespace(),
+          r.getResourceNames());
     });
   }
 

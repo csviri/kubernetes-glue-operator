@@ -71,7 +71,7 @@ class WorkflowOperatorTest {
 
     extension.delete(cr);
 
-    await().timeout(Duration.ofSeconds(5)).untilAsserted(() -> {
+    await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
       assertThat(cm1).isNull();
     });

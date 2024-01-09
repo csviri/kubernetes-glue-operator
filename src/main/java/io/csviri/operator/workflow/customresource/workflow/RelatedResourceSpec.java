@@ -1,15 +1,23 @@
 package io.csviri.operator.workflow.customresource.workflow;
 
+import java.util.List;
 import java.util.Objects;
+
+import io.fabric8.generator.annotation.Required;
 
 public class RelatedResourceSpec {
 
   // name for referencing the resource from templates and conditions (not name from object metadata)
+  @Required
   private String name;
 
+  @Required
   private String apiVersion;
+  @Required
   private String kind;
-  private String resourceName;
+  private String namespace;
+  private List<String> resourceNames;
+
 
   public String getApiVersion() {
     return apiVersion;
@@ -38,12 +46,21 @@ public class RelatedResourceSpec {
     return this;
   }
 
-  public String getResourceName() {
-    return resourceName;
+  public List<String> getResourceNames() {
+    return resourceNames;
   }
 
-  public RelatedResourceSpec setResourceName(String resourceName) {
-    this.resourceName = resourceName;
+  public RelatedResourceSpec setResourceNames(List<String> resourceNames) {
+    this.resourceNames = resourceNames;
+    return this;
+  }
+
+  public String getNamespace() {
+    return namespace;
+  }
+
+  public RelatedResourceSpec setNamespace(String namespace) {
+    this.namespace = namespace;
     return this;
   }
 
@@ -54,12 +71,13 @@ public class RelatedResourceSpec {
     if (o == null || getClass() != o.getClass())
       return false;
     RelatedResourceSpec that = (RelatedResourceSpec) o;
-    return Objects.equals(apiVersion, that.apiVersion) && Objects.equals(kind, that.kind)
-        && Objects.equals(name, that.name);
+    return Objects.equals(name, that.name) && Objects.equals(apiVersion, that.apiVersion)
+        && Objects.equals(kind, that.kind) && Objects.equals(namespace, that.namespace)
+        && Objects.equals(resourceNames, that.resourceNames);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiVersion, kind, name);
+    return Objects.hash(name, apiVersion, kind, namespace, resourceNames);
   }
 }

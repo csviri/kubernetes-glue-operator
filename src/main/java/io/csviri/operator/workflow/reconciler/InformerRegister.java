@@ -1,6 +1,7 @@
 package io.csviri.operator.workflow.reconciler;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -12,8 +13,10 @@ import io.csviri.operator.workflow.Utils;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
+import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
+import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 // todo test
@@ -23,6 +26,8 @@ class InformerRegister {
 
   private final Map<GroupVersionKind, Set<String>> gvkOfInformerToWorkflow = new HashMap<>();
   private final Map<String, Set<GroupVersionKind>> workflowToInformerGVK = new HashMap<>();
+  private final Map<GroupVersionKind, RelatedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
+      new ConcurrentHashMap<>();
 
   public synchronized void deRegisterInformerOnWorkflowChange(Context<Workflow> context,
       Workflow primary) {
@@ -37,6 +42,22 @@ class InformerRegister {
           gvk);
       deRegisterInformer(gvk, primary, context);
     });
+  }
+
+  // todo tests + remake WO to use related resources
+  public void registerInformerForRelatedResource(Context<Workflow> context, Workflow workflow,
+      GroupVersionKind gvk, String namespace, List<String> names) {
+
+    relatedResourceMappers.putIfAbsent(gvk, new RelatedResourceSecondaryToPrimaryMapper());
+    var mapper = relatedResourceMappers.get(gvk);
+    mapper.addResourceIDMapping(
+        names.stream().map(n -> new ResourceID(n, namespace)).collect(Collectors.toSet()),
+        ResourceID.fromResource(workflow));
+
+    registerInformer(context, workflow, gvk,
+        () -> new InformerEventSource<>(InformerConfiguration.<GenericKubernetesResource>from(gvk)
+            .withSecondaryToPrimaryMapper(mapper)
+            .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
   }
 
   public void registerInformer(Context<Workflow> context, Workflow workflow, GroupVersionKind gvk,
