@@ -1,2 +1,0 @@
-io.csviri.operator.workflow.reconciler.WorkflowOperatorReconciler,io.csviri.operator.workflow.customresource.operator.WorkflowOperator
-io.csviri.operator.workflow.reconciler.WorkflowReconciler,io.csviri.operator.workflow.customresource.workflow.Workflow
