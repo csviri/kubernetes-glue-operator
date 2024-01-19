@@ -33,6 +33,7 @@ public class GenericDependentResource
   private static final ObjectMapper objectMapper = new ObjectMapper();
   private static final MustacheFactory mustacheFactory = new DefaultMustacheFactory();
   private static final String KEY_TO_ACCESS_PARENT = "parent";
+  public static final String WORKFLOW_METADATA_KEY = "workflowMetadata";
 
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
@@ -61,13 +62,7 @@ public class GenericDependentResource
     // this can be precompiled?
     var mustache = mustacheFactory.compile(new StringReader(template), "desired");
     // convert GKR to Map for better access ?
-    var actualResourcesByName = Utils.getActualResourcesByNameInWorkflow(context, primary);
-    var mustacheContext = actualResourcesByName.entrySet().stream().collect(Collectors
-        .toMap(Map.Entry::getKey, e -> objectMapper.convertValue(e.getValue(), Map.class)));
-    mustacheContext.put("workflowMetadata",
-        objectMapper.convertValue(primary.getMetadata(), Map.class));
-
-    addPrimaryResourceOfOperatorIfAvailable(context, primary, mustacheContext);
+    var mustacheContext = createMustacheContextWithResources(primary, context);
 
     var res = mustache.execute(new StringWriter(), mustacheContext);
 
@@ -81,6 +76,19 @@ public class GenericDependentResource
       resultDesired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
     }
     return resultDesired;
+  }
+
+  private Map<String, Map> createMustacheContextWithResources(Workflow primary,
+      Context<Workflow> context) {
+    var actualResourcesByName = Utils.getActualResourcesByNameInWorkflow(context, primary);
+    var mustacheContext = actualResourcesByName.entrySet().stream().collect(Collectors
+        .toMap(Map.Entry::getKey, e -> objectMapper.convertValue(e.getValue(), Map.class)));
+    mustacheContext.put(WORKFLOW_METADATA_KEY,
+        objectMapper.convertValue(primary.getMetadata(), Map.class));
+
+    // todo remove if related resources finished
+    addPrimaryResourceOfOperatorIfAvailable(context, primary, mustacheContext);
+    return mustacheContext;
   }
 
   private void addPrimaryResourceOfOperatorIfAvailable(Context<Workflow> context,

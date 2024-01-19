@@ -23,10 +23,10 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
   private static final String RESOURCE_AS_STRING_NAME_SUFFIX = "Str";
 
-  private final String script;
+  private final String inputScript;
 
-  public JavaScripCondition(String script) {
-    this.script = script;
+  public JavaScripCondition(String inputScript) {
+    this.inputScript = inputScript;
   }
 
   @Override
@@ -38,22 +38,10 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       ScriptEngine engine = manager.getEngineByName("js");
 
       StringBuilder finalScript = new StringBuilder();
-      var target = dependentResource.getSecondaryResource(workflow, context);
-      target.ifPresent(t -> {
-        engine.put("targetStr", Serialization.asJson(t));
-        finalScript.append("const target = JSON.parse(targetStr);\n");
-      });
+      addTargetResourceToScript(dependentResource, workflow, context, engine, finalScript);
+      addSecondaryResourceToScript(workflow, context, engine, finalScript);
 
-      Map<String, String> namedSecondaryResources =
-          nameAndSerializeSecondaryResources(context, workflow);
-      namedSecondaryResources.forEach((k, v) -> {
-        var stringKey = k + RESOURCE_AS_STRING_NAME_SUFFIX;
-        engine.put(stringKey, v);
-        finalScript.append("const ").append(k).append("= JSON.parse(").append(stringKey)
-            .append(");\n");
-      });
-
-      finalScript.append("\n").append(script);
+      finalScript.append("\n").append(inputScript);
 
       LOG.debug("Final Condition JS:\n{}", finalScript);
 
@@ -65,7 +53,29 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
     }
   }
 
-  private Map<String, String> nameAndSerializeSecondaryResources(
+  private static void addSecondaryResourceToScript(Workflow workflow, Context<Workflow> context,
+      ScriptEngine engine, StringBuilder finalScript) {
+    Map<String, String> namedSecondaryResources =
+        nameAndSerializeSecondaryResources(context, workflow);
+    namedSecondaryResources.forEach((k, v) -> {
+      var stringKey = k + RESOURCE_AS_STRING_NAME_SUFFIX;
+      engine.put(stringKey, v);
+      finalScript.append("const ").append(k).append("= JSON.parse(").append(stringKey)
+          .append(");\n");
+    });
+  }
+
+  private static void addTargetResourceToScript(
+      DependentResource<GenericKubernetesResource, Workflow> dependentResource, Workflow workflow,
+      Context<Workflow> context, ScriptEngine engine, StringBuilder finalScript) {
+    var target = dependentResource.getSecondaryResource(workflow, context);
+    target.ifPresent(t -> {
+      engine.put("targetStr", Serialization.asJson(t));
+      finalScript.append("const target = JSON.parse(targetStr);\n");
+    });
+  }
+
+  private static Map<String, String> nameAndSerializeSecondaryResources(
       Context<Workflow> context, Workflow workflow) {
     return Utils.getActualResourcesByNameInWorkflow(context, workflow).entrySet().stream()
         .collect(Collectors.toMap(Map.Entry::getKey, e -> Serialization.asJson(e.getValue())));
