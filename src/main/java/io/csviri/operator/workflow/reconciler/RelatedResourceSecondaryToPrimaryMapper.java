@@ -8,17 +8,21 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.SecondaryToPrimaryMapper;
+import io.javaoperatorsdk.operator.processing.event.source.informer.Mappers;
 
-// todo combine with owner reference triggering
 public class RelatedResourceSecondaryToPrimaryMapper
     implements SecondaryToPrimaryMapper<GenericKubernetesResource> {
 
-  private Map<ResourceID, Set<ResourceID>> idMap = new ConcurrentHashMap<>();
+  private final Map<ResourceID, Set<ResourceID>> idMap = new ConcurrentHashMap<>();
 
   @Override
   public Set<ResourceID> toPrimaryResourceIDs(GenericKubernetesResource resource) {
-    return idMap.get(new ResourceID(resource.getMetadata().getName(),
-        resource.getMetadata().getNamespace()));
+    var res = Mappers.fromOwnerReferences(false).toPrimaryResourceIDs(resource);
+    var idMapped = idMap.get(new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
+    if (idMapped != null) {
+      res.addAll(idMapped);
+    }
+    return res;
   }
 
   public void addResourceIDMapping(Collection<ResourceID> resourceIDs, ResourceID workFlowId) {
