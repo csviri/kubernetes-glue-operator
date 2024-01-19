@@ -9,6 +9,8 @@ import io.csviri.operator.workflow.customresource.workflow.Workflow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
+import io.javaoperatorsdk.operator.processing.event.ResourceID;
+import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 public class Utils {
 
@@ -23,11 +25,30 @@ public class Utils {
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
               && Utils.getName(r).equals(sr.getMetadata().getName())
+      // todo add to docs
       // namespace not compared here, it should be done it is just not trivial, now it is limited to
       // have one kind of resource in the workflow with the same resource name
       ).findFirst();
       dependentSpec.ifPresent(spec -> res.put(spec.getName(), sr));
     });
+
+    workflow.getSpec().getRelatedResources().forEach(r -> {
+      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      var es =
+          (InformerEventSource<GenericKubernetesResource, Workflow>) context.eventSourceRetriever()
+              .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
+      var namespace =
+          r.getNamespace() == null ? workflow.getMetadata().getNamespace() : r.getNamespace();
+      if (r.getResourceNames().size() == 1) {
+        es.get(new ResourceID(r.getName(), namespace)).ifPresent(resource -> {
+          res.put(r.getName(), resource);
+        });
+      } else {
+        r.getResourceNames().forEach(resourceName -> es.get(new ResourceID(r.getName(), namespace))
+            .ifPresent(resource -> res.put(r.getName() + "." + resourceName, resource)));
+      }
+    });
+
     return res;
   }
 
