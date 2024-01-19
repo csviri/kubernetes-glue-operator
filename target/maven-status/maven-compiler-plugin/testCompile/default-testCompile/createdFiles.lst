@@ -1,0 +1,14 @@
+META-INF/fabric8/testcustomresource2s.io.csviri.operator.workflow-v1beta1.yml
+META-INF/fabric8/testcustomresources.io.csviri.operator.workflow-v1beta1.yml
+META-INF/fabric8/clusterscopetestcustomresources.io.csviri.operator.workflow-v1.yml
+META-INF/fabric8/testcustomresource2s.io.csviri.operator.workflow-v1.yml
+io/csviri/operator/workflow/WorkflowTest.class
+io/csviri/operator/workflow/customresource/ClusterScopeTestCustomResource.class
+io/csviri/operator/workflow/customresource/TestCustomResourceSpec.class
+io/csviri/operator/workflow/customresource/TestCustomResource.class
+io/csviri/operator/workflow/JavaScripConditionTest.class
+META-INF/fabric8/testcustomresources.io.csviri.operator.workflow-v1.yml
+io/csviri/operator/workflow/TestUtils.class
+io/csviri/operator/workflow/WorkflowOperatorTest.class
+META-INF/fabric8/clusterscopetestcustomresources.io.csviri.operator.workflow-v1beta1.yml
+io/csviri/operator/workflow/customresource/TestCustomResource2.class

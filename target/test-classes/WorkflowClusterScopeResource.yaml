@@ -1,0 +1,15 @@
+apiVersion: io.csviri.operator.workflow/v1beta1
+kind: Workflow
+metadata:
+  name: "testworkflow"
+spec:
+  resources:
+    - name: cluster-scoped-resource
+      resource:
+        apiVersion: io.csviri.operator.workflow/v1
+        kind: ClusterScopeTestCustomResource
+        metadata:
+          name: "test-resource-1"
+        spec:
+          value: "value1"
+
