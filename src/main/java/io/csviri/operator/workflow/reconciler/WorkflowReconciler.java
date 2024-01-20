@@ -41,6 +41,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       Context<Workflow> context) {
 
     registerWorkflowOperatorPrimaryInformerIfApplies(context, primary);
+    // todo related resource can be already a child resource to other workflow test
     registerRelatedResourceInformers(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     actualWorkflow.reconcile(primary, context);

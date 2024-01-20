@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.workflow.conditions.JavaScripCondition;
@@ -26,6 +27,12 @@ class JavaScripConditionTest {
 
   Context<Workflow> mockContext = mock(Context.class);
   DependentResource<GenericKubernetesResource, Workflow> dr = mock(DependentResource.class);
+  Workflow dummyWorkflow = new Workflow();
+
+  @BeforeEach
+  void setup() {
+    dummyWorkflow.setSpec(new WorkflowSpec());
+  }
 
   @Test
   void javaScriptSimpleConditionTest() {
@@ -38,7 +45,7 @@ class JavaScripConditionTest {
     when(mockContext.getSecondaryResources(any())).thenReturn(Set.of());
     when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(configMap()));
 
-    var res = condition.isMet(dr, null, mockContext);
+    var res = condition.isMet(dr, dummyWorkflow, mockContext);
     assertThat(res).isTrue();
   }
 
@@ -51,7 +58,7 @@ class JavaScripConditionTest {
                     target.data.key1 == "val1";
                 """);
 
-        var res = condition.isMet(dr, null, mockContext);
+        var res = condition.isMet(dr, dummyWorkflow, mockContext);
         assertThat(res).isTrue();
     }
 
