@@ -98,10 +98,12 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   private io.javaoperatorsdk.operator.processing.dependent.workflow.Workflow<Workflow> buildWorkflowAndRegisterInformers(
       Workflow primary, Context<Workflow> context) {
     var builder = new WorkflowBuilder<Workflow>();
+    Set<String> leafDependentNames = Utils.leafResourceNames(primary);
 
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
     primary.getSpec().getResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
-        context, spec, genericDependentResourceMap, builder));
+        context, spec, genericDependentResourceMap, builder,
+        leafDependentNames.contains(spec.getName())));
 
     return builder.build();
   }
@@ -134,7 +136,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
   private void createAndAddDependentToWorkflow(Workflow primary, Context<Workflow> context,
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
-      WorkflowBuilder<Workflow> builder) {
+      WorkflowBuilder<Workflow> builder, boolean leafDependent) {
 
 
     var dr = createDependentResource(spec);
@@ -160,13 +162,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     Optional.ofNullable(spec.getDeletePostCondition())
         .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
   }
-
-  private static String dependentName(DependentResourceSpec spec) {
-    return spec.getName() == null || spec.getName().isBlank()
-        ? DependentResource.defaultNameFor((Class<? extends DependentResource>) spec.getClass())
-        : spec.getName();
-  }
-
+  
   private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
     return spec.getResourceTemplate() != null
         ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())

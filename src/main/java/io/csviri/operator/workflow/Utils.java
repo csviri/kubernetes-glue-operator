@@ -1,8 +1,6 @@
 package io.csviri.operator.workflow;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import io.csviri.operator.workflow.customresource.workflow.DependentResourceSpec;
 import io.csviri.operator.workflow.customresource.workflow.Workflow;
@@ -94,6 +92,15 @@ public class Utils {
 
   public static String getKindFromTemplate(String resourceTemplate) {
     return getPropertyValueFromTemplate(resourceTemplate, "kind");
+  }
+
+  public static Set<String> leafResourceNames(Workflow workflow) {
+    Set<String> result = new HashSet<>();
+    workflow.getSpec().getResources().forEach(r -> result.add(r.getName()));
+    workflow.getSpec().getResources().forEach(r -> {
+      r.getDependsOn().forEach(result::remove);
+    });
+    return result;
   }
 
   private static Optional<String> getOptionalPropertyValueFromTemplate(String resourceTemplate,
