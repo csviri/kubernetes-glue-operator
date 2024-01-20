@@ -134,8 +134,8 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Workflow> builder) {
 
-    var name = dependentName(spec);
-    var dr = createDependentResource(spec, name);
+
+    var dr = createDependentResource(spec);
     var gvk = dr.getGroupVersionKind();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
@@ -149,7 +149,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
-    genericDependentResourceMap.put(name, dr);
+    genericDependentResourceMap.put(spec.getName(), dr);
 
     Optional.ofNullable(spec.getReadyPostCondition())
         .ifPresent(c -> builder.withReadyPostcondition(toCondition(c)));
@@ -165,11 +165,10 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
         : spec.getName();
   }
 
-  private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
-      String name) {
+  private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
     return spec.getResourceTemplate() != null
-        ? new GenericDependentResource(spec.getResourceTemplate(), name)
-        : new GenericDependentResource(spec.getResource(), name);
+        ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())
+        : new GenericDependentResource(spec.getResource(), spec.getName());
   }
 
   @SuppressWarnings({"rawtypes"})
