@@ -19,7 +19,6 @@ import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
-import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
@@ -162,7 +161,7 @@ public class WorkflowReconciler implements Reconciler<Workflow>, Cleaner<Workflo
     Optional.ofNullable(spec.getDeletePostCondition())
         .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
   }
-  
+
   private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
     return spec.getResourceTemplate() != null
         ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())
