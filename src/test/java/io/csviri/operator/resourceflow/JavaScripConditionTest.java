@@ -10,9 +10,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.resourceflow.conditions.JavaScripCondition;
-import io.csviri.operator.resourceflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
-import io.csviri.operator.resourceflow.customresource.workflow.WorkflowSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.DependentResourceSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlowSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -31,7 +31,7 @@ class JavaScripConditionTest {
 
   @BeforeEach
   void setup() {
-    dummyResourceFlow.setSpec(new WorkflowSpec());
+    dummyResourceFlow.setSpec(new ResourceFlowSpec());
   }
 
   @Test
@@ -68,7 +68,7 @@ class JavaScripConditionTest {
         when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(configMap()));
 
         ResourceFlow resourceFlow = new ResourceFlow();
-        resourceFlow.setSpec(new WorkflowSpec());
+        resourceFlow.setSpec(new ResourceFlowSpec());
         resourceFlow.getSpec().setResources(new ArrayList<>());
         var drSpec = new DependentResourceSpec();
         drSpec.setName("secondary");

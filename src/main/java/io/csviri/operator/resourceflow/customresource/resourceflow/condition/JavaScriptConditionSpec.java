@@ -1,4 +1,4 @@
-package io.csviri.operator.resourceflow.customresource.workflow.condition;
+package io.csviri.operator.resourceflow.customresource.resourceflow.condition;
 
 public class JavaScriptConditionSpec extends ConditionSpec {
 

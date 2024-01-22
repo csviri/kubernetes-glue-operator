@@ -3,8 +3,8 @@ package io.csviri.operator.resourceflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.csviri.operator.resourceflow.reconciler.WorkflowOperatorReconciler;
-import io.csviri.operator.resourceflow.reconciler.WorkflowReconciler;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
 import io.javaoperatorsdk.operator.Operator;
 
 public class Runner {
@@ -13,8 +13,8 @@ public class Runner {
 
   public static void main(String[] args) {
     Operator operator = new Operator();
-    operator.register(new WorkflowReconciler());
-    operator.register(new WorkflowOperatorReconciler());
+    operator.register(new ResourceFlowReconciler());
+    operator.register(new ResourceFlowOperatorReconciler());
     operator.start();
     log.info("Workflow controller started.");
 

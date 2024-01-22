@@ -3,7 +3,7 @@ package io.csviri.operator.resourceflow.dependent;
 import java.util.Objects;
 import java.util.Optional;
 
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.ResourceDiscriminator;

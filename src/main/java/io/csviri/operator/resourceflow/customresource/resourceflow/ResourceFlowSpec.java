@@ -1,10 +1,10 @@
-package io.csviri.operator.resourceflow.customresource.workflow;
+package io.csviri.operator.resourceflow.customresource.resourceflow;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class WorkflowSpec {
+public class ResourceFlowSpec {
 
   private List<DependentResourceSpec> resources = new ArrayList<>();
 
@@ -22,7 +22,7 @@ public class WorkflowSpec {
     return relatedResources;
   }
 
-  public WorkflowSpec setRelatedResources(List<RelatedResourceSpec> relatedResources) {
+  public ResourceFlowSpec setRelatedResources(List<RelatedResourceSpec> relatedResources) {
     this.relatedResources = relatedResources;
     return this;
   }
@@ -40,7 +40,7 @@ public class WorkflowSpec {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    WorkflowSpec that = (WorkflowSpec) o;
+    ResourceFlowSpec that = (ResourceFlowSpec) o;
     return Objects.equals(resources, that.resources);
   }
 

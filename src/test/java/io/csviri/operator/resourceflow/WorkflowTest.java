@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.resourceflow.customresource.ClusterScopeTestCustomResource;
-import io.csviri.operator.resourceflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
-import io.csviri.operator.resourceflow.reconciler.WorkflowReconciler;
+import io.csviri.operator.resourceflow.customresource.resourceflow.DependentResourceSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
@@ -25,14 +25,14 @@ class WorkflowTest {
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
-          .withReconciler(new WorkflowReconciler())
+          .withReconciler(new ResourceFlowReconciler())
           .withAdditionalCustomResourceDefinition(ClusterScopeTestCustomResource.class)
           .build();
 
   @SuppressWarnings("unchecked")
   @Test
   void javaScriptCondition() {
-    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/Workflow2ResourceAndCondition.yaml");
+    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/ResourceFlow2ResourceAndCondition.yaml");
     resourceFlow = extension.create(resourceFlow);
 
     await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {
@@ -65,7 +65,7 @@ class WorkflowTest {
 
   @Test
   void templatingObject() {
-    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/WorkflowTemplating.yaml");
+    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/ResourceFlowTemplating.yaml");
     resourceFlow = extension.create(resourceFlow);
 
     await().untilAsserted(() -> {
@@ -88,7 +88,7 @@ class WorkflowTest {
 
   @Test
   void stringTemplate() {
-    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/WorkflowWithResourceTemplate.yaml");
+    ResourceFlow resourceFlow = TestUtils.loadWorkflow("/ResourceFlowWithResourceTemplate.yaml");
 
     resourceFlow = extension.create(resourceFlow);
 
@@ -142,7 +142,7 @@ class WorkflowTest {
   void handlingClusterScopeDependents() {
 
     final var clusterScopedResourceName = "test-resource-1";
-    var w = TestUtils.loadWorkflow("/WorkflowClusterScopeResource.yaml");
+    var w = TestUtils.loadWorkflow("/ResourceFlowClusterScopeResource.yaml");
     w = extension.create(w);
 
     await().untilAsserted(() -> {
@@ -166,7 +166,7 @@ class WorkflowTest {
 
   @Test
   void changingWorkflow() {
-    ResourceFlow w = extension.create(TestUtils.loadWorkflow("/WorkflowToChange.yaml"));
+    ResourceFlow w = extension.create(TestUtils.loadWorkflow("/ResourceFlowToChange.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap1");
@@ -203,7 +203,7 @@ class WorkflowTest {
   private List<ResourceFlow> testWorkflowList(int num) {
     List<ResourceFlow> res = new ArrayList<>();
     IntStream.range(0, num).forEach(index -> {
-      ResourceFlow w = TestUtils.loadWorkflow("/WorkflowTemplateForConcurrency.yaml");
+      ResourceFlow w = TestUtils.loadWorkflow("/ResourceFlowTemplateForConcurrency.yaml");
       w.getMetadata().setName(w.getMetadata().getName() + index);
       res.add(w);
     });

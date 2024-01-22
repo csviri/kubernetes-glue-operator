@@ -7,10 +7,10 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.csviri.operator.resourceflow.customresource.operator.WorkflowOperator;
-import io.csviri.operator.resourceflow.customresource.operator.WorkflowOperatorSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
-import io.csviri.operator.resourceflow.customresource.workflow.WorkflowSpec;
+import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperator;
+import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperatorSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlowSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
@@ -22,11 +22,11 @@ import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 @ControllerConfiguration
-public class WorkflowOperatorReconciler
-    implements Reconciler<WorkflowOperator>, EventSourceInitializer<WorkflowOperator>,
-    Cleaner<WorkflowOperator> {
+public class ResourceFlowOperatorReconciler
+    implements Reconciler<ResourceFlowOperator>, EventSourceInitializer<ResourceFlowOperator>,
+    Cleaner<ResourceFlowOperator> {
 
-  private static final Logger log = LoggerFactory.getLogger(WorkflowOperatorReconciler.class);
+  private static final Logger log = LoggerFactory.getLogger(ResourceFlowOperatorReconciler.class);
 
   public static final String WORKFLOW_LABEL_KEY = "foroperator";
   public static final String WORKFLOW_LABEL_VALUE = "true";
@@ -37,20 +37,20 @@ public class WorkflowOperatorReconciler
   public static final String WATCH_KIND = WATCH_PREFIX + "kind";
   public static final String WATCH_NAME = WATCH_PREFIX + "name";
 
-  private InformerEventSource<ResourceFlow, WorkflowOperator> workflowEventSource;
+  private InformerEventSource<ResourceFlow, ResourceFlowOperator> workflowEventSource;
 
   @Override
-  public UpdateControl<WorkflowOperator> reconcile(WorkflowOperator workflowOperator,
-      Context<WorkflowOperator> context) {
+  public UpdateControl<ResourceFlowOperator> reconcile(ResourceFlowOperator resourceFlowOperator,
+      Context<ResourceFlowOperator> context) {
 
-    log.debug("Reconciling: {} in namespace: {}", workflowOperator.getMetadata().getName(),
-        workflowOperator.getMetadata().getNamespace());
+    log.debug("Reconciling: {} in namespace: {}", resourceFlowOperator.getMetadata().getName(),
+        resourceFlowOperator.getMetadata().getNamespace());
 
-    var targetCREventSource = getOrRegisterCustomResourceEventSource(workflowOperator, context);
+    var targetCREventSource = getOrRegisterCustomResourceEventSource(resourceFlowOperator, context);
     targetCREventSource.list().forEach(cr -> {
       var workFlow = workflowEventSource
           .get(new ResourceID(workflowName(cr), cr.getMetadata().getNamespace()));
-      var targetWorkflow = createWorkflow(cr, workflowOperator);
+      var targetWorkflow = createWorkflow(cr, resourceFlowOperator);
       if (workFlow.isEmpty()) {
         context.getClient().resource(targetWorkflow).create();
       } else if (!match(workFlow.orElseThrow(), targetWorkflow)) {
@@ -67,7 +67,7 @@ public class WorkflowOperatorReconciler
   }
 
   private ResourceFlow createWorkflow(GenericKubernetesResource cr,
-      WorkflowOperator workflowOperator) {
+      ResourceFlowOperator resourceFlowOperator) {
     var res = new ResourceFlow();
     Map<String, String> annotation = new HashMap<>();
     GroupVersionKind gvk = new GroupVersionKind(cr.getApiVersion(), cr.getKind());
@@ -82,25 +82,25 @@ public class WorkflowOperatorReconciler
         .withNamespace(cr.getMetadata().getNamespace())
         .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
-    res.setSpec(toWorkflowSpec(workflowOperator.getSpec()));
+    res.setSpec(toWorkflowSpec(resourceFlowOperator.getSpec()));
     res.addOwnerReference(cr);
     return res;
   }
 
-  private WorkflowSpec toWorkflowSpec(WorkflowOperatorSpec spec) {
-    var res = new WorkflowSpec();
+  private ResourceFlowSpec toWorkflowSpec(ResourceFlowOperatorSpec spec) {
+    var res = new ResourceFlowSpec();
     res.setResources(spec.getResources());
     return res;
   }
 
-  private InformerEventSource<GenericKubernetesResource, WorkflowOperator> getOrRegisterCustomResourceEventSource(
-      WorkflowOperator workflowOperator, Context<WorkflowOperator> context) {
-    var spec = workflowOperator.getSpec();
+  private InformerEventSource<GenericKubernetesResource, ResourceFlowOperator> getOrRegisterCustomResourceEventSource(
+      ResourceFlowOperator resourceFlowOperator, Context<ResourceFlowOperator> context) {
+    var spec = resourceFlowOperator.getSpec();
     var gvk = new GroupVersionKind(spec.getParent().getApiVersion(), spec.getParent().getKind());
-    InformerEventSource<GenericKubernetesResource, WorkflowOperator> es;
+    InformerEventSource<GenericKubernetesResource, ResourceFlowOperator> es;
     // note that this allows just one operator per gvk (what is limitation but ok for now)
     try {
-      es = (InformerEventSource<GenericKubernetesResource, WorkflowOperator>) context
+      es = (InformerEventSource<GenericKubernetesResource, ResourceFlowOperator>) context
           .eventSourceRetriever()
           .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
       es.start();
@@ -108,7 +108,7 @@ public class WorkflowOperatorReconciler
       es = new InformerEventSource<>(InformerConfiguration.from(gvk,
           context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
           .withSecondaryToPrimaryMapper(
-              resource -> Set.of(ResourceID.fromResource(workflowOperator)))
+              resource -> Set.of(ResourceID.fromResource(resourceFlowOperator)))
           .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
       context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(), es);
     }
@@ -117,7 +117,7 @@ public class WorkflowOperatorReconciler
 
   @Override
   public Map<String, EventSource> prepareEventSources(
-      EventSourceContext<WorkflowOperator> eventSourceContext) {
+      EventSourceContext<ResourceFlowOperator> eventSourceContext) {
     workflowEventSource = new InformerEventSource<>(
         InformerConfiguration.from(ResourceFlow.class, eventSourceContext)
             .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
@@ -127,9 +127,9 @@ public class WorkflowOperatorReconciler
   }
 
   @Override
-  public DeleteControl cleanup(WorkflowOperator workflowOperator,
-      Context<WorkflowOperator> context) {
-    var spec = workflowOperator.getSpec();
+  public DeleteControl cleanup(ResourceFlowOperator resourceFlowOperator,
+      Context<ResourceFlowOperator> context) {
+    var spec = resourceFlowOperator.getSpec();
     var gvk = new GroupVersionKind(spec.getParent().getApiVersion(), spec.getParent().getKind());
     context.eventSourceRetriever().dynamicallyDeRegisterEventSource(gvk.toString());
     return DeleteControl.defaultDelete();

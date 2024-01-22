@@ -11,11 +11,11 @@ import io.csviri.operator.resourceflow.customresource.TestCustomResource;
 import io.csviri.operator.resourceflow.customresource.TestCustomResource2;
 import io.csviri.operator.resourceflow.customresource.TestCustomResourceSpec;
 import io.csviri.operator.resourceflow.customresource.operator.Parent;
-import io.csviri.operator.resourceflow.customresource.operator.WorkflowOperator;
-import io.csviri.operator.resourceflow.customresource.operator.WorkflowOperatorSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.resourceflow.reconciler.WorkflowOperatorReconciler;
-import io.csviri.operator.resourceflow.reconciler.WorkflowReconciler;
+import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperator;
+import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperatorSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.DependentResourceSpec;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
@@ -33,8 +33,8 @@ class ResourceFlowOperatorTest {
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
-          .withReconciler(new WorkflowReconciler())
-          .withReconciler(new WorkflowOperatorReconciler())
+          .withReconciler(new ResourceFlowReconciler())
+          .withReconciler(new ResourceFlowOperatorReconciler())
           .withAdditionalCustomResourceDefinition(TestCustomResource.class)
           .withAdditionalCustomResourceDefinition(TestCustomResource2.class)
           .build();
@@ -59,7 +59,7 @@ class ResourceFlowOperatorTest {
 
   @Test
   void templating() {
-    var wo = TestUtils.loadWorkflowOperator("/WorkflowOperatorTemplating.yaml");
+    var wo = TestUtils.loadWorkflowOperator("/ResourceFlowOperatorTemplating.yaml");
     extension.create(wo);
     var cr = extension.create(testCustomResource());
 
@@ -80,7 +80,7 @@ class ResourceFlowOperatorTest {
   @Test
   void simpleConcurrencyTest() {
     int num = 10;
-    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml"));
+    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency.yaml"));
 
     var resources =
         IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
@@ -102,8 +102,8 @@ class ResourceFlowOperatorTest {
   @Test
   void simpleConcurrencyForMultipleOperatorTest() {
     int num = 10;
-    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency.yaml"));
-    extension.create(TestUtils.loadWorkflowOperator("/WorkflowOperatorConcurrency2.yaml"));
+    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency.yaml"));
+    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency2.yaml"));
 
     var crs =
         IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
@@ -161,12 +161,12 @@ class ResourceFlowOperatorTest {
     return res;
   }
 
-  WorkflowOperator testWorkflowOperator() {
-    var wo = new WorkflowOperator();
+  ResourceFlowOperator testWorkflowOperator() {
+    var wo = new ResourceFlowOperator();
     wo.setMetadata(new ObjectMetaBuilder()
         .withName("wo1")
         .build());
-    var spec = new WorkflowOperatorSpec();
+    var spec = new ResourceFlowOperatorSpec();
     wo.setSpec(spec);
     spec.setParent(new Parent(CR_GROUP + "/v1", TestCustomResource.class.getSimpleName()));
 

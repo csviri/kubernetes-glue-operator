@@ -1,6 +1,6 @@
 package io.csviri.operator.resourceflow.conditions;
 
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.readiness.Readiness;
 import io.javaoperatorsdk.operator.api.reconciler.Context;

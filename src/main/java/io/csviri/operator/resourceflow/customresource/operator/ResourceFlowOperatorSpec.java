@@ -2,10 +2,10 @@ package io.csviri.operator.resourceflow.customresource.operator;
 
 import java.util.Objects;
 
-import io.csviri.operator.resourceflow.customresource.workflow.WorkflowSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlowSpec;
 import io.fabric8.generator.annotation.Required;
 
-public class WorkflowOperatorSpec extends WorkflowSpec {
+public class ResourceFlowOperatorSpec extends ResourceFlowSpec {
 
   @Required
   private Parent parent;
@@ -14,7 +14,7 @@ public class WorkflowOperatorSpec extends WorkflowSpec {
     return parent;
   }
 
-  public WorkflowOperatorSpec setParent(Parent parent) {
+  public ResourceFlowOperatorSpec setParent(Parent parent) {
     this.parent = parent;
     return this;
   }
@@ -27,7 +27,7 @@ public class WorkflowOperatorSpec extends WorkflowSpec {
       return false;
     if (!super.equals(o))
       return false;
-    WorkflowOperatorSpec that = (WorkflowOperatorSpec) o;
+    ResourceFlowOperatorSpec that = (ResourceFlowOperatorSpec) o;
     return Objects.equals(parent, that.parent);
   }
 

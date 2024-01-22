@@ -2,8 +2,8 @@ package io.csviri.operator.resourceflow;
 
 import java.util.*;
 
-import io.csviri.operator.resourceflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.DependentResourceSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;

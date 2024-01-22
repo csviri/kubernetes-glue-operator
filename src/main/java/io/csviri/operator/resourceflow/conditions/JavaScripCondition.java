@@ -9,8 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.resourceflow.Utils;
-import io.csviri.operator.resourceflow.WorkflowException;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
+import io.csviri.operator.resourceflow.ResourceFlowException;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -49,7 +49,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       return (boolean) script.eval();
 
     } catch (ScriptException e) {
-      throw new WorkflowException(e);
+      throw new ResourceFlowException(e);
     }
   }
 

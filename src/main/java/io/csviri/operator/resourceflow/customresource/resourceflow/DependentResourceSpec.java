@@ -1,10 +1,10 @@
-package io.csviri.operator.resourceflow.customresource.workflow;
+package io.csviri.operator.resourceflow.customresource.resourceflow;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.csviri.operator.resourceflow.customresource.workflow.condition.ConditionSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.condition.ConditionSpec;
 import io.fabric8.crd.generator.annotation.PreserveUnknownFields;
 import io.fabric8.generator.annotation.Required;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;

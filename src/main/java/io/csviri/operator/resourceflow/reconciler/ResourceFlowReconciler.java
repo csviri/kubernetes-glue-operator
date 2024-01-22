@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory;
 import io.csviri.operator.resourceflow.Utils;
 import io.csviri.operator.resourceflow.conditions.JavaScripCondition;
 import io.csviri.operator.resourceflow.conditions.PodsReadyCondition;
-import io.csviri.operator.resourceflow.customresource.workflow.DependentResourceSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
-import io.csviri.operator.resourceflow.customresource.workflow.condition.ConditionSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.condition.JavaScriptConditionSpec;
-import io.csviri.operator.resourceflow.customresource.workflow.condition.PodsReadyConditionSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.DependentResourceSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
+import io.csviri.operator.resourceflow.customresource.resourceflow.condition.ConditionSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.condition.JavaScriptConditionSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.condition.PodsReadyConditionSpec;
 import io.csviri.operator.resourceflow.dependent.GenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -25,12 +25,12 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
-import static io.csviri.operator.resourceflow.reconciler.WorkflowOperatorReconciler.*;
+import static io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler.*;
 
-@ControllerConfiguration()
-public class WorkflowReconciler implements Reconciler<ResourceFlow>, Cleaner<ResourceFlow> {
+@ControllerConfiguration
+public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner<ResourceFlow> {
 
-  private static final Logger log = LoggerFactory.getLogger(WorkflowReconciler.class);
+  private static final Logger log = LoggerFactory.getLogger(ResourceFlowReconciler.class);
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
 
   private final InformerRegister informerRegister = new InformerRegister();

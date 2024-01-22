@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.csviri.operator.resourceflow.Utils;
-import io.csviri.operator.resourceflow.customresource.workflow.ResourceFlow;
-import io.csviri.operator.resourceflow.reconciler.WorkflowReconciler;
+import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
+import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -23,7 +23,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
 
-import static io.csviri.operator.resourceflow.reconciler.WorkflowOperatorReconciler.*;
+import static io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler.*;
 
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<ResourceFlow>
@@ -70,7 +70,7 @@ public class GenericDependentResource
     var resultDesired = Serialization.unmarshal(res.toString(), GenericKubernetesResource.class);
 
     resultDesired.getMetadata().getAnnotations()
-        .put(WorkflowReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
+        .put(ResourceFlowReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
 
     // set only for cluster scoped when detection is ready
     if (resultDesired.getMetadata().getNamespace() == null) {

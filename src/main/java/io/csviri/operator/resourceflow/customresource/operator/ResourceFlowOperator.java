@@ -1,4 +1,4 @@
-package io.csviri.operator.resourceflow.customresource.workflow;
+package io.csviri.operator.resourceflow.customresource.operator;
 
 import io.fabric8.kubernetes.api.model.Namespaced;
 import io.fabric8.kubernetes.client.CustomResource;
@@ -8,7 +8,8 @@ import io.fabric8.kubernetes.model.annotation.Version;
 
 @Group("io.csviri.operator.resourceflow")
 @Version("v1beta1")
-@ShortNames("rf")
-public class ResourceFlow extends CustomResource<WorkflowSpec, WorkflowStatus>
+@ShortNames("rfo")
+public class ResourceFlowOperator
+    extends CustomResource<ResourceFlowOperatorSpec, ResourceFlowOperatorStatus>
     implements Namespaced {
 }
