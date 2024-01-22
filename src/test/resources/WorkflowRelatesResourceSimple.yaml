@@ -1,5 +1,5 @@
-apiVersion: io.csviri.operator.workflow/v1beta1
-kind: Workflow
+apiVersion: io.csviri.operator.resourceflow/v1beta1
+kind: ResourceFlow
 metadata:
   name: wf-related-resource
 spec:

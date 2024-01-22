@@ -6,7 +6,7 @@
     </Console>
   </Appenders>
   <Loggers>
-    <Logger level="debug" name="io.csviri.operator.workflow" additivity="false">
+    <Logger level="debug" name="io.csviri.operator.resourceFlow" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Root level="info">

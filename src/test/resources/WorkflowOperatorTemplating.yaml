@@ -1,10 +1,10 @@
-apiVersion: io.csviri.operator.workflow/v1beta1
-kind: WorkflowOperator
+apiVersion: io.csviri.operator.resourceflow/v1beta1
+kind: ResourceFlowOperator
 metadata:
-  name: wo-templating-sample
+  name: rfo-templating-sample
 spec:
   parent:
-    apiVersion: io.csviri.operator.workflow/v1
+    apiVersion: io.csviri.operator.resourceflow/v1
     kind: TestCustomResource
   resources:
     - name: configMap1
