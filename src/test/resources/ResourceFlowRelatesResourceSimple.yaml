@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceflow/v1beta1
 kind: ResourceFlow
 metadata:
-  name: wf-related-resource
+  name: related-resource-test1
 spec:
   resources:
     - name: configMap1
@@ -11,7 +11,7 @@ spec:
         metadata:
           name: cm1
         data:
-          key: "{{secret1.data.key1}}"
+          key: "{{secret1.data.key}}"
     - name: configMap2
       resource:
         apiVersion: v1
@@ -29,4 +29,4 @@ spec:
       apiVersion: v1
       kind: Secret
       namespace: "set from test"
-      resourceNames: testSecret1
+      resourceNames: ["secret1"]

@@ -10,7 +10,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 
 public class TestUtils {
 
-  public static ResourceFlow loadWorkflow(String path) {
+  public static ResourceFlow loadResoureFlow(String path) {
     try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, ResourceFlow.class);
     } catch (IOException e) {
@@ -18,7 +18,7 @@ public class TestUtils {
     }
   }
 
-  public static ResourceFlowOperator loadWorkflowOperator(String path) {
+  public static ResourceFlowOperator loadResourceFlowOperator(String path) {
     try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, ResourceFlowOperator.class);
     } catch (IOException e) {

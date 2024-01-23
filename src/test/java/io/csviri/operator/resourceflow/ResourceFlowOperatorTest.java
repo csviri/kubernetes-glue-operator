@@ -59,7 +59,7 @@ class ResourceFlowOperatorTest {
 
   @Test
   void templating() {
-    var wo = TestUtils.loadWorkflowOperator("/ResourceFlowOperatorTemplating.yaml");
+    var wo = TestUtils.loadResourceFlowOperator("/ResourceFlowOperatorTemplating.yaml");
     extension.create(wo);
     var cr = extension.create(testCustomResource());
 
@@ -80,7 +80,7 @@ class ResourceFlowOperatorTest {
   @Test
   void simpleConcurrencyTest() {
     int num = 10;
-    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency.yaml"));
+    extension.create(TestUtils.loadResourceFlowOperator("/ResourceFlowOperatorConcurrency.yaml"));
 
     var resources =
         IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
@@ -102,8 +102,8 @@ class ResourceFlowOperatorTest {
   @Test
   void simpleConcurrencyForMultipleOperatorTest() {
     int num = 10;
-    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency.yaml"));
-    extension.create(TestUtils.loadWorkflowOperator("/ResourceFlowOperatorConcurrency2.yaml"));
+    extension.create(TestUtils.loadResourceFlowOperator("/ResourceFlowOperatorConcurrency.yaml"));
+    extension.create(TestUtils.loadResourceFlowOperator("/ResourceFlowOperatorConcurrency2.yaml"));
 
     var crs =
         IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
