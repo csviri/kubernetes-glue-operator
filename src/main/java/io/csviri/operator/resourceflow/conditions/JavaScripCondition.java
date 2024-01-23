@@ -8,8 +8,8 @@ import javax.script.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.csviri.operator.resourceflow.Utils;
 import io.csviri.operator.resourceflow.ResourceFlowException;
+import io.csviri.operator.resourceflow.Utils;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;

@@ -20,7 +20,7 @@ import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-class WorkflowTest {
+class ResourceFlowTest {
 
   @RegisterExtension
   LocallyRunOperatorExtension extension =
