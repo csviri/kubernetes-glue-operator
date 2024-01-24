@@ -39,7 +39,7 @@ public class Utils {
       var namespace =
           r.getNamespace() == null ? resourceFlow.getMetadata().getNamespace() : r.getNamespace();
       if (r.getResourceNames().size() == 1) {
-        es.get(new ResourceID(r.getName(), namespace)).ifPresent(resource -> {
+        es.get(new ResourceID(r.getResourceNames().get(0), namespace)).ifPresent(resource -> {
           res.put(r.getName(), resource);
         });
       } else {

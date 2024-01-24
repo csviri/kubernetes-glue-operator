@@ -37,6 +37,7 @@ public class ResourceFlowRelatedResourcesTest {
     extension.create(secret());
     ResourceFlow resourceFlow =
         TestUtils.loadResoureFlow("/ResourceFlowRelatesResourceSimple.yaml");
+
     extension.create(resourceFlow);
 
     await().untilAsserted(() -> {
@@ -46,6 +47,16 @@ public class ResourceFlowRelatedResourcesTest {
 
       var cm2 = extension.get(ConfigMap.class, "cm2");
       assertThat(cm2).isNotNull();
+    });
+
+    extension.delete(resourceFlow);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      var cm2 = extension.get(ConfigMap.class, "cm2");
+
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
     });
   }
 
@@ -58,7 +69,7 @@ public class ResourceFlowRelatedResourcesTest {
   Secret secret() {
     return new SecretBuilder()
         .withMetadata(new ObjectMetaBuilder()
-            .withName("secret1")
+            .withName("test-secret1")
             .build())
         .withData(Map.of("key", BASE64_VALUE))
         .build();

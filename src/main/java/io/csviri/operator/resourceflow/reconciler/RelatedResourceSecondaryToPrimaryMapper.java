@@ -1,6 +1,7 @@
 package io.csviri.operator.resourceflow.reconciler;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,9 @@ public class RelatedResourceSecondaryToPrimaryMapper
   }
 
   public void addResourceIDMapping(Collection<ResourceID> resourceIDs, ResourceID workFlowId) {
-    resourceIDs.forEach(resourceID -> idMap.merge(resourceID, Set.of(workFlowId), (s1, s2) -> {
+    Set<ResourceID> workflowIDSet = new HashSet<>();
+    workflowIDSet.add(workFlowId);
+    resourceIDs.forEach(resourceID -> idMap.merge(resourceID, workflowIDSet, (s1, s2) -> {
       s1.addAll(s2);
       return s1;
     }));

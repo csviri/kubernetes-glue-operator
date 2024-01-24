@@ -11,7 +11,7 @@ spec:
         metadata:
           name: cm1
         data:
-          key: "{{secret1.data.key}}"
+          key: "{{{secret1.data.key}}}"
     - name: configMap2
       resource:
         apiVersion: v1
@@ -23,10 +23,9 @@ spec:
       condition:
         type: JSCondition
         script: |
-          secret1.metadata.name == "testSecret1";
+          secret1.metadata.name == "test-secret1";
   relatedResources:
     - name: secret1
       apiVersion: v1
       kind: Secret
-      namespace: "set from test"
-      resourceNames: ["secret1"]
+      resourceNames: ["test-secret1"]
