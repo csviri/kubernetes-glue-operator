@@ -16,4 +16,4 @@ spec:
     - name: related-configmap
       apiVersion: v1
       kind: ConfigMap
-      resourceNames: ["rel-cm1"]
+      resourceNames: ["related-cm1"]

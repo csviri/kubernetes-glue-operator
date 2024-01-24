@@ -10,10 +10,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.csviri.operator.resourceflow.customresource.ClusterScopeTestCustomResource;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
-import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
-import io.fabric8.kubernetes.api.model.Secret;
-import io.fabric8.kubernetes.api.model.SecretBuilder;
+import io.fabric8.kubernetes.api.model.*;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +22,8 @@ public class ResourceFlowRelatedResourcesTest {
       Base64.getEncoder().encodeToString("val1".getBytes(StandardCharsets.UTF_8));
   private static final String BASE64_VALUE_2 =
       Base64.getEncoder().encodeToString("val2".getBytes(StandardCharsets.UTF_8));
+  public static final String CONFIG_MAP_VALUE_1 = "val1";
+  public static final String CONFIG_MAP_VALUE_2 = "val2";
 
   @RegisterExtension
   LocallyRunOperatorExtension extension =
@@ -84,8 +83,42 @@ public class ResourceFlowRelatedResourcesTest {
     });
   }
 
-  void managedAndRelatedResourceOfSameType() {
+  @Test
+  void managedAndRelatedResourceOfSameTypeAndTriggering() {
+    var relatedConfigMap = extension.create(configMap());
+    ResourceFlow resourceFlow =
+        extension.create(TestUtils.loadResoureFlow("/resourceflow/RelatesResourceSameType.yaml"));
 
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      assertThat(cm1).isNotNull();
+      assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_1);
+    });
+
+    // changes on the managed config map reverted
+    var cm = extension.get(ConfigMap.class, "cm1");
+    cm.getData().put("key", CONFIG_MAP_VALUE_2);
+    extension.replace(cm);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_1);
+    });
+
+    // related resource triggering reconciliation
+    relatedConfigMap.getData().put("key", CONFIG_MAP_VALUE_2);
+    extension.replace(relatedConfigMap);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_2);
+    });
+
+    extension.delete(resourceFlow);
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      assertThat(cm1).isNull();
+    });
   }
 
   Secret secret() {
@@ -99,7 +132,15 @@ public class ResourceFlowRelatedResourcesTest {
             .build())
         .withData(Map.of("key", val))
         .build();
+  }
 
+  ConfigMap configMap() {
+    return new ConfigMapBuilder()
+        .withMetadata(new ObjectMetaBuilder()
+            .withName("related-cm1")
+            .build())
+        .withData(Map.of("key", CONFIG_MAP_VALUE_1))
+        .build();
   }
 
 }
