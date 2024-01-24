@@ -59,7 +59,15 @@ public class ResourceFlowRelatedResourcesTest {
       assertThat(cm2).isNull();
     });
   }
-  
+
+  void managedAndRelatedResourceOfSameType() {
+
+  }
+
+  void multipleResourceNamesInRelated() {
+
+  }
+
   Secret secret() {
     return new SecretBuilder()
         .withMetadata(new ObjectMetaBuilder()
