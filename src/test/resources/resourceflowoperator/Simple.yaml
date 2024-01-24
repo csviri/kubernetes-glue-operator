@@ -7,8 +7,7 @@ spec:
     apiVersion: io.csviri.operator.resourceflow/v1
     kind: TestCustomResource
   resources:
-    - dependsOn: []
-      name: configMap1
+    - name: configMap1
       resource:
         apiVersion: v1
         data:

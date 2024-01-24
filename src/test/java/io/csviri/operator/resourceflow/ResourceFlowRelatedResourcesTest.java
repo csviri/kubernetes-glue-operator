@@ -35,7 +35,7 @@ public class ResourceFlowRelatedResourcesTest {
   void simpleRelatedResourceUsage() {
     extension.create(secret());
     ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowRelatesResourceSimple.yaml");
+        TestUtils.loadResoureFlow("/resourceflow/RelatedResourceSimple.yaml");
 
     extension.create(resourceFlow);
 

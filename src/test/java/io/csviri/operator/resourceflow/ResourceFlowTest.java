@@ -67,7 +67,7 @@ class ResourceFlowTest {
   @Test
   void templatingObject() {
     ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowTemplating.yaml");
+        TestUtils.loadResoureFlow("/resourceflow/Templating.yaml");
     resourceFlow = extension.create(resourceFlow);
 
     await().untilAsserted(() -> {
@@ -91,7 +91,7 @@ class ResourceFlowTest {
   @Test
   void stringTemplate() {
     ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowWithResourceTemplate.yaml");
+        TestUtils.loadResoureFlow("/resourceflow/ResourceTemplate.yaml");
 
     resourceFlow = extension.create(resourceFlow);
 
@@ -145,7 +145,7 @@ class ResourceFlowTest {
   void handlingClusterScopeDependents() {
 
     final var clusterScopedResourceName = "test-resource-1";
-    var w = TestUtils.loadResoureFlow("/resourceflow/ResourceFlowClusterScopeResource.yaml");
+    var w = TestUtils.loadResoureFlow("/resourceflow/ClusterScopeResource.yaml");
     w = extension.create(w);
 
     await().untilAsserted(() -> {
@@ -170,7 +170,7 @@ class ResourceFlowTest {
   @Test
   void changingWorkflow() {
     ResourceFlow w =
-        extension.create(TestUtils.loadResoureFlow("/resourceflow/ResourceFlowToChange.yaml"));
+        extension.create(TestUtils.loadResoureFlow("/resourceflow/ChanginResources.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap1");
@@ -208,7 +208,7 @@ class ResourceFlowTest {
     List<ResourceFlow> res = new ArrayList<>();
     IntStream.range(0, num).forEach(index -> {
       ResourceFlow w =
-          TestUtils.loadResoureFlow("/resourceflow/ResourceFlowTemplateForConcurrency.yaml");
+          TestUtils.loadResoureFlow("/resourceflow/TemplateForConcurrency.yaml");
       w.getMetadata().setName(w.getMetadata().getName() + index);
       res.add(w);
     });
