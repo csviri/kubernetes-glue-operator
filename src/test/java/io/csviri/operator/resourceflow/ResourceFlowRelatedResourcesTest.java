@@ -59,13 +59,7 @@ public class ResourceFlowRelatedResourcesTest {
       assertThat(cm2).isNull();
     });
   }
-
-  @Disabled
-  @Test
-  void multipleRelatedResourceUsage() {
-    // todo
-  }
-
+  
   Secret secret() {
     return new SecretBuilder()
         .withMetadata(new ObjectMetaBuilder()
