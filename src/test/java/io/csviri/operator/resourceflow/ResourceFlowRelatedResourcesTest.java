@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -36,7 +35,7 @@ public class ResourceFlowRelatedResourcesTest {
   void simpleRelatedResourceUsage() {
     extension.create(secret());
     ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/ResourceFlowRelatesResourceSimple.yaml");
+        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowRelatesResourceSimple.yaml");
 
     extension.create(resourceFlow);
 

@@ -33,7 +33,7 @@ class ResourceFlowTest {
   @Test
   void javaScriptCondition() {
     ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/ResourceFlow2ResourceAndCondition.yaml");
+        TestUtils.loadResoureFlow("/resourceflow/TwoResourcesAndCondition.yaml");
     resourceFlow = extension.create(resourceFlow);
 
     await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {
@@ -66,7 +66,8 @@ class ResourceFlowTest {
 
   @Test
   void templatingObject() {
-    ResourceFlow resourceFlow = TestUtils.loadResoureFlow("/ResourceFlowTemplating.yaml");
+    ResourceFlow resourceFlow =
+        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowTemplating.yaml");
     resourceFlow = extension.create(resourceFlow);
 
     await().untilAsserted(() -> {
@@ -89,7 +90,8 @@ class ResourceFlowTest {
 
   @Test
   void stringTemplate() {
-    ResourceFlow resourceFlow = TestUtils.loadResoureFlow("/ResourceFlowWithResourceTemplate.yaml");
+    ResourceFlow resourceFlow =
+        TestUtils.loadResoureFlow("/resourceflow/ResourceFlowWithResourceTemplate.yaml");
 
     resourceFlow = extension.create(resourceFlow);
 
@@ -143,7 +145,7 @@ class ResourceFlowTest {
   void handlingClusterScopeDependents() {
 
     final var clusterScopedResourceName = "test-resource-1";
-    var w = TestUtils.loadResoureFlow("/ResourceFlowClusterScopeResource.yaml");
+    var w = TestUtils.loadResoureFlow("/resourceflow/ResourceFlowClusterScopeResource.yaml");
     w = extension.create(w);
 
     await().untilAsserted(() -> {
@@ -167,7 +169,8 @@ class ResourceFlowTest {
 
   @Test
   void changingWorkflow() {
-    ResourceFlow w = extension.create(TestUtils.loadResoureFlow("/ResourceFlowToChange.yaml"));
+    ResourceFlow w =
+        extension.create(TestUtils.loadResoureFlow("/resourceflow/ResourceFlowToChange.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap1");
@@ -204,7 +207,8 @@ class ResourceFlowTest {
   private List<ResourceFlow> testWorkflowList(int num) {
     List<ResourceFlow> res = new ArrayList<>();
     IntStream.range(0, num).forEach(index -> {
-      ResourceFlow w = TestUtils.loadResoureFlow("/ResourceFlowTemplateForConcurrency.yaml");
+      ResourceFlow w =
+          TestUtils.loadResoureFlow("/resourceflow/ResourceFlowTemplateForConcurrency.yaml");
       w.getMetadata().setName(w.getMetadata().getName() + index);
       res.add(w);
     });
