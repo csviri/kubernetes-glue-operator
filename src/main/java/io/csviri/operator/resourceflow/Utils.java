@@ -43,8 +43,8 @@ public class Utils {
           res.put(r.getName(), resource);
         });
       } else {
-        r.getResourceNames().forEach(resourceName -> es.get(new ResourceID(r.getName(), namespace))
-            .ifPresent(resource -> res.put(r.getName() + "." + resourceName, resource)));
+        r.getResourceNames().forEach(resourceName -> es.get(new ResourceID(resourceName, namespace))
+            .ifPresent(resource -> res.put(r.getName() + "#" + resourceName, resource)));
       }
     });
 
