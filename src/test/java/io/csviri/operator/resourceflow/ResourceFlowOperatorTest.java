@@ -153,7 +153,7 @@ class ResourceFlowOperatorTest {
     res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
     return res;
   }
-  
+
   TestCustomResource2 testCustomResource2(int index) {
     var res = new TestCustomResource2();
     res.setMetadata(new ObjectMetaBuilder()

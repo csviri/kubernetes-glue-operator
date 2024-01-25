@@ -82,13 +82,14 @@ class InformerRegister {
     InformerEventSource<GenericKubernetesResource, ResourceFlow> es;
     synchronized (this) {
       markEventSource(gvk, resourceFlow);
-      es = getInformerEventSource(context, gvk).map(e -> {
-        log.debug("Found event source for: {}", gvk);
-        if (existingInformerConsumer != null) {
-          existingInformerConsumer.accept(e);
-        }
-        return e;
-      }).orElse(null);
+      es = getInformerEventSource(context, gvk)
+          .map(e -> {
+            log.debug("Found event source for: {}", gvk);
+            if (existingInformerConsumer != null) {
+              existingInformerConsumer.accept(e);
+            }
+            return e;
+          }).orElse(null);
     }
     if (es == null) {
       log.debug("Adding new event source for: {}", gvk);
@@ -98,10 +99,15 @@ class InformerRegister {
               newEventSource);
       if (resultEventSource != newEventSource) {
         log.debug("Event source registered meanwhile for gvk: {}", gvk);
-        existingInformerConsumer
-            .accept(
-                (InformerEventSource<GenericKubernetesResource, ResourceFlow>) resultEventSource);
+        if (existingInformerConsumer != null) {
+          existingInformerConsumer
+              .accept(
+                  (InformerEventSource<GenericKubernetesResource, ResourceFlow>) resultEventSource);
+        }
       }
+    } else {
+      // wait until even source starts
+      es.start();
     }
   }
 
