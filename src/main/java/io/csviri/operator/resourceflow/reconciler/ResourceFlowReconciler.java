@@ -22,8 +22,6 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
-import static io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler.*;
-
 @ControllerConfiguration
 public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner<ResourceFlow> {
 
@@ -42,7 +40,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
-    informerRegister.deRegisterInformerOnWorkflowChange(context, primary);
+    informerRegister.deRegisterInformerOnResourceFlowChange(context, primary);
     return UpdateControl.noUpdate();
   }
 
@@ -52,7 +50,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     resourceFlow.getSpec().getRelatedResources().forEach(r -> {
       var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
       informerRegister.registerInformerForRelatedResource(context, resourceFlow, gvk,
-          r.getNamespace(),
+          r.getNamespace() == null ? resourceFlow.getMetadata().getNamespace() : r.getNamespace(),
           r.getResourceNames());
     });
   }
@@ -116,10 +114,8 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
         Utils.getName(spec),
         Utils.getNamespace(spec).orElse(null)));
 
-    informerRegister.registerInformer(context, primary, gvk,
-        () -> dr.eventSource(context.eventSourceRetriever()
-            .eventSourceContextForDynamicRegistration()).orElseThrow(),
-        dr::configureWith);
+    var es = informerRegister.registerInformer(context, gvk, primary);
+    dr.configureWith(es);
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));

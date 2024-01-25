@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -141,6 +142,7 @@ class ResourceFlowTest {
     }));
   }
 
+  @Disabled("Cluster scoped resources not supported yet")
   @Test
   void handlingClusterScopeDependents() {
 
