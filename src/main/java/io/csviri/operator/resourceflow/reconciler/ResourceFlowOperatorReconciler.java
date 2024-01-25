@@ -1,14 +1,13 @@
 package io.csviri.operator.resourceflow.reconciler;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperator;
 import io.csviri.operator.resourceflow.customresource.operator.ResourceFlowOperatorSpec;
+import io.csviri.operator.resourceflow.customresource.resourceflow.RelatedResourceSpec;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlowSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -30,14 +29,9 @@ public class ResourceFlowOperatorReconciler
 
   public static final String WORKFLOW_LABEL_KEY = "foroperator";
   public static final String WORKFLOW_LABEL_VALUE = "true";
-  public static final String WATCH_PREFIX = "workflow-operator-watch-cr/";
+  public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
 
-  public static final String WATCH_GROUP = WATCH_PREFIX + "group";
-  public static final String WATCH_VERSION = WATCH_PREFIX + "version";
-  public static final String WATCH_KIND = WATCH_PREFIX + "kind";
-  public static final String WATCH_NAME = WATCH_PREFIX + "name";
-
-  private InformerEventSource<ResourceFlow, ResourceFlowOperator> workflowEventSource;
+  private InformerEventSource<ResourceFlow, ResourceFlowOperator> resourceFlowEventSource;
 
   @Override
   public UpdateControl<ResourceFlowOperator> reconcile(ResourceFlowOperator resourceFlowOperator,
@@ -48,12 +42,12 @@ public class ResourceFlowOperatorReconciler
 
     var targetCREventSource = getOrRegisterCustomResourceEventSource(resourceFlowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      var workFlow = workflowEventSource
+      var resourceFlow = resourceFlowEventSource
           .get(new ResourceID(workflowName(cr), cr.getMetadata().getNamespace()));
       var targetWorkflow = createWorkflow(cr, resourceFlowOperator);
-      if (workFlow.isEmpty()) {
+      if (resourceFlow.isEmpty()) {
         context.getClient().resource(targetWorkflow).create();
-      } else if (!match(workFlow.orElseThrow(), targetWorkflow)) {
+      } else if (!match(resourceFlow.orElseThrow(), targetWorkflow)) {
         context.getClient().resource(targetWorkflow).update();
       }
     });
@@ -62,34 +56,41 @@ public class ResourceFlowOperatorReconciler
   }
 
   private boolean match(ResourceFlow actualResourceFlow, ResourceFlow targetResourceFlow) {
+    // todo match related resource
     // for now cannot change watched resource, coming with related resources
-    return actualResourceFlow.getSpec().equals(targetResourceFlow.getSpec());
+    return actualResourceFlow.getSpec().getResources()
+        .equals(targetResourceFlow.getSpec().getResources());
   }
 
   private ResourceFlow createWorkflow(GenericKubernetesResource cr,
       ResourceFlowOperator resourceFlowOperator) {
     var res = new ResourceFlow();
-    Map<String, String> annotation = new HashMap<>();
-    GroupVersionKind gvk = new GroupVersionKind(cr.getApiVersion(), cr.getKind());
-    annotation.put(WATCH_GROUP, gvk.getGroup());
-    annotation.put(WATCH_VERSION, gvk.getVersion());
-    annotation.put(WATCH_KIND, gvk.getKind());
-    annotation.put(WATCH_NAME, cr.getMetadata().getName());
 
     res.setMetadata(new ObjectMetaBuilder()
-        .withAnnotations(annotation)
         .withName(workflowName(cr))
         .withNamespace(cr.getMetadata().getNamespace())
         .withLabels(Map.of(WORKFLOW_LABEL_KEY, WORKFLOW_LABEL_VALUE))
         .build());
     res.setSpec(toWorkflowSpec(resourceFlowOperator.getSpec()));
+
+    var parent = resourceFlowOperator.getSpec().getParent();
+    RelatedResourceSpec parentRelatedSpec = new RelatedResourceSpec();
+    parentRelatedSpec.setName(PARENT_RELATED_RESOURCE_NAME);
+    parentRelatedSpec.setApiVersion(parent.getApiVersion());
+    parentRelatedSpec.setKind(parent.getKind());
+    parentRelatedSpec.setResourceNames(List.of(cr.getMetadata().getName()));
+    parentRelatedSpec.setNamespace(cr.getMetadata().getNamespace());
+
+    res.getSpec().getRelatedResources().add(parentRelatedSpec);
+
     res.addOwnerReference(cr);
     return res;
   }
 
   private ResourceFlowSpec toWorkflowSpec(ResourceFlowOperatorSpec spec) {
     var res = new ResourceFlowSpec();
-    res.setResources(spec.getResources());
+    res.setResources(new ArrayList<>(spec.getResources()));
+    res.setRelatedResources(new ArrayList<>(spec.getRelatedResources()));
     return res;
   }
 
@@ -118,12 +119,12 @@ public class ResourceFlowOperatorReconciler
   @Override
   public Map<String, EventSource> prepareEventSources(
       EventSourceContext<ResourceFlowOperator> eventSourceContext) {
-    workflowEventSource = new InformerEventSource<>(
+    resourceFlowEventSource = new InformerEventSource<>(
         InformerConfiguration.from(ResourceFlow.class, eventSourceContext)
             .withLabelSelector(WORKFLOW_LABEL_KEY + "=" + WORKFLOW_LABEL_VALUE)
             .build(),
         eventSourceContext);
-    return EventSourceInitializer.nameEventSources(workflowEventSource);
+    return EventSourceInitializer.nameEventSources(resourceFlowEventSource);
   }
 
   @Override
@@ -135,7 +136,7 @@ public class ResourceFlowOperatorReconciler
     return DeleteControl.defaultDelete();
   }
 
-  private String workflowName(GenericKubernetesResource cr) {
+  private static String workflowName(GenericKubernetesResource cr) {
     return KubernetesResourceUtil.sanitizeName(cr.getMetadata().getName() + "-" + cr.getKind());
   }
 

@@ -17,13 +17,10 @@ import io.csviri.operator.resourceflow.dependent.GenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClientException;
-import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
-import io.javaoperatorsdk.operator.processing.event.ResourceID;
-import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import static io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler.*;
 
@@ -39,7 +36,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   public UpdateControl<ResourceFlow> reconcile(ResourceFlow primary,
       Context<ResourceFlow> context) {
 
-    registerWorkflowOperatorPrimaryInformerIfApplies(context, primary);
     // todo related resources cleanup informers
     // todo related resource can be already a child resource to other workflow test
     registerRelatedResourceInformers(context, primary);
@@ -71,9 +67,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
           primary, context);
     });
 
-    var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
-    optionalGVK.ifPresent(gvk -> informerRegister.deRegisterInformer(gvk, primary, context));
-
     return DeleteControl.defaultDelete();
   }
 
@@ -83,7 +76,8 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
 
     context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
       String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
-      if (primary.getSpec().getResources().stream()
+      // dependent name is null for related resources
+      if (dependentName != null && primary.getSpec().getResources().stream()
           .filter(pr -> pr.getName().equals(dependentName)).findAny().isEmpty()) {
         try {
           log.debug("Deleting resource with name: {}", dependentName);
@@ -107,31 +101,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
         leafDependentNames.contains(spec.getName())));
 
     return builder.build();
-  }
-
-  private Optional<GroupVersionKind> registerWorkflowOperatorPrimaryInformerIfApplies(
-      Context<ResourceFlow> context,
-      ResourceFlow primary) {
-
-    var optionalGVK = gvkFromAnnotationForOperator(primary.getMetadata().getAnnotations());
-    if (optionalGVK.isEmpty()) {
-      return Optional.empty();
-    }
-
-    GroupVersionKind gvk = optionalGVK.orElseThrow();
-
-    informerRegister.registerInformer(context, primary, gvk, () -> new InformerEventSource<>(
-        InformerConfiguration
-            .from(gvk,
-                context.eventSourceRetriever()
-                    .eventSourceContextForDynamicRegistration())
-            .withSecondaryToPrimaryMapper(
-                resource -> Set.of(new ResourceID(resource.getMetadata().getName(),
-                    resource.getMetadata().getNamespace())))
-            .build(),
-        context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
-
-    return optionalGVK;
   }
 
   private void createAndAddDependentToWorkflow(ResourceFlow primary, Context<ResourceFlow> context,
@@ -178,14 +147,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
       return new JavaScripCondition(jsCondition.getScript());
     }
     throw new IllegalStateException("Unknown condition: " + condition);
-  }
-
-  private Optional<GroupVersionKind> gvkFromAnnotationForOperator(Map<String, String> annotations) {
-    if (!annotations.containsKey(WATCH_GROUP)) {
-      return Optional.empty();
-    }
-    return Optional.of(new GroupVersionKind(annotations.get(WATCH_GROUP),
-        annotations.get(WATCH_VERSION), annotations.get(WATCH_KIND)));
   }
 
 }

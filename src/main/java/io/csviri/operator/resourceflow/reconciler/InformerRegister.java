@@ -36,6 +36,11 @@ class InformerRegister {
     var currentGVKSet = primary.getSpec().getResources().stream()
         .map(Utils::getGVK)
         .collect(Collectors.toSet());
+
+    primary.getSpec().getRelatedResources().forEach(r -> {
+      currentGVKSet.add(new GroupVersionKind(r.getApiVersion(), r.getKind()));
+    });
+
     registeredGVKSet.removeAll(currentGVKSet);
     registeredGVKSet.forEach(gvk -> {
       log.debug("De-registering Informer on Workflow change for workflow: {} gvk: {}", primary,
@@ -49,8 +54,11 @@ class InformerRegister {
       ResourceFlow resourceFlow,
       GroupVersionKind gvk, String namespace, List<String> names) {
 
-    relatedResourceMappers.putIfAbsent(gvk, new RelatedResourceSecondaryToPrimaryMapper());
-    var mapper = relatedResourceMappers.get(gvk);
+    RelatedResourceSecondaryToPrimaryMapper mapper;
+    synchronized (this) {
+      relatedResourceMappers.putIfAbsent(gvk, new RelatedResourceSecondaryToPrimaryMapper());
+      mapper = relatedResourceMappers.get(gvk);
+    }
     mapper.addResourceIDMapping(
         names.stream().map(n -> new ResourceID(n, namespace)).collect(Collectors.toSet()),
         ResourceID.fromResource(resourceFlow));
@@ -58,13 +66,8 @@ class InformerRegister {
     registerInformer(context, resourceFlow, gvk,
         () -> new InformerEventSource<>(InformerConfiguration.<GenericKubernetesResource>from(gvk)
             .withSecondaryToPrimaryMapper(mapper)
-            .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration()));
-  }
-
-  public void registerInformer(Context<ResourceFlow> context, ResourceFlow resourceFlow,
-      GroupVersionKind gvk,
-      Supplier<InformerEventSource<GenericKubernetesResource, ResourceFlow>> newEventSource) {
-    registerInformer(context, resourceFlow, gvk, newEventSource, null);
+            .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration()),
+        null);
   }
 
   @SuppressWarnings("unchecked")
@@ -94,6 +97,7 @@ class InformerRegister {
           context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(),
               newEventSource);
       if (resultEventSource != newEventSource) {
+        log.debug("Event source registered meanwhile for gvk: {}", gvk);
         existingInformerConsumer
             .accept(
                 (InformerEventSource<GenericKubernetesResource, ResourceFlow>) resultEventSource);

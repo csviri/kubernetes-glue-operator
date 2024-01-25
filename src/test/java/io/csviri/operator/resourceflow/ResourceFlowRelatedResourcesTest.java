@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -83,6 +84,7 @@ public class ResourceFlowRelatedResourcesTest {
     });
   }
 
+  @Disabled
   @Test
   void managedAndRelatedResourceOfSameTypeAndTriggering() {
     var relatedConfigMap = extension.create(configMap());

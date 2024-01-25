@@ -78,6 +78,7 @@ class ResourceFlowOperatorTest {
     });
   }
 
+  // todo investigate error in the logs - stale config map patch + others?
   @Test
   void simpleConcurrencyTest() {
     int num = 10;
@@ -87,18 +88,20 @@ class ResourceFlowOperatorTest {
     var resources =
         IntStream.range(0, num).mapToObj(n -> extension.create(testCustomResource(n))).toList();
 
-    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
-      var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
-      assertThat(cm).isNotNull();
-      assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
-    }));
+    await()
+        .untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+          var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+          assertThat(cm).isNotNull();
+          assertThat(cm.getData()).containsEntry("key", TEST_RESOURCE_VALUE + n);
+        }));
 
     resources.forEach(r -> extension.delete(r));
 
-    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
-      var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
-      assertThat(cm).isNull();
-    }));
+    await()
+        .untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+          var cm = extension.get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+          assertThat(cm).isNull();
+        }));
   }
 
   @Test
@@ -150,11 +153,7 @@ class ResourceFlowOperatorTest {
     res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
     return res;
   }
-
-  TestCustomResource2 testCustomResource2() {
-    return testCustomResource2(1);
-  }
-
+  
   TestCustomResource2 testCustomResource2(int index) {
     var res = new TestCustomResource2();
     res.setMetadata(new ObjectMetaBuilder()
