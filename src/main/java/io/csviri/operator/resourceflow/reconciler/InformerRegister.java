@@ -27,6 +27,7 @@ class InformerRegister {
   private final Map<GroupVersionKind, RelatedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
 
+  // todo related resources deleting?
   public synchronized void deRegisterInformerOnResourceFlowChange(Context<ResourceFlow> context,
       ResourceFlow primary) {
     var registeredGVKSet =
@@ -80,17 +81,6 @@ class InformerRegister {
 
   }
 
-
-  public void cleanupRelatedResourceMappingForResourceFow(ResourceFlow resourceFlow) {
-    resourceFlow.getSpec().getRelatedResources().forEach(r -> {
-      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
-      relatedResourceMappers.get(gvk)
-          .removeMappingFor(new ResourceID(resourceFlow.getMetadata().getName(),
-              resourceFlow.getMetadata().getNamespace()));
-    });
-  }
-
-
   public synchronized void deRegisterInformer(GroupVersionKind groupVersionKind,
       ResourceFlow primary,
       Context<ResourceFlow> context) {
@@ -99,6 +89,25 @@ class InformerRegister {
       log.debug("De-registering informer for gvk: {} primary: {}", groupVersionKind, primary);
       context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
     }
+  }
+
+  public void deRegisterInformerForRelatedResources(ResourceFlow primary,
+      Context<ResourceFlow> context) {
+    cleanupRelatedResourceMappingForResourceFow(primary);
+
+    primary.getSpec().getRelatedResources().forEach(r -> {
+      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      deRegisterInformer(gvk, primary, context);
+    });
+  }
+
+  private void cleanupRelatedResourceMappingForResourceFow(ResourceFlow resourceFlow) {
+    resourceFlow.getSpec().getRelatedResources().forEach(r -> {
+      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      relatedResourceMappers.get(gvk)
+          .removeMappingFor(new ResourceID(resourceFlow.getMetadata().getName(),
+              resourceFlow.getMetadata().getNamespace()));
+    });
   }
 
   private synchronized void markEventSource(GroupVersionKind gvk,
@@ -141,8 +150,4 @@ class InformerRegister {
     }
   }
 
-  public void deRegisterInformerForRelatedResources(ResourceFlow primary,
-      Context<ResourceFlow> context) {
-    // todo
-  }
 }

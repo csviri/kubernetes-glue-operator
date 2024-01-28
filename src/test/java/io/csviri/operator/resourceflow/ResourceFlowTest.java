@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -140,33 +139,6 @@ class ResourceFlowTest {
       var w = extension.get(ResourceFlow.class, "testworkflow" + index);
       assertThat(w).isNull();
     }));
-  }
-
-  @Disabled("Cluster scoped resources not supported yet")
-  @Test
-  void handlingClusterScopeDependents() {
-
-    final var clusterScopedResourceName = "test-resource-1";
-    var w = TestUtils.loadResoureFlow("/resourceflow/ClusterScopeResource.yaml");
-    w = extension.create(w);
-
-    await().untilAsserted(() -> {
-      var clusterScopedResource =
-          extension.get(ClusterScopeTestCustomResource.class, clusterScopedResourceName);
-      assertThat(clusterScopedResource).isNotNull();
-    });
-
-    // Deletion not working with owner references since Workflow is not cluster scoped.
-    // https://github.com/csviri/resource-workflow-operator/issues/4
-    //
-    // extension.delete(w);
-    //
-    // await().untilAsserted(() -> {
-    // var clusterScopedResource =
-    // extension.get(ClusterScopeTestCustomResource.class, clusterScopedResourceName);
-    // assertThat(clusterScopedResource).isNull();
-    // });
-
   }
 
   @Test

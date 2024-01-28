@@ -57,10 +57,8 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   public DeleteControl cleanup(ResourceFlow primary, Context<ResourceFlow> context) {
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
 
-    // todo check if delete successfully executed / not posponed
+    // todo check if delete successfully executed / not postponed
     var result = actualWorkflow.cleanup(primary, context);
-
-    informerRegister.cleanupRelatedResourceMappingForResourceFow(primary);
 
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
