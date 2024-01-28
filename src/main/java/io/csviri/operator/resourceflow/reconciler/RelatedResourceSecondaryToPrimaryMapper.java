@@ -14,12 +14,12 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.Mappers;
 public class RelatedResourceSecondaryToPrimaryMapper
     implements SecondaryToPrimaryMapper<GenericKubernetesResource> {
 
-  private final Map<ResourceID, Set<ResourceID>> idMap = new ConcurrentHashMap<>();
+  private final Map<ResourceID, Set<ResourceID>> secondaryToPrimaryMap = new ConcurrentHashMap<>();
 
   @Override
   public Set<ResourceID> toPrimaryResourceIDs(GenericKubernetesResource resource) {
     var res = Mappers.fromOwnerReferences(false).toPrimaryResourceIDs(resource);
-    var idMapped = idMap.get(
+    var idMapped = secondaryToPrimaryMap.get(
         new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
     if (idMapped != null) {
       res.addAll(idMapped);
@@ -30,13 +30,14 @@ public class RelatedResourceSecondaryToPrimaryMapper
   public void addResourceIDMapping(Collection<ResourceID> resourceIDs, ResourceID workFlowId) {
     Set<ResourceID> workflowIDSet = new HashSet<>();
     workflowIDSet.add(workFlowId);
-    resourceIDs.forEach(resourceID -> idMap.merge(resourceID, workflowIDSet, (s1, s2) -> {
-      s1.addAll(s2);
-      return s1;
-    }));
+    resourceIDs
+        .forEach(resourceID -> secondaryToPrimaryMap.merge(resourceID, workflowIDSet, (s1, s2) -> {
+          s1.addAll(s2);
+          return s1;
+        }));
   }
 
   public void removeMappingFor(ResourceID workflowID) {
-    idMap.values().forEach(s -> s.remove(workflowID));
+    secondaryToPrimaryMap.values().forEach(s -> s.remove(workflowID));
   }
 }

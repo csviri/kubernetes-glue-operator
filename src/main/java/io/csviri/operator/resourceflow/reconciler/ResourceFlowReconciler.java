@@ -34,8 +34,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   public UpdateControl<ResourceFlow> reconcile(ResourceFlow primary,
       Context<ResourceFlow> context) {
 
-    // todo related resources cleanup informers
-    // todo related resource can be already a child resource to other workflow test
+
     registerRelatedResourceInformers(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     actualWorkflow.reconcile(primary, context);
@@ -44,7 +43,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     return UpdateControl.noUpdate();
   }
 
-  // todo deregister
   private void registerRelatedResourceInformers(Context<ResourceFlow> context,
       ResourceFlow resourceFlow) {
     resourceFlow.getSpec().getRelatedResources().forEach(r -> {
@@ -59,11 +57,17 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   public DeleteControl cleanup(ResourceFlow primary, Context<ResourceFlow> context) {
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
 
+    // todo check if delete successfully executed / not posponed
+    var result = actualWorkflow.cleanup(primary, context);
+
+    informerRegister.cleanupRelatedResourceMappingForResourceFow(primary);
+
     actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
       var genericDependentResource = (GenericDependentResource) dr;
       informerRegister.deRegisterInformer(genericDependentResource.getGroupVersionKind(),
           primary, context);
     });
+    informerRegister.deRegisterInformerForRelatedResources(primary, context);
 
     return DeleteControl.defaultDelete();
   }

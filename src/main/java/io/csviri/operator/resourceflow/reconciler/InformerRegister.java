@@ -80,6 +80,17 @@ class InformerRegister {
 
   }
 
+
+  public void cleanupRelatedResourceMappingForResourceFow(ResourceFlow resourceFlow) {
+    resourceFlow.getSpec().getRelatedResources().forEach(r -> {
+      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      relatedResourceMappers.get(gvk)
+          .removeMappingFor(new ResourceID(resourceFlow.getMetadata().getName(),
+              resourceFlow.getMetadata().getNamespace()));
+    });
+  }
+
+
   public synchronized void deRegisterInformer(GroupVersionKind groupVersionKind,
       ResourceFlow primary,
       Context<ResourceFlow> context) {
@@ -130,4 +141,8 @@ class InformerRegister {
     }
   }
 
+  public void deRegisterInformerForRelatedResources(ResourceFlow primary,
+      Context<ResourceFlow> context) {
+    // todo
+  }
 }
