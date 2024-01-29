@@ -19,11 +19,12 @@ public class RelatedResourceSecondaryToPrimaryMapper
   @Override
   public Set<ResourceID> toPrimaryResourceIDs(GenericKubernetesResource resource) {
     var res = Mappers.fromOwnerReferences(false).toPrimaryResourceIDs(resource);
-    var idMapped = secondaryToPrimaryMap.get(
-        new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
-    if (idMapped != null) {
-      res.addAll(idMapped);
-    }
+    // todo empty kind issue
+    // var idMapped = secondaryToPrimaryMap.get(
+    // new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
+    // if (idMapped != null) {
+    // res.addAll(idMapped);
+    // }
     return res;
   }
 

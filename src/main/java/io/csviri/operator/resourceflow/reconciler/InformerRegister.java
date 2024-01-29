@@ -8,9 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.resourceflow.Utils;
+import io.csviri.operator.resourceflow.customresource.resourceflow.RelatedResourceSpec;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
-import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
@@ -27,7 +27,7 @@ class InformerRegister {
   private final Map<GroupVersionKind, RelatedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
 
-  // todo related resources deleting?
+  // todo related resources deleting? => cache of related resource
   public synchronized void deRegisterInformerOnResourceFlowChange(Context<ResourceFlow> context,
       ResourceFlow primary) {
     var registeredGVKSet =
@@ -50,13 +50,19 @@ class InformerRegister {
 
   // todo tests + remake WO to use related resources
   public void registerInformerForRelatedResource(Context<ResourceFlow> context,
-      ResourceFlow resourceFlow,
-      GroupVersionKind gvk, String relatedResourceNamespace, List<String> relatedResourceNames) {
-    registerInformer(context, gvk, resourceFlow);
-    var mapper = relatedResourceMappers.get(gvk);
+      ResourceFlow resourceFlow, RelatedResourceSpec relatedResourceSpec) {
 
+    GroupVersionKind gvk =
+        new GroupVersionKind(relatedResourceSpec.getApiVersion(), relatedResourceSpec.getKind());
+    registerInformer(context, gvk, resourceFlow);
+
+    var mapper = relatedResourceMappers.get(gvk);
+    var relatedResourceNamespace =
+        relatedResourceSpec.getNamespace() == null ? resourceFlow.getMetadata().getNamespace()
+            : relatedResourceSpec.getNamespace();
     mapper.addResourceIDMapping(
-        relatedResourceNames.stream().map(n -> new ResourceID(n, relatedResourceNamespace))
+        relatedResourceSpec.getResourceNames().stream()
+            .map(n -> new ResourceID(n, relatedResourceNamespace))
             .collect(Collectors.toSet()),
         ResourceID.fromResource(resourceFlow));
   }
@@ -137,17 +143,6 @@ class InformerRegister {
 
   private String workflowId(ResourceFlow resourceFlow) {
     return resourceFlow.getMetadata().getName() + "#" + resourceFlow.getMetadata().getNamespace();
-  }
-
-  private static <P extends HasMetadata> Optional<InformerEventSource<GenericKubernetesResource, P>> getInformerEventSource(
-      Context<P> context, GroupVersionKind gvk) {
-    try {
-      return Optional
-          .of((InformerEventSource<GenericKubernetesResource, P>) context.eventSourceRetriever()
-              .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString()));
-    } catch (IllegalArgumentException e) {
-      return Optional.empty();
-    }
   }
 
 }

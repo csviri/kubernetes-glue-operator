@@ -47,9 +47,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
       ResourceFlow resourceFlow) {
     resourceFlow.getSpec().getRelatedResources().forEach(r -> {
       var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
-      informerRegister.registerInformerForRelatedResource(context, resourceFlow, gvk,
-          r.getNamespace() == null ? resourceFlow.getMetadata().getNamespace() : r.getNamespace(),
-          r.getResourceNames());
+      informerRegister.registerInformerForRelatedResource(context, resourceFlow, r);
     });
   }
 
