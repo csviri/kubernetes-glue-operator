@@ -4,4 +4,7 @@
 Limitations will be continuously eliminated in the coming releases.
 
 1. Child resources and related resources are always namespace scoped resources.
+2. Related resource changes are not triggering the reconciliation.
+   Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
+   https://github.com/fabric8io/kubernetes-client/issues/5729
 
