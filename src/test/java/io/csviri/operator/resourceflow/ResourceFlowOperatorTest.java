@@ -78,7 +78,6 @@ class ResourceFlowOperatorTest {
     });
   }
 
-  // todo investigate error in the logs - stale config map patch + others?
   @Test
   void simpleConcurrencyTest() {
     int num = 10;

@@ -34,7 +34,6 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   public UpdateControl<ResourceFlow> reconcile(ResourceFlow primary,
       Context<ResourceFlow> context) {
 
-
     registerRelatedResourceInformers(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     actualWorkflow.reconcile(primary, context);
@@ -68,7 +67,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     return DeleteControl.defaultDelete();
   }
 
-  // todo test
+  // todo test + remove informer for related resources
   private void cleanupRemovedResourcesFromWorkflow(Context<ResourceFlow> context,
       ResourceFlow primary) {
 
@@ -78,7 +77,8 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
       if (dependentName != null && primary.getSpec().getResources().stream()
           .filter(pr -> pr.getName().equals(dependentName)).findAny().isEmpty()) {
         try {
-          log.debug("Deleting resource with name: {}", dependentName);
+          log.debug("Deleting resource with name: {}", dependentName + "for resource flow: {} "
+              + primary.getMetadata().getName());
           context.getClient().resource(r).delete();
         } catch (KubernetesClientException e) {
           // can happen that already deleted, just in cache.
