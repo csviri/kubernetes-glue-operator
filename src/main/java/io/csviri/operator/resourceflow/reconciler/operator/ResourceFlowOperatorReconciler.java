@@ -52,6 +52,9 @@ public class ResourceFlowOperatorReconciler
         context.getClient().resource(desiredResourceFlow).create();
       } else if (!operatorResourceFlowMatcher.matchResourceFlows(resourceFlow.orElseThrow(),
           desiredResourceFlow)) {
+        log.debug("Updating resource from for operator name: {} namespace: {}",
+            resourceFlowOperator.getMetadata().getName(),
+            resourceFlowOperator.getMetadata().getNamespace());
         context.getClient().resource(desiredResourceFlow).update();
       }
     });
