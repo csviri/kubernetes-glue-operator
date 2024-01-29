@@ -1,4 +1,4 @@
-package io.csviri.operator.resourceflow.reconciler;
+package io.csviri.operator.resourceflow.reconciler.flow;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

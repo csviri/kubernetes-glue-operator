@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.resourceflow.customresource.ClusterScopeTestCustomResource;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
-import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
+import io.csviri.operator.resourceflow.reconciler.flow.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.*;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 

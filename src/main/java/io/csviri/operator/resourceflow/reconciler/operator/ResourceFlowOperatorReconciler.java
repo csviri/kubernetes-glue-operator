@@ -1,4 +1,4 @@
-package io.csviri.operator.resourceflow.reconciler;
+package io.csviri.operator.resourceflow.reconciler.operator;
 
 import java.util.*;
 

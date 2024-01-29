@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import io.csviri.operator.resourceflow.Utils;
 import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
-import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
+import io.csviri.operator.resourceflow.reconciler.flow.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -20,8 +20,6 @@ import io.javaoperatorsdk.operator.processing.dependent.kubernetes.GenericKubern
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.MustacheFactory;
-
-import static io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler.*;
 
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<ResourceFlow>

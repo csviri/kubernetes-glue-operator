@@ -1,4 +1,4 @@
-package io.csviri.operator.resourceflow.reconciler;
+package io.csviri.operator.resourceflow.reconciler.flow;
 
 import java.util.Collection;
 import java.util.HashSet;

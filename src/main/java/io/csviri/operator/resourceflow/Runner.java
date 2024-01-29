@@ -3,8 +3,8 @@ package io.csviri.operator.resourceflow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.csviri.operator.resourceflow.reconciler.ResourceFlowOperatorReconciler;
-import io.csviri.operator.resourceflow.reconciler.ResourceFlowReconciler;
+import io.csviri.operator.resourceflow.reconciler.flow.ResourceFlowReconciler;
+import io.csviri.operator.resourceflow.reconciler.operator.ResourceFlowOperatorReconciler;
 import io.javaoperatorsdk.operator.Operator;
 
 public class Runner {
