@@ -33,6 +33,9 @@ public class ResourceFlowOperatorReconciler
 
   private InformerEventSource<ResourceFlow, ResourceFlowOperator> resourceFlowEventSource;
 
+  private final OperatorResourceFlowMatcher operatorResourceFlowMatcher =
+      new OperatorResourceFlowMatcher();
+
   @Override
   public UpdateControl<ResourceFlowOperator> reconcile(ResourceFlowOperator resourceFlowOperator,
       Context<ResourceFlowOperator> context) {
@@ -44,25 +47,19 @@ public class ResourceFlowOperatorReconciler
     targetCREventSource.list().forEach(cr -> {
       var resourceFlow = resourceFlowEventSource
           .get(new ResourceID(workflowName(cr), cr.getMetadata().getNamespace()));
-      var targetWorkflow = createWorkflow(cr, resourceFlowOperator);
+      var desiredResourceFlow = createResourceFlow(cr, resourceFlowOperator);
       if (resourceFlow.isEmpty()) {
-        context.getClient().resource(targetWorkflow).create();
-      } else if (!match(resourceFlow.orElseThrow(), targetWorkflow)) {
-        context.getClient().resource(targetWorkflow).update();
+        context.getClient().resource(desiredResourceFlow).create();
+      } else if (!operatorResourceFlowMatcher.matchResourceFlows(resourceFlow.orElseThrow(),
+          desiredResourceFlow)) {
+        context.getClient().resource(desiredResourceFlow).update();
       }
     });
 
     return UpdateControl.noUpdate();
   }
 
-  private boolean match(ResourceFlow actualResourceFlow, ResourceFlow targetResourceFlow) {
-    // todo match related resource
-    // for now cannot change watched resource, coming with related resources
-    return actualResourceFlow.getSpec().getResources()
-        .equals(targetResourceFlow.getSpec().getResources());
-  }
-
-  private ResourceFlow createWorkflow(GenericKubernetesResource cr,
+  private ResourceFlow createResourceFlow(GenericKubernetesResource cr,
       ResourceFlowOperator resourceFlowOperator) {
     var res = new ResourceFlow();
 
