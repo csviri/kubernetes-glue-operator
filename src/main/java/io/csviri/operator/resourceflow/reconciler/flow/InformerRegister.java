@@ -17,7 +17,7 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
-// todo test
+// todo unit test
 class InformerRegister {
 
   private static final Logger log = LoggerFactory.getLogger(InformerRegister.class);
@@ -27,7 +27,7 @@ class InformerRegister {
   private final Map<GroupVersionKind, RelatedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
 
-  // todo related resources deleting? => cache of related resource
+  // todo test related resources deleting
   public synchronized void deRegisterInformerOnResourceFlowChange(Context<ResourceFlow> context,
       ResourceFlow primary) {
     var registeredGVKSet =

@@ -25,7 +25,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder
 public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner<ResourceFlow> {
 
   private static final Logger log = LoggerFactory.getLogger(ResourceFlowReconciler.class);
-  public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.workflow/name";
+  public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.resourceflow/name";
 
   private final InformerRegister informerRegister = new InformerRegister();
 
@@ -35,9 +35,10 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
 
     registerRelatedResourceInformers(context, primary);
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
-    actualWorkflow.reconcile(primary, context);
+    var result = actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
     informerRegister.deRegisterInformerOnResourceFlowChange(context, primary);
+    result.throwAggregateExceptionIfErrorsPresent();
     return UpdateControl.noUpdate();
   }
 
@@ -69,7 +70,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     });
   }
 
-  // todo test + remove informer for related resources
+  // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<ResourceFlow> context,
       ResourceFlow primary) {
 
