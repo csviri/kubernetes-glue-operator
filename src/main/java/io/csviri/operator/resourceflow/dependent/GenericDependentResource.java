@@ -11,7 +11,7 @@ import io.csviri.operator.resourceflow.reconciler.flow.ResourceFlowReconciler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
-import io.javaoperatorsdk.operator.api.reconciler.dependent.GarbageCollected;
+import io.javaoperatorsdk.operator.api.reconciler.dependent.Deleter;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.Creator;
 import io.javaoperatorsdk.operator.processing.dependent.Updater;
@@ -23,7 +23,7 @@ import com.github.mustachejava.MustacheFactory;
 
 public class GenericDependentResource
     extends GenericKubernetesDependentResource<ResourceFlow>
-    implements GarbageCollected<ResourceFlow>,
+    implements Deleter<ResourceFlow>,
     Updater<GenericKubernetesResource, ResourceFlow>,
     Creator<GenericKubernetesResource, ResourceFlow> {
 

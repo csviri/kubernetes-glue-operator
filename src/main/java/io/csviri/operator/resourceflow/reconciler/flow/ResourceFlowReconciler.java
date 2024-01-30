@@ -13,12 +13,14 @@ import io.csviri.operator.resourceflow.customresource.resourceflow.ResourceFlow;
 import io.csviri.operator.resourceflow.customresource.resourceflow.condition.ConditionSpec;
 import io.csviri.operator.resourceflow.customresource.resourceflow.condition.JavaScriptConditionSpec;
 import io.csviri.operator.resourceflow.customresource.resourceflow.condition.PodsReadyConditionSpec;
+import io.csviri.operator.resourceflow.dependent.GCGenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.reconciler.*;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
+import io.javaoperatorsdk.operator.processing.dependent.workflow.KubernetesResourceDeletedCondition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
 @ControllerConfiguration
@@ -27,6 +29,8 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   private static final Logger log = LoggerFactory.getLogger(ResourceFlowReconciler.class);
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.resourceflow/name";
 
+  private final KubernetesResourceDeletedCondition deletePostCondition =
+      new KubernetesResourceDeletedCondition();
   private final InformerRegister informerRegister = new InformerRegister();
 
   @Override
@@ -104,14 +108,13 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     return builder.build();
   }
 
-  // todo leaf dependents vs non leaf
   private void createAndAddDependentToWorkflow(ResourceFlow primary, Context<ResourceFlow> context,
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<ResourceFlow> builder, boolean leafDependent) {
 
 
-    var dr = createDependentResource(spec);
+    var dr = createDependentResource(spec, leafDependent);
     var gvk = dr.getGroupVersionKind();
 
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
@@ -123,6 +126,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
+    builder.withDeletePostcondition(deletePostCondition);
     genericDependentResourceMap.put(spec.getName(), dr);
 
     Optional.ofNullable(spec.getReadyPostCondition())
@@ -133,10 +137,17 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
         .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
   }
 
-  private static GenericDependentResource createDependentResource(DependentResourceSpec spec) {
-    return spec.getResourceTemplate() != null
-        ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())
-        : new GenericDependentResource(spec.getResource(), spec.getName());
+  private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
+      boolean leafDependent) {
+    if (leafDependent) {
+      return spec.getResourceTemplate() != null
+          ? new GCGenericDependentResource(spec.getResourceTemplate(), spec.getName())
+          : new GCGenericDependentResource(spec.getResource(), spec.getName());
+    } else {
+      return spec.getResourceTemplate() != null
+          ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())
+          : new GenericDependentResource(spec.getResource(), spec.getName());
+    }
   }
 
   @SuppressWarnings({"rawtypes"})
