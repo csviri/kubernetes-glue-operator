@@ -38,8 +38,10 @@ public class RelatedResourceSecondaryToPrimaryMapper
         }));
   }
 
-  // todo remove empty sets
   public void removeMappingFor(ResourceID workflowID) {
-    secondaryToPrimaryMap.values().forEach(s -> s.remove(workflowID));
+    secondaryToPrimaryMap.entrySet().stream().forEach(e -> {
+      e.getValue().remove(workflowID);
+    });
+    secondaryToPrimaryMap.entrySet().removeIf(e -> e.getValue().isEmpty());
   }
 }
