@@ -1,6 +1,9 @@
 package io.csviri.operator.resourceflow.reconciler.operator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,9 +36,6 @@ public class ResourceFlowOperatorReconciler
 
   private InformerEventSource<ResourceFlow, ResourceFlowOperator> resourceFlowEventSource;
 
-  private final OperatorResourceFlowMatcher operatorResourceFlowMatcher =
-      new OperatorResourceFlowMatcher();
-
   @Override
   public UpdateControl<ResourceFlowOperator> reconcile(ResourceFlowOperator resourceFlowOperator,
       Context<ResourceFlowOperator> context) {
@@ -45,17 +45,18 @@ public class ResourceFlowOperatorReconciler
 
     var targetCREventSource = getOrRegisterCustomResourceEventSource(resourceFlowOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      var resourceFlow = resourceFlowEventSource
+      var actualResourceFlow = resourceFlowEventSource
           .get(new ResourceID(workflowName(cr), cr.getMetadata().getNamespace()));
       var desiredResourceFlow = createResourceFlow(cr, resourceFlowOperator);
-      if (resourceFlow.isEmpty()) {
-        context.getClient().resource(desiredResourceFlow).create();
-      } else if (!operatorResourceFlowMatcher.matchResourceFlows(resourceFlow.orElseThrow(),
-          desiredResourceFlow)) {
-        log.debug("Updating resource from for operator name: {} namespace: {}",
+      if (actualResourceFlow.isEmpty()) {
+        context.getClient().resource(desiredResourceFlow).serverSideApply();
+      } else if (!actualResourceFlow.orElseThrow().getSpec()
+          .equals(desiredResourceFlow.getSpec())) {
+        log.debug("Updating resource from for operator name: {} cr: {} namespace: {}",
             resourceFlowOperator.getMetadata().getName(),
+            cr.getMetadata().getName(),
             resourceFlowOperator.getMetadata().getNamespace());
-        context.getClient().resource(desiredResourceFlow).update();
+        context.getClient().resource(desiredResourceFlow).serverSideApply();
       }
     });
 

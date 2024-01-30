@@ -104,6 +104,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     return builder.build();
   }
 
+  // todo leaf dependents vs non leaf
   private void createAndAddDependentToWorkflow(ResourceFlow primary, Context<ResourceFlow> context,
       DependentResourceSpec spec,
       Map<String, GenericDependentResource> genericDependentResourceMap,
