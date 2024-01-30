@@ -16,7 +16,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <josdk.version>4.7.1-SNAPSHOT</josdk.version>
+        <josdk.version>4.7.1</josdk.version>
         <slf4j.version>1.7.36</slf4j.version>
         <junit.version>5.10.1</junit.version>
         <log4j.version>2.22.1</log4j.version>
