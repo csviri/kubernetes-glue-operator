@@ -18,7 +18,6 @@ import io.csviri.operator.resourceflow.dependent.GenericResourceDiscriminator;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.reconciler.*;
-import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
@@ -42,29 +41,32 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     return UpdateControl.noUpdate();
   }
 
-  private void registerRelatedResourceInformers(Context<ResourceFlow> context,
-      ResourceFlow resourceFlow) {
-    resourceFlow.getSpec().getRelatedResources().forEach(r -> {
-      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
-      informerRegister.registerInformerForRelatedResource(context, resourceFlow, r);
-    });
-  }
-
   @Override
   public DeleteControl cleanup(ResourceFlow primary, Context<ResourceFlow> context) {
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
 
-    // todo check if delete successfully executed / not postponed
     var result = actualWorkflow.cleanup(primary, context);
+    result.throwAggregateExceptionIfErrorsPresent();
 
-    actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
-      var genericDependentResource = (GenericDependentResource) dr;
-      informerRegister.deRegisterInformer(genericDependentResource.getGroupVersionKind(),
-          primary, context);
+    if (!result.allPostConditionsMet()) {
+      return DeleteControl.noFinalizerRemoval();
+    } else {
+      actualWorkflow.getDependentResourcesByNameWithoutActivationCondition().forEach((n, dr) -> {
+        var genericDependentResource = (GenericDependentResource) dr;
+        informerRegister.deRegisterInformer(genericDependentResource.getGroupVersionKind(),
+            primary, context);
+      });
+      informerRegister.deRegisterInformerForRelatedResources(primary, context);
+
+      return DeleteControl.defaultDelete();
+    }
+  }
+
+  private void registerRelatedResourceInformers(Context<ResourceFlow> context,
+      ResourceFlow resourceFlow) {
+    resourceFlow.getSpec().getRelatedResources().forEach(r -> {
+      informerRegister.registerInformerForRelatedResource(context, resourceFlow, r);
     });
-    informerRegister.deRegisterInformerForRelatedResources(primary, context);
-
-    return DeleteControl.defaultDelete();
   }
 
   // todo test + remove informer for related resources

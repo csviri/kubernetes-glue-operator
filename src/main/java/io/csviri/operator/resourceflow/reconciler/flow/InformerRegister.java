@@ -133,7 +133,6 @@ class InformerRegister {
 
   private boolean unmarkEventSource(GroupVersionKind gvk,
       ResourceFlow resourceFlow) {
-
     var gvkSet = workflowToInformerGVK.get(resourceFlow.getMetadata().getName());
     gvkSet.remove(gvk);
     var es = gvkOfInformerToWorkflow.get(gvk);
