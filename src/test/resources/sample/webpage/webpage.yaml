@@ -1,0 +1,15 @@
+apiVersion: "resourceflowoperator.sample/v1"
+kind: WebPage
+metadata:
+  name: hellows
+spec:
+  exposed: false
+  html: |
+    <html>
+      <head>
+        <title>Hello Operator World</title>
+      </head>
+      <body>
+        Hello World! 
+      </body>
+    </html>
