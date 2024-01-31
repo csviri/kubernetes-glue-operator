@@ -92,8 +92,10 @@ class InformerRegister {
       Context<ResourceFlow> context) {
     var lastForGVK = unmarkEventSource(groupVersionKind, primary);
     if (lastForGVK) {
-      log.debug("De-registering informer for gvk: {} primary: {}", groupVersionKind, primary);
-      context.eventSourceRetriever().dynamicallyDeRegisterEventSource(groupVersionKind.toString());
+      var es = context.eventSourceRetriever()
+          .dynamicallyDeRegisterEventSource(groupVersionKind.toString());
+      es.ifPresent(i -> log.debug("De-registered informer for gvk: {} primary: {}",
+          groupVersionKind, primary));
     }
   }
 
