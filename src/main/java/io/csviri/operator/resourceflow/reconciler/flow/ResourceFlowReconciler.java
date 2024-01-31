@@ -126,7 +126,10 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
 
     builder.addDependentResource(dr);
     spec.getDependsOn().forEach(s -> builder.dependsOn(genericDependentResourceMap.get(s)));
-    builder.withDeletePostcondition(deletePostCondition);
+    // if a resources does not depend on another there is no reason to add cleanup condition
+    if (!spec.getDependsOn().isEmpty()) {
+      builder.withDeletePostcondition(deletePostCondition);
+    }
     genericDependentResourceMap.put(spec.getName(), dr);
 
     Optional.ofNullable(spec.getReadyPostCondition())
