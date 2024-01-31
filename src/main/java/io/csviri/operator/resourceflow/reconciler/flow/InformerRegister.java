@@ -48,7 +48,7 @@ class InformerRegister {
     });
   }
 
-  // todo tests + remake WO to use related resources
+  // todo tests
   public void registerInformerForRelatedResource(Context<ResourceFlow> context,
       ResourceFlow resourceFlow, RelatedResourceSpec relatedResourceSpec) {
 
