@@ -1,6 +1,5 @@
 package io.csviri.operator.resourceflow.sample.webpage;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -22,19 +21,24 @@ public class WebPageSampleTest {
           .withReconciler(new ResourceFlowOperatorReconciler())
           .build();
 
-
-  @Disabled("wip")
   @Test
   void webPageCRUD() {
     TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.crd.yml");
     TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.operator.yaml");
     var webPage = TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.yaml");
 
-
     await().untilAsserted(() -> {
       var deployment = extension.get(Deployment.class, webPage.getMetadata().getName());
 
       assertThat(deployment).isNotNull();
+    });
+    // todo JS condition error
+    extension.delete(webPage);
+
+    await().untilAsserted(() -> {
+      var deployment = extension.get(Deployment.class, webPage.getMetadata().getName());
+
+      assertThat(deployment).isNull();
     });
   }
 

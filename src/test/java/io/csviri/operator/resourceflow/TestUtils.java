@@ -39,7 +39,9 @@ public class TestUtils {
 
   public static GenericKubernetesResource createOrUpdate(AbstractOperatorExtension extension,
       String path) {
-    return createOrUpdate(extension.getKubernetesClient(), path);
+    return extension.getKubernetesClient().resource(load(path))
+        .inNamespace(extension.getNamespace())
+        .createOr(NonDeletingOperation::update);
   }
 
   public static GenericKubernetesResource createOrUpdate(KubernetesClient client, String path) {
