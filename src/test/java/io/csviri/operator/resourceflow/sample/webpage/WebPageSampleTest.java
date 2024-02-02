@@ -32,7 +32,7 @@ public class WebPageSampleTest {
 
       assertThat(deployment).isNotNull();
     });
-    // todo JS condition error
+    // todo change ingress, change html, complete asserts
     extension.delete(webPage);
 
     await().untilAsserted(() -> {
