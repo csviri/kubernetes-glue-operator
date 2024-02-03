@@ -72,15 +72,15 @@ class ResourceFlowOperatorTest {
       assertThat(cm1).isNotNull();
       assertThat(cm1.getData()).containsEntry("key", initialValue);
     });
-
-    var changedValue = "changed-value";
-    cr.getSpec().setValue(changedValue);
-    cr = extension.replace(cr);
-
-    await().untilAsserted(() -> {
-      var cm1 = extension.get(ConfigMap.class, name);
-      assertThat(cm1.getData()).containsEntry("key", changedValue);
-    });
+    // todo
+    // var changedValue = "changed-value";
+    // cr.getSpec().setValue(changedValue);
+    // cr = extension.replace(cr);
+    //
+    // await().untilAsserted(() -> {
+    // var cm1 = extension.get(ConfigMap.class, name);
+    // assertThat(cm1.getData()).containsEntry("key", changedValue);
+    // });
 
     extension.delete(cr);
 

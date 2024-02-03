@@ -16,6 +16,7 @@ import io.csviri.operator.resourceflow.customresource.resourceflow.condition.Pod
 import io.csviri.operator.resourceflow.dependent.GCGenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericDependentResource;
 import io.csviri.operator.resourceflow.dependent.GenericResourceDiscriminator;
+import io.csviri.operator.resourceflow.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.javaoperatorsdk.operator.api.reconciler.*;
@@ -32,6 +33,7 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
   private final KubernetesResourceDeletedCondition deletePostCondition =
       new KubernetesResourceDeletedCondition();
   private final InformerRegister informerRegister = new InformerRegister();
+  private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
 
   @Override
   public UpdateControl<ResourceFlow> reconcile(ResourceFlow primary,
@@ -48,6 +50,10 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
 
   @Override
   public DeleteControl cleanup(ResourceFlow primary, Context<ResourceFlow> context) {
+    // todo if related resource referenced to name the resource (name / namespace) the related
+    // resource might be deleted
+    // at this point - shall we add finalizer?
+
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
 
     var result = actualWorkflow.cleanup(primary, context);
@@ -117,9 +123,14 @@ public class ResourceFlowReconciler implements Reconciler<ResourceFlow>, Cleaner
     var dr = createDependentResource(spec, leafDependent);
     var gvk = dr.getGroupVersionKind();
 
+
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
-        Utils.getName(spec),
-        Utils.getNamespace(spec).orElse(null)));
+        // name can reference related resources todo doc
+        genericTemplateHandler.processTemplate(Utils.getName(spec), primary, context),
+        // todo test processing ns as template
+        Utils.getNamespace(spec).map(ns -> genericTemplateHandler
+            .processTemplate(Utils.getName(spec), primary, context))
+            .orElse(null)));
 
     var es = informerRegister.registerInformer(context, gvk, primary);
     dr.configureWith(es);

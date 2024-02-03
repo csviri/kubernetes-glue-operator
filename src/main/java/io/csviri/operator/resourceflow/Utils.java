@@ -12,6 +12,8 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 
 public class Utils {
 
+  public static final String RESOURCE_NAME_DELIMITER = "#";
+
   private Utils() {}
 
   public static Map<String, GenericKubernetesResource> getActualResourcesByNameInWorkflow(
@@ -44,7 +46,9 @@ public class Utils {
         }, () -> res.put(r.getName(), null));
       } else {
         r.getResourceNames().forEach(resourceName -> es.get(new ResourceID(resourceName, namespace))
-            .ifPresent(resource -> res.put(r.getName() + "#" + resourceName, resource)));
+            .ifPresentOrElse(
+                resource -> res.put(r.getName() + RESOURCE_NAME_DELIMITER + resourceName, resource),
+                () -> res.put(r.getName() + "#" + resourceName, null)));
       }
     });
 
