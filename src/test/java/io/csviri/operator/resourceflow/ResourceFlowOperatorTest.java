@@ -30,6 +30,7 @@ class ResourceFlowOperatorTest {
   public static final String TEST_RESOURCE_PREFIX = "testcr";
   public static final String TEST_RESOURCE2_PREFIX = "testcr2";
 
+
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
@@ -63,11 +64,22 @@ class ResourceFlowOperatorTest {
         .loadResourceFlowOperator("/resourceflowoperator/Templating.yaml");
     extension.create(wo);
     var cr = extension.create(testCustomResource());
+    String initialValue = cr.getSpec().getValue();
+    String name = cr.getMetadata().getName();
 
     await().untilAsserted(() -> {
-      var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
+      var cm1 = extension.get(ConfigMap.class, name);
       assertThat(cm1).isNotNull();
-      assertThat(cm1.getData()).containsEntry("key", cr.getSpec().getValue());
+      assertThat(cm1.getData()).containsEntry("key", initialValue);
+    });
+
+    var changedValue = "changed-value";
+    cr.getSpec().setValue(changedValue);
+    cr = extension.replace(cr);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, name);
+      assertThat(cm1.getData()).containsEntry("key", changedValue);
     });
 
     extension.delete(cr);

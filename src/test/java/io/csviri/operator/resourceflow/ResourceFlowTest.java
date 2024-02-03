@@ -29,6 +29,30 @@ class ResourceFlowTest {
           .withAdditionalCustomResourceDefinition(ClusterScopeTestCustomResource.class)
           .build();
 
+  @Test
+  void simpleTemplating() {
+    ResourceFlow resourceFlow =
+        TestUtils.loadResoureFlow("/resourceflow/Templating.yaml");
+    resourceFlow = extension.create(resourceFlow);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
+
+    extension.delete(resourceFlow);
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   void javaScriptCondition() {
@@ -59,30 +83,6 @@ class ResourceFlowTest {
     await().untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "configmap1");
       var cm2 = extension.get(ConfigMap.class, "configmap2");
-      assertThat(cm1).isNull();
-      assertThat(cm2).isNull();
-    });
-  }
-
-  @Test
-  void templatingObject() {
-    ResourceFlow resourceFlow =
-        TestUtils.loadResoureFlow("/resourceflow/Templating.yaml");
-    resourceFlow = extension.create(resourceFlow);
-
-    await().untilAsserted(() -> {
-      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
-      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
-      assertThat(cm1).isNotNull();
-      assertThat(cm2).isNotNull();
-
-      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
-    });
-
-    extension.delete(resourceFlow);
-    await().untilAsserted(() -> {
-      var cm1 = extension.get(ConfigMap.class, "templconfigmap1");
-      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
       assertThat(cm1).isNull();
       assertThat(cm2).isNull();
     });
