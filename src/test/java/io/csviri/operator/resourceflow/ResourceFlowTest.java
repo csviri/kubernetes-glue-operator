@@ -22,6 +22,7 @@ import static org.awaitility.Awaitility.await;
 
 class ResourceFlowTest {
 
+  public static final String CHANGED_VALUE = "changed_value";
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
@@ -42,6 +43,17 @@ class ResourceFlowTest {
       assertThat(cm2).isNotNull();
 
       assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
+
+    ((Map<String, String>) resourceFlow.getSpec().getResources().get(0).getResource()
+        .getAdditionalProperties().get("data"))
+        .put("key", CHANGED_VALUE);
+
+    extension.replace(resourceFlow);
+
+    await().untilAsserted(() -> {
+      var cm2 = extension.get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo(CHANGED_VALUE);
     });
 
     extension.delete(resourceFlow);
