@@ -1,0 +1,17 @@
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: GlueOperator
+metadata:
+  name: rfo2
+spec:
+  parent:
+    apiVersion: io.csviri.operator.resourceglue/v1
+    kind: TestCustomResource2
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: "{{parent.metadata.name}}"
+        data:
+          key: "{{parent.spec.value}}"

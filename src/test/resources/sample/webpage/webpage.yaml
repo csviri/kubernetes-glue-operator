@@ -1,4 +1,4 @@
-apiVersion: "resourceflowoperator.sample/v1"
+apiVersion: "resourceglueoperator.sample/v1"
 kind: WebPage
 metadata:
   name: hellows

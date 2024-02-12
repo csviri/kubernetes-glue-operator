@@ -1,2 +1,2 @@
-# Resource Workflow Operator Documentation
+# Resource Glue Operator Documentation
 

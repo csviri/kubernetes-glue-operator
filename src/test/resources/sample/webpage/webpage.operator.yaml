@@ -1,10 +1,10 @@
-apiVersion: io.csviri.operator.resourceflow/v1beta1
-kind: ResourceFlowOperator
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: GlueOperator
 metadata:
   name: rfo1
 spec:
   parent:
-    apiVersion: resourceflowoperator.sample/v1
+    apiVersion: resourceglueoperator.sample/v1
     kind: WebPage
   resources:
     - name: html-config-map

@@ -1,0 +1,31 @@
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: Glue
+metadata:
+  name: related-resource-test1
+spec:
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cm1
+        data:
+          key: "{{{secret1.data.key}}}"
+    - name: configMap2
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: cm2
+        data:
+          key: "val2"
+      condition:
+        type: JSCondition
+        script: |
+          secret1.metadata.name == "test-secret1";
+  relatedResources:
+    - name: secret1
+      apiVersion: v1
+      kind: Secret
+      resourceNames: ["test-secret1"]

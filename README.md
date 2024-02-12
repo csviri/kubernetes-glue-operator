@@ -1,3 +1,3 @@
-# Resource Flow Operator
+# Resource Glue Operator
 
 

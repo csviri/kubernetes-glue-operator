@@ -1,0 +1,26 @@
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: Glue
+metadata:
+  name: rf-to-change
+spec:
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap1
+        data:
+          key: "value1"
+    - name: configMap2
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap2
+        data:
+          key: "value2"
+
+
+
+

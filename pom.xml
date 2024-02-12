@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.csviri.operator.resourceflow</groupId>
-    <artifactId>resource-flow-operator</artifactId>
+    <groupId>io.csviri.operator.resourceglue</groupId>
+    <artifactId>resource-glue-operator</artifactId>
     <version>0.1.0-SNAPSHOT</version>
     <name>Resource Flow Operator</name>
     <packaging>jar</packaging>
@@ -158,7 +158,7 @@
                         </goals>
                         <phase>initialize</phase>
                         <configuration>
-                            <property>workflowoperator.project.root</property>
+                            <property>resourceglueoperator.project.root</property>
                         </configuration>
                     </execution>
                 </executions>
@@ -173,7 +173,7 @@
                         </goals>
                         <configuration>
                             <!--suppress UnresolvedMavenProperty -->
-                            <configFile>${workflowoperator.project.root}/contributing/eclipse-google-style.xml</configFile>
+                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml</configFile>
                         </configuration>
                     </execution>
                 </executions>
