@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceglue/v1beta1
 kind: GlueOperator
 metadata:
-  name: rfo1
+  name: webpage-operator
 spec:
   parent:
     apiVersion: resourceglueoperator.sample/v1
