@@ -4,7 +4,7 @@ metadata:
   name: webpage-operator
 spec:
   parent:
-    apiVersion: resourceglueoperator.sample/v1  # watches all the custom resource of type WebPage
+    apiVersion: resourceglueoperator.sample/v1
     kind: WebPage
   resources:
     - name: html-config-map
@@ -12,20 +12,30 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"  # the parent resource (target webpage instance) can be referenced as "parent"
+          name: "{{parent.metadata.name}}"
         data:
           index.html: "{{{parent.spec.html}}}"
     - name: deployment
       resource:
-        apiVersion: apps/v1
+        apiVersion: apps/v1 #
         kind: Deployment
         metadata:
           name: "{{parent.metadata.name}}"
-        spec: # details omitted
+        spec:
+          selector:
+            matchLabels:
+              app: "{{parent.metadata.name}}"
+          replicas: 1
+          template:
+            metadata:
+              labels:
+                app: "{{parent.metadata.name}}"
             spec:
               containers:
                 - name: nginx
                   image: nginx:1.17.0
+                  ports:
+                    - containerPort: 80
                   volumeMounts:
                     - name: html-volume
                       mountPath: /usr/share/nginx/html
@@ -39,7 +49,14 @@ spec:
         kind: Service
         metadata:
           name: "{{parent.metadata.name}}"
-        spec: # Omitted details
+        spec:
+          selector:
+            app: "{{parent.metadata.name}}"
+          ports:
+            - protocol: TCP
+              port: 80
+              targetPort: 80
+          type: NodePort
     - name: ingress
       condition:
         type: JSCondition
@@ -50,5 +67,16 @@ spec:
         kind: Ingress
         metadata:
           name: "{{parent.metadata.name}}"
-      # Omitted Details
-
+          annotations:
+            nginx.ingress.kubernetes.io/rewrite-target: /$1
+        spec:
+          rules:
+            - http:
+                paths:
+                  - path: /
+                    pathType: Prefix
+                    backend:
+                      service:
+                        name: "{{parent.metadata.name}}"
+                        port:
+                          number: 80
