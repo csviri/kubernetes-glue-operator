@@ -32,7 +32,7 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{{parent.metadata.name}}"  #dd
         data:
           index.html: "{{{parent.spec.html}}}"
     - name: deployment
