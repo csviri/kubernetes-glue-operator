@@ -58,7 +58,7 @@ spec:
         metadata:
           name: "{{parent.metadata.name}}"  # the parent resource (target webpage instance) can be referenced as "parent"
         data:
-          index.html: "{{{parent.spec.html}}}"
+          index.html: "{{{parent.spec.html}}}" # adding the html from spec to a config map
     - name: deployment
       resource:
         apiVersion: apps/v1
@@ -76,7 +76,7 @@ spec:
             volumes:
               - name: html-volume
                 configMap:
-                  name: "{{parent.metadata.name}}"
+                  name: "{{parent.metadata.name}}" # mounting the html using the config map to nginx server
     - name: service
       resource:
         apiVersion: v1
@@ -87,7 +87,7 @@ spec:
     - name: ingress
       condition:
         type: JSCondition
-        script: |
+        script: | # creating just ingress only if the exposed is true (this can be changed in runtime)
           parent.spec.exposed == "true";
       resource:
         apiVersion: networking.k8s.io/v1
