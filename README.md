@@ -15,9 +15,8 @@ Find extensible documentation [here](docs/index.md)
 The project introduces two Kubernetes custom resources `Glue` and `GlueOperator`.
 You can use `GlueOperator` to define your own operator.
 Let's take a look on an example, where we define an operator for WebPage custom resource, where we want to server
-a static website on the cluster (You can see the 
+a static website on the cluster (You can see the
 [full example here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage)):
-
 
 ```yaml
 
@@ -38,8 +37,10 @@ spec:
     </html>
 ```
 
-To create an operator with `resource-glue-operator` we have to first apply the [CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
-Then create the definition of how the `WebPage` should be reconciled, thus what resources should be created for a `WebPage`:
+To create an operator (or more precisely the controller part) with `resource-glue-operator` we have to first apply
+the [CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
+Then to create the definition of how the `WebPage` should be reconciled, thus what resources should be created for
+a `WebPage`:
 
 ```yaml
 apiVersion: io.csviri.operator.resourceglue/v1beta1
@@ -96,3 +97,11 @@ spec:
           name: "{{parent.metadata.name}}"
       # Omitted Details
 ```
+
+There are multiple aspects to realize here. When such resource created, the related four resource will be templated
+and applied to the cluster. In case anything changes in the custom resource or the managed resources the reconciliation
+will be triggered again. 
+
+Note also the `condition` part for `Ingress` resource, there are multiple types of condition, here `JSCondition` is
+used, which allows to write conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
+is true, if the property is changed to `false` after, the resource is deleted.  
