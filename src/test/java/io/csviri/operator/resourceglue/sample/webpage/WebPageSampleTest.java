@@ -33,7 +33,7 @@ public class WebPageSampleTest {
   void webPageCRUD() {
     TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.crd.yml");
     TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.operator.yaml");
-    var webPage = TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.yaml");
+    var webPage = TestUtils.createOrUpdate(extension, "/sample/webpage/webpage.sample.yaml");
 
     await().untilAsserted(() -> {
       var deployment = extension.get(Deployment.class, webPage.getMetadata().getName());
