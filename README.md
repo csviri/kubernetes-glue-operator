@@ -10,7 +10,11 @@ should be reconciled. Supports conditional resource in runtime, ordering of reso
 
 Find extensible documentation [here](docs/index.md)
 
+## Use Cases
+
 ## Quick Introduction
+
+### The `GlueOperator` Resource
 
 The project introduces two Kubernetes custom resources `Glue` and `GlueOperator`.
 You can use `GlueOperator` to define your own operator.
@@ -106,6 +110,6 @@ Note also the `condition` part for `Ingress` resource, there are multiple types 
 used, which allows to write conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
 is true, if the property is changed to `false` after, the resource is deleted.
 
-## The `Glue` Resource
+### The `Glue` Resource
 
 
