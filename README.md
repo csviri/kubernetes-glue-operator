@@ -112,5 +112,3 @@ used, which allows to write conditions in Javascript. The `Ingress` will be crea
 is true, if the property is changed to `false` after, the resource is deleted.
 
 ### The `Glue` Resource
-
-
