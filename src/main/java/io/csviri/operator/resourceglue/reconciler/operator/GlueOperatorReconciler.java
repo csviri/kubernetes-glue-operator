@@ -63,29 +63,29 @@ public class GlueOperatorReconciler
     return UpdateControl.noUpdate();
   }
 
-  private Glue createResourceFlow(GenericKubernetesResource cr,
+  private Glue createResourceFlow(GenericKubernetesResource targetParentResource,
       GlueOperator glueOperator) {
-    var res = new Glue();
+    var glue = new Glue();
 
-    res.setMetadata(new ObjectMetaBuilder()
-        .withName(glueName(cr))
-        .withNamespace(cr.getMetadata().getNamespace())
+    glue.setMetadata(new ObjectMetaBuilder()
+        .withName(glueName(targetParentResource))
+        .withNamespace(targetParentResource.getMetadata().getNamespace())
         .withLabels(Map.of(GLUE_LABEL_KEY, GLUE_LABEL_VALUE))
         .build());
-    res.setSpec(toWorkflowSpec(glueOperator.getSpec()));
+    glue.setSpec(toWorkflowSpec(glueOperator.getSpec()));
 
     var parent = glueOperator.getSpec().getParent();
     RelatedResourceSpec parentRelatedSpec = new RelatedResourceSpec();
     parentRelatedSpec.setName(PARENT_RELATED_RESOURCE_NAME);
     parentRelatedSpec.setApiVersion(parent.getApiVersion());
     parentRelatedSpec.setKind(parent.getKind());
-    parentRelatedSpec.setResourceNames(List.of(cr.getMetadata().getName()));
-    parentRelatedSpec.setNamespace(cr.getMetadata().getNamespace());
+    parentRelatedSpec.setResourceNames(List.of(targetParentResource.getMetadata().getName()));
+    parentRelatedSpec.setNamespace(targetParentResource.getMetadata().getNamespace());
 
-    res.getSpec().getRelatedResources().add(parentRelatedSpec);
+    glue.getSpec().getRelatedResources().add(parentRelatedSpec);
 
-    res.addOwnerReference(cr);
-    return res;
+    glue.addOwnerReference(targetParentResource);
+    return glue;
   }
 
   private ResourceGlueSpec toWorkflowSpec(ResourceGlueOperatorSpec spec) {

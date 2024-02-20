@@ -21,12 +21,13 @@ public class RelatedResourceSecondaryToPrimaryMapper
     // based on if GC or non GC dependent it can have different mapping
     var res = Mappers.fromOwnerReferences(false).toPrimaryResourceIDs(resource);
     res.addAll(Mappers.fromDefaultAnnotations().toPrimaryResourceIDs(resource));
-    // todo empty kind issue
-    // var idMapped = secondaryToPrimaryMap.get(
-    // new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
-    // if (idMapped != null) {
-    // res.addAll(idMapped);
-    // }
+
+    // related resource mapping
+    var idMapped = secondaryToPrimaryMap.get(
+        new ResourceID(resource.getMetadata().getName(), resource.getMetadata().getNamespace()));
+    if (idMapped != null) {
+      res.addAll(idMapped);
+    }
     return res;
   }
 

@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import io.csviri.operator.resourceglue.TestUtils;
-import io.csviri.operator.resourceglue.reconciler.glue.ResourceGlueReconciler;
+import io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler;
 import io.csviri.operator.resourceglue.reconciler.operator.GlueOperatorReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -25,7 +25,7 @@ public class WebPageSampleTest {
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
-          .withReconciler(new ResourceGlueReconciler())
+          .withReconciler(new GlueReconciler())
           .withReconciler(new GlueOperatorReconciler())
           .build();
 

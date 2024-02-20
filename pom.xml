@@ -43,6 +43,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <version>${fabric8-client.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.javaoperatorsdk</groupId>
             <artifactId>operator-framework</artifactId>
             <version>${josdk.version}</version>

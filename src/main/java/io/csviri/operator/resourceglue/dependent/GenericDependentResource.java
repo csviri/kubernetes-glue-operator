@@ -2,7 +2,7 @@ package io.csviri.operator.resourceglue.dependent;
 
 import io.csviri.operator.resourceglue.Utils;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
-import io.csviri.operator.resourceglue.reconciler.glue.ResourceGlueReconciler;
+import io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler;
 import io.csviri.operator.resourceglue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
@@ -51,7 +51,7 @@ public class GenericDependentResource
     var resultDesired = Serialization.unmarshal(res, GenericKubernetesResource.class);
 
     resultDesired.getMetadata().getAnnotations()
-        .put(ResourceGlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
+        .put(GlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
 
     // set only for cluster scoped when detection is ready
     if (resultDesired.getMetadata().getNamespace() == null) {

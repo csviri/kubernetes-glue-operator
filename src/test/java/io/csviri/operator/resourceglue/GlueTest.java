@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import io.csviri.operator.resourceglue.customresource.ClusterScopeTestCustomResource;
 import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
-import io.csviri.operator.resourceglue.reconciler.glue.ResourceGlueReconciler;
+import io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
@@ -26,7 +26,7 @@ class GlueTest {
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
-          .withReconciler(new ResourceGlueReconciler())
+          .withReconciler(new GlueReconciler())
           .withAdditionalCustomResourceDefinition(ClusterScopeTestCustomResource.class)
           .build();
 

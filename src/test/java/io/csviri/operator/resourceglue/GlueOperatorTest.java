@@ -14,7 +14,7 @@ import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec
 import io.csviri.operator.resourceglue.customresource.operator.GlueOperator;
 import io.csviri.operator.resourceglue.customresource.operator.Parent;
 import io.csviri.operator.resourceglue.customresource.operator.ResourceGlueOperatorSpec;
-import io.csviri.operator.resourceglue.reconciler.glue.ResourceGlueReconciler;
+import io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler;
 import io.csviri.operator.resourceglue.reconciler.operator.GlueOperatorReconciler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -34,7 +34,7 @@ class GlueOperatorTest {
   @RegisterExtension
   LocallyRunOperatorExtension extension =
       LocallyRunOperatorExtension.builder()
-          .withReconciler(new ResourceGlueReconciler())
+          .withReconciler(new GlueReconciler())
           .withReconciler(new GlueOperatorReconciler())
           .withAdditionalCustomResourceDefinition(TestCustomResource.class)
           .withAdditionalCustomResourceDefinition(TestCustomResource2.class)
@@ -54,7 +54,9 @@ class GlueOperatorTest {
 
     await().timeout(Duration.ofSeconds(10)).untilAsserted(() -> {
       var cm1 = extension.get(ConfigMap.class, "test1");
+      var actualCR = extension.get(TestCustomResource.class, cr.getMetadata().getName());
       assertThat(cm1).isNull();
+      assertThat(actualCR).isNull();
     });
   }
 
@@ -72,21 +74,23 @@ class GlueOperatorTest {
       assertThat(cm1).isNotNull();
       assertThat(cm1.getData()).containsEntry("key", initialValue);
     });
-    // todo
-    // var changedValue = "changed-value";
-    // cr.getSpec().setValue(changedValue);
-    // cr = extension.replace(cr);
-    //
-    // await().untilAsserted(() -> {
-    // var cm1 = extension.get(ConfigMap.class, name);
-    // assertThat(cm1.getData()).containsEntry("key", changedValue);
-    // });
+
+    var changedValue = "changed-value";
+    cr.getSpec().setValue(changedValue);
+    cr = extension.replace(cr);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, name);
+      assertThat(cm1.getData()).containsEntry("key", changedValue);
+    });
 
     extension.delete(cr);
 
     await().untilAsserted(() -> {
-      var cm1 = extension.get(ConfigMap.class, "configmap-wo-templated");
+      var cm1 = extension.get(ConfigMap.class, name);
+      var actualCR = extension.get(TestCustomResource.class, name);
       assertThat(cm1).isNull();
+      assertThat(actualCR).isNull();
     });
   }
 
