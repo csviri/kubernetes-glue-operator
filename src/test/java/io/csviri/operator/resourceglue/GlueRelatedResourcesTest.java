@@ -105,15 +105,13 @@ public class GlueRelatedResourcesTest {
       assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_1);
     });
 
-    // todo empty kind issue
-    // related resource triggering reconciliation
-    // relatedConfigMap.getData().put("key", CONFIG_MAP_VALUE_2);
-    // extension.replace(relatedConfigMap);
-    //
-    // await().untilAsserted(() -> {
-    // var cm1 = extension.get(ConfigMap.class, "cm1");
-    // assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_2);
-    // });
+    relatedConfigMap.getData().put("key", CONFIG_MAP_VALUE_2);
+    extension.replace(relatedConfigMap);
+
+    await().untilAsserted(() -> {
+      var cm1 = extension.get(ConfigMap.class, "cm1");
+      assertThat(cm1.getData()).containsEntry("key", CONFIG_MAP_VALUE_2);
+    });
 
     extension.delete(glue);
     await().untilAsserted(() -> {
