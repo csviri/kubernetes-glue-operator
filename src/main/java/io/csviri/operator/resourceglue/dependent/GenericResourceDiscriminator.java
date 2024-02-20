@@ -12,9 +12,9 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 public class GenericResourceDiscriminator
     implements ResourceDiscriminator<GenericKubernetesResource, Glue> {
 
-  private GroupVersionKind groupVersionKind;
-  private String name;
-  private String namespace;
+  private final GroupVersionKind groupVersionKind;
+  private final String name;
+  private final String namespace;
 
   public GenericResourceDiscriminator(GroupVersionKind groupVersionKind, String name,
       String namespace) {
