@@ -9,7 +9,6 @@ import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 import io.fabric8.kubernetes.client.utils.Serialization;
-import io.javaoperatorsdk.operator.junit.AbstractOperatorExtension;
 
 public class TestUtils {
 
@@ -37,12 +36,12 @@ public class TestUtils {
     }
   }
 
-  public static GenericKubernetesResource createOrUpdate(AbstractOperatorExtension extension,
-      String path) {
-    return extension.getKubernetesClient().resource(load(path))
-        .inNamespace(extension.getNamespace())
-        .createOr(NonDeletingOperation::update);
-  }
+  // public static GenericKubernetesResource createOrUpdate(AbstractOperatorExtension extension,
+  // String path) {
+  // return extension.getKubernetesClient().resource(load(path))
+  // .inNamespace(extension.getNamespace())
+  // .createOr(NonDeletingOperation::update);
+  // }
 
   public static GenericKubernetesResource createOrUpdate(KubernetesClient client, String path) {
     return client.resource(load(path)).createOr(NonDeletingOperation::update);

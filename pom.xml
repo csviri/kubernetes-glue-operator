@@ -122,6 +122,17 @@
         </pluginManagement>
         <plugins>
             <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
@@ -153,7 +164,8 @@
                         </goals>
                         <configuration>
                             <!--suppress UnresolvedMavenProperty -->
-                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml</configFile>
+                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml
+                            </configFile>
                         </configuration>
                     </execution>
                 </executions>
