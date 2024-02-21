@@ -31,9 +31,9 @@ public class RelatedResourceSecondaryToPrimaryMapper
     return res;
   }
 
-  public void addResourceIDMapping(Collection<ResourceID> resourceIDs, ResourceID workFlowId) {
+  public void addResourceIDMapping(Collection<ResourceID> resourceIDs, ResourceID glueID) {
     Set<ResourceID> glueIDSet = new HashSet<>();
-    glueIDSet.add(workFlowId);
+    glueIDSet.add(glueID);
     resourceIDs
         .forEach(resourceID -> secondaryToPrimaryMap.merge(resourceID, glueIDSet, (s1, s2) -> {
           s1.addAll(s2);
