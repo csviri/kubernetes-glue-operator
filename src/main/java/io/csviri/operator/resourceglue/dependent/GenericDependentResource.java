@@ -19,7 +19,6 @@ public class GenericDependentResource
     Updater<GenericKubernetesResource, Glue>,
     Creator<GenericKubernetesResource, Glue> {
 
-
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
   private final String name;
@@ -60,11 +59,13 @@ public class GenericDependentResource
     return resultDesired;
   }
 
-
-
   @Override
   public Result<GenericKubernetesResource> match(GenericKubernetesResource actualResource,
       Glue primary, Context<Glue> context) {
+    // todo create issue in JOSDK and link here
+    if (actualResource.getKind().equals("Deployment") && actualResource.getApiVersion().equals("apps/v1")) {
+      return super.match(actualResource,primary,context);
+    }
     return Result.nonComputed(false);
   }
 }

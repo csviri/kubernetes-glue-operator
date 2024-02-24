@@ -42,6 +42,8 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
   public UpdateControl<Glue> reconcile(Glue primary,
       Context<Glue> context) {
 
+    log.debug("Reconciling glue. name: {} namespace: {}",
+            primary.getMetadata().getName(),primary.getMetadata().getNamespace());
     registerRelatedResourceInformers(context, primary);
     if (ownersBeingDeleted(primary, context)) {
       return UpdateControl.noUpdate();
