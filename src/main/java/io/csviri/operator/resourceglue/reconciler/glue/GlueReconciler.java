@@ -43,7 +43,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       Context<Glue> context) {
 
     log.debug("Reconciling glue. name: {} namespace: {}",
-            primary.getMetadata().getName(),primary.getMetadata().getNamespace());
+        primary.getMetadata().getName(), primary.getMetadata().getNamespace());
     registerRelatedResourceInformers(context, primary);
     if (ownersBeingDeleted(primary, context)) {
       return UpdateControl.noUpdate();
@@ -152,18 +152,20 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Glue> builder, boolean leafDependent) {
 
+    // todo test processing ns as template
+    // name can reference related resources todo doc
+    var targetNamespace = Utils.getNamespace(spec).map(ns -> genericTemplateHandler
+        .processTemplate(Utils.getName(spec), primary, context));
+    var resourceInSameNamespaceAsPrimary =
+        targetNamespace.map(n -> n.trim().equals(primary.getMetadata().getNamespace().trim()))
+            .orElse(true);
 
-    var dr = createDependentResource(spec, leafDependent);
+    var dr = createDependentResource(spec, leafDependent, resourceInSameNamespaceAsPrimary);
     var gvk = dr.getGroupVersionKind();
 
-
     dr.setResourceDiscriminator(new GenericResourceDiscriminator(dr.getGroupVersionKind(),
-        // name can reference related resources todo doc
         genericTemplateHandler.processTemplate(Utils.getName(spec), primary, context),
-        // todo test processing ns as template
-        Utils.getNamespace(spec).map(ns -> genericTemplateHandler
-            .processTemplate(Utils.getName(spec), primary, context))
-            .orElse(null)));
+        targetNamespace.orElse(null)));
 
     var es = informerRegister.registerInformer(context, gvk, primary);
     dr.configureWith(es);
@@ -185,8 +187,8 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
   }
 
   private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
-      boolean leafDependent) {
-    if (leafDependent) {
+      boolean leafDependent, Boolean resourceInSameNamespaceAsPrimary) {
+    if (leafDependent && resourceInSameNamespaceAsPrimary) {
       return spec.getResourceTemplate() != null
           ? new GCGenericDependentResource(spec.getResourceTemplate(), spec.getName())
           : new GCGenericDependentResource(spec.getResource(), spec.getName());

@@ -22,7 +22,8 @@ public class GenericDependentResource
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
   private final String name;
-  // todo share between instances
+
+  // optimize share between instances
   private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
 
   public GenericDependentResource(GenericKubernetesResource desired, String name) {
@@ -63,8 +64,9 @@ public class GenericDependentResource
   public Result<GenericKubernetesResource> match(GenericKubernetesResource actualResource,
       Glue primary, Context<Glue> context) {
     // todo create issue in JOSDK and link here
-    if (actualResource.getKind().equals("Deployment") && actualResource.getApiVersion().equals("apps/v1")) {
-      return super.match(actualResource,primary,context);
+    if (actualResource.getKind().equals("Deployment")
+        && actualResource.getApiVersion().equals("apps/v1")) {
+      return super.match(actualResource, primary, context);
     }
     return Result.nonComputed(false);
   }

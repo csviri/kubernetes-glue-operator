@@ -190,6 +190,11 @@ class GlueTest {
     });
   }
 
+  @Test
+  void childInDifferentNamespaceAsPrimary() {
+    // todo
+  }
+
   private List<Glue> testWorkflowList(int num) {
     List<Glue> res = new ArrayList<>();
     IntStream.range(0, num).forEach(index -> {

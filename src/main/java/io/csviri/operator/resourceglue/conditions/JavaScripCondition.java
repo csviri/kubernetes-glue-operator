@@ -47,7 +47,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
       CompiledScript script = ((Compilable) engine).compile(finalScript.toString());
       var res = (boolean) script.eval();
-      LOG.debug("JS Condition evaluated as: {}",res);
+      LOG.debug("JS Condition evaluated as: {}", res);
       return res;
     } catch (ScriptException e) {
       throw new ResourceFlowException(e);

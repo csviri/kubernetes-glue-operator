@@ -2,7 +2,6 @@ package io.csviri.operator.resourceglue.sample.webpage;
 
 import java.util.HashMap;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -18,7 +17,6 @@ import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-
 
 public class WebPageSampleTest {
 
