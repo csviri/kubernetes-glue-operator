@@ -46,8 +46,9 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       LOG.debug("Final Condition JS:\n{}", finalScript);
 
       CompiledScript script = ((Compilable) engine).compile(finalScript.toString());
-      return (boolean) script.eval();
-
+      var res = (boolean) script.eval();
+      LOG.debug("JS Condition evaluated as: {}",res);
+      return res;
     } catch (ScriptException e) {
       throw new ResourceFlowException(e);
     }
@@ -61,7 +62,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
     namedSecondaryResources.forEach((k, v) -> {
       var stringKey = k + RESOURCE_AS_STRING_NAME_SUFFIX;
       engine.put(stringKey, v);
-      finalScript.append("const ").append(k).append("= JSON.parse(").append(stringKey)
+      finalScript.append("const ").append(k).append(" = JSON.parse(").append(stringKey)
           .append(");\n");
     });
   }

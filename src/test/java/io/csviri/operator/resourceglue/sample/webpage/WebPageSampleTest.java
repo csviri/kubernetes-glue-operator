@@ -19,7 +19,7 @@ import io.javaoperatorsdk.operator.junit.LocallyRunOperatorExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Disabled
+
 public class WebPageSampleTest {
 
   @RegisterExtension
