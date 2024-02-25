@@ -89,7 +89,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     // at this point - shall we add finalizer?
 
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
-
     var result = actualWorkflow.cleanup(primary, context);
     result.throwAggregateExceptionIfErrorsPresent();
 
