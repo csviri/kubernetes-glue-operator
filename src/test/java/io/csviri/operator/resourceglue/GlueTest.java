@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -190,9 +191,32 @@ class GlueTest {
     });
   }
 
+  @Disabled("Not supported in current version")
   @Test
   void childInDifferentNamespaceAsPrimary() {
-    // todo
+    Glue w = extension
+        .create(TestUtils.loadResoureFlow("/resourceglue/ResourceInDifferentNamespace.yaml"));
+
+    await().untilAsserted(() -> {
+      var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
+          .withName("configmap1");
+      var cm2 = extension.get(ConfigMap.class, "configmap2");
+
+      assertThat(cmDifferentNS).isNotNull();
+      assertThat(cm2).isNotNull();
+    });
+
+    extension.delete(w);
+
+    await().untilAsserted(() -> {
+      var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
+          .withName("configmap1");
+      var cm2 = extension.get(ConfigMap.class, "configmap2");
+
+      assertThat(cmDifferentNS).isNull();
+      assertThat(cm2).isNull();
+    });
+
   }
 
   private List<Glue> testWorkflowList(int num) {
