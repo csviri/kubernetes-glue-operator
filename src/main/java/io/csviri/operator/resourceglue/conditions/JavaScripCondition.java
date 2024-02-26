@@ -1,5 +1,7 @@
 package io.csviri.operator.resourceglue.conditions;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       Glue glue,
       Context<Glue> context) {
     try {
+      var start = LocalDateTime.now();
       ScriptEngineManager manager = new ScriptEngineManager();
       ScriptEngine engine = manager.getEngineByName("js");
 
@@ -47,7 +50,8 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
 
       CompiledScript script = ((Compilable) engine).compile(finalScript.toString());
       var res = (boolean) script.eval();
-      LOG.debug("JS Condition evaluated as: {}", res);
+      LOG.debug("JS Condition evaluated as: {} within {}ms", res,
+          ChronoUnit.MILLIS.between(start, LocalDateTime.now()));
       return res;
     } catch (ScriptException e) {
       throw new ResourceFlowException(e);

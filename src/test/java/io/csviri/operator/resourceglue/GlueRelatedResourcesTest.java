@@ -36,7 +36,7 @@ public class GlueRelatedResourcesTest {
   void simpleRelatedResourceUsage() {
     extension.create(secret());
     Glue glue =
-        TestUtils.loadResoureFlow("/resourceglue/RelatedResourceSimple.yaml");
+        TestUtils.loadResoureFlow("/resourceglue/RelatedResourceSimpleWithCondition.yaml");
 
     extension.create(glue);
 
