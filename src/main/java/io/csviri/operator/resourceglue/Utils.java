@@ -25,7 +25,6 @@ public class Utils {
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
               && Utils.getName(r).equals(sr.getMetadata().getName())
-      // todo add to docs
       // namespace not compared here, it should be done it is just not trivial, now it is limited to
       // have one kind of resource in the workflow with the same resource name
       ).findFirst();

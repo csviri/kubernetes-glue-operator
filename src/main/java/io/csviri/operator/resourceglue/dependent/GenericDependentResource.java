@@ -63,7 +63,7 @@ public class GenericDependentResource
   @Override
   public Result<GenericKubernetesResource> match(GenericKubernetesResource actualResource,
       Glue primary, Context<Glue> context) {
-    // todo create issue in JOSDK and link here
+    // see details here: https://github.com/operator-framework/java-operator-sdk/issues/2249
     if (actualResource.getKind().equals("Deployment")
         && actualResource.getApiVersion().equals("apps/v1")) {
       return super.match(actualResource, primary, context);
