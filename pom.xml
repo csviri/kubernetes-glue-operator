@@ -25,7 +25,7 @@
         <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <graalvm.version>23.0.3</graalvm.version>
-        <mokito.version>5.10.0</mokito.version>
+        <mokito.version>5.11.0</mokito.version>
         <mustache.version>0.9.11</mustache.version>
     </properties>
 
