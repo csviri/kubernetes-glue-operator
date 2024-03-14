@@ -6,229 +6,219 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
 
-import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import org.junit.jupiter.api.Test;
 
+import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
-import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.Secret;
 import io.quarkus.test.junit.QuarkusTest;
-
-import jakarta.inject.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @QuarkusTest
-class GlueTest {
+class GlueTest extends TestBase {
 
-    public static final String CHANGED_VALUE = "changed_value";
+  public static final String CHANGED_VALUE = "changed_value";
 
-    @Inject
-    KubernetesClient client;
+  @SuppressWarnings("unchecked")
+  @Test
+  void simpleTemplating() {
+    Glue glue =
+        TestUtils.loadResoureFlow("/resourceglue/Templating.yaml");
+    glue = create(glue);
 
-    @Test
-    void simpleTemplating() {
-        Glue glue =
-                TestUtils.loadResoureFlow("/resourceglue/Templating.yaml");
-        glue = client.resource(glue).create();
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "templconfigmap1");
+      var cm2 = get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
 
-        await().untilAsserted(() -> {
-            var cm1 = client.configMaps().withName("templconfigmap1").get();
-            var cm2 = client.configMaps().withName("templconfigmap2").get();
-            assertThat(cm1).isNotNull();
-            assertThat(cm2).isNotNull();
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
 
-            assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
-        });
+    ((Map<String, String>) glue.getSpec().getResources().get(0).getResource()
+        .getAdditionalProperties().get("data"))
+        .put("key", CHANGED_VALUE);
 
-        ((Map<String, String>) glue.getSpec().getResources().get(0).getResource()
-                .getAdditionalProperties().get("data"))
-                .put("key", CHANGED_VALUE);
+    update(glue);
 
+    await().untilAsserted(() -> {
+      var cm2 = get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo(CHANGED_VALUE);
+    });
 
-        glue.getMetadata().setResourceVersion(null);
-        client.resource(glue).update();
+    delete(glue);
 
-        await().untilAsserted(() -> {
-            var cm2 = client.configMaps().withName("templconfigmap2").get();
-            assertThat(cm2.getData().get("valueFromCM1")).isEqualTo(CHANGED_VALUE);
-        });
-
-        client.resource(glue).delete();
-        await().timeout(Duration.ofSeconds(30)).untilAsserted(() -> {
-            var cm1 = client.configMaps().withName("templconfigmap1").get();
-            var cm2 = client.configMaps().withName("templconfigmap2").get();
-            assertThat(cm1).isNull();
-            assertThat(cm2).isNull();
-        });
-    }
-
-    @SuppressWarnings("unchecked")
-    @Test
-    void javaScriptCondition() {
-        Glue glue =
-                TestUtils.loadResoureFlow("/resourceglue/TwoResourcesAndCondition.yaml");
-        glue = client.resource(glue).create();
-
-        await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {
-            var cm1 = client.configMaps().withName("configmap1").get();
-            var cm2 = client.configMaps().withName("configmap2").get();
-            assertThat(cm1).isNotNull();
-            assertThat(cm2).isNull();
-        });
-
-        Map<String, String> map = (Map<String, String>) glue.getSpec().getResources()
-                .get(0).getResource().getAdditionalProperties().get("data");
-        map.put("createOther", "true");
-
-        glue.getMetadata().setResourceVersion(null);
-        client.resource(glue).update();
-
-        await().untilAsserted(() -> {
-            var cm1 = client.configMaps().withName("configmap1").get();
-            var cm2 = client.configMaps().withName("configmap2").get();
-            assertThat(cm1).isNotNull();
-            assertThat(cm2).isNotNull();
-        });
-
-        client.resource(glue).delete();
-        await().untilAsserted(() -> {
-            var cm1 = client.configMaps().withName("configmap1").get();
-            var cm2 = client.configMaps().withName("configmap2").get();
-            assertThat(cm1).isNull();
-            assertThat(cm2).isNull();
-        });
-    }
-
-   @Test
-   void stringTemplate() {
-   Glue glue =
-   TestUtils.loadResoureFlow("/resourceglue/ResourceTemplate.yaml");
-
-   glue = client.resource(glue).create();
-
-   await().timeout(Duration.ofSeconds(120)).untilAsserted(() -> {
-       var cm1 = client.configMaps().withName("templconfigmap1").get();
-       var cm2 = client.configMaps().withName("templconfigmap2").get();
-        assertThat(cm1).isNotNull();
-        assertThat(cm2).isNotNull();
-
-        assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
-   });
-
-   client.resource(glue).delete();
-   await().untilAsserted(() -> {
-      var cm1 = client.configMaps().withName("templconfigmap1").get();
-      var cm2 = client.configMaps().withName("templconfigmap2").get();
+    await().timeout(Duration.ofSeconds(30)).untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "templconfigmap1");
+      var cm2 = get(ConfigMap.class, "templconfigmap2");
       assertThat(cm1).isNull();
       assertThat(cm2).isNull();
-   });
-   }
+    });
+  }
 
-     @Test
-     void simpleConcurrencyTest() {
-     int num = 10;
-     List<Glue> glueList = testWorkflowList(num);
+  @SuppressWarnings("unchecked")
+  @Test
+  void javaScriptCondition() {
+    Glue glue =
+        TestUtils.loadResoureFlow("/resourceglue/TwoResourcesAndCondition.yaml");
+    create(glue);
 
-     glueList.forEach(w -> {
-     client.resource(w).create();
-     });
+    await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNull();
+    });
 
-     await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
-     var w = client.resources(Glue.class).withName("testglue" + index).get();
-     assertThat(w).isNotNull();
-     var cm1 = client.configMaps().withName("testglue" + index + "-1").get();
-     var cm2 = client.configMaps().withName("testglue" + index + "-2").get();
+    Map<String, String> map = (Map<String, String>) glue.getSpec().getResources()
+        .get(0).getResource().getAdditionalProperties().get("data");
+    map.put("createOther", "true");
 
-     assertThat(cm1).isNotNull();
-     assertThat(cm2).isNotNull();
-     }));
+    update(glue);
 
-     glueList.forEach(w -> {
-        client.resource(w).delete(w);
-     });
-     await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
-      var w=  client.resources(Glue.class).withName("testglue" + index).get();
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+    });
 
-     assertThat(w).isNull();
-     }));
-     }
+    delete(glue);
 
-     @Test
-     void changingWorkflow() {
-     Glue w =
-     client.resource(TestUtils.loadResoureFlow("/resourceglue/ChanginResources.yaml")).create();
+    await().timeout(Duration.ofSeconds(GC_TIMEOUT_SEC)).untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
 
-     await().untilAsserted(() -> {
-     var cm1 = client.configMaps().withName("configmap1").get();
-     var cm2 = client.configMaps().withName("configmap2").get();
-     assertThat(cm1).isNotNull();
-     assertThat(cm2).isNotNull();
-     });
+  @Test
+  void stringTemplate() {
+    Glue glue = create(TestUtils.loadResoureFlow("/resourceglue/ResourceTemplate.yaml"));
 
-     w.getSpec().getResources().remove(1);
-     w.getSpec().getResources().add(new DependentResourceSpec()
-     .setName("secret")
-     .setResource(TestUtils.load("/Secret.yaml")));
-     w = client.resource(w).update();
+    await().timeout(Duration.ofSeconds(120)).untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "templconfigmap1");
+      var cm2 = get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
 
-     await().untilAsserted(() -> {
-         var cm1 = client.configMaps().withName("configmap1").get();
-         var cm2 = client.configMaps().withName("configmap2").get();
-     var s = client.secrets().withName("secret1").get();
-     assertThat(cm1).isNotNull();
-     assertThat(cm2).isNull();
-     assertThat(s).isNotNull();
-     });
+      assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
+    });
 
-     w.getMetadata().setResourceVersion(null);
-     client.resource(w).delete();
+    delete(glue);
 
-     await().untilAsserted(() -> {
-         var cm1 = client.configMaps().withName("configmap1").get();
-         var s = client.secrets().withName("secret1").get();
-     assertThat(cm1).isNull();
-     assertThat(s).isNull();
-     });
-     }
-    //
-//     @Disabled("Not supported in current version")
-//     @Test
-//     void childInDifferentNamespaceAsPrimary() {
-//     Glue w = extension
-//     .create(TestUtils.loadResoureFlow("/resourceglue/ResourceInDifferentNamespace.yaml"));
-//
-//     await().untilAsserted(() -> {
-//     var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
-//     .withName("configmap1");
-//     var cm2 = extension.get(ConfigMap.class, "configmap2");
-//
-//     assertThat(cmDifferentNS).isNotNull();
-//     assertThat(cm2).isNotNull();
-//     });
-//
-//     extension.delete(w);
-//
-//     await().untilAsserted(() -> {
-//     var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
-//     .withName("configmap1");
-//     var cm2 = extension.get(ConfigMap.class, "configmap2");
-//
-//     assertThat(cmDifferentNS).isNull();
-//     assertThat(cm2).isNull();
-//     });
-//
-//     }
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "templconfigmap1");
+      var cm2 = get(ConfigMap.class, "templconfigmap2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
 
-     private List<Glue> testWorkflowList(int num) {
-          List<Glue> res = new ArrayList<>();
-             IntStream.range(0, num).forEach(index -> {
-     Glue w =
-     TestUtils.loadResoureFlow("/resourceglue/TemplateForConcurrency.yaml");
-     w.getMetadata().setName(w.getMetadata().getName() + index);
-     res.add(w);
-     });
-     return res;
-     }
+  @Test
+  void simpleConcurrencyTest() {
+    int num = 10;
+    List<Glue> glueList = testWorkflowList(num);
+
+    glueList.forEach(this::create);
+
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+
+      var w = get(Glue.class, "testglue" + index);
+      assertThat(w).isNotNull();
+      var cm1 = get(ConfigMap.class, "testglue" + index + "-1");
+      var cm2 = get(ConfigMap.class, "testglue" + index + "-2");
+
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+    }));
+
+    glueList.forEach(this::delete);
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+      var w = get(Glue.class, "testglue" + index);
+      assertThat(w).isNull();
+    }));
+  }
+
+  @Test
+  void changingWorkflow() {
+    Glue glue = create(TestUtils.loadResoureFlow("/resourceglue/ChanginResources.yaml"));
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+    });
+
+    glue.getSpec().getResources().remove(1);
+    glue.getSpec().getResources().add(new DependentResourceSpec()
+        .setName("secret")
+        .setResource(TestUtils.load("/Secret.yaml")));
+
+    update(glue);
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+      var s = get(Secret.class, "secret1");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNull();
+      assertThat(s).isNotNull();
+    });
+
+    glue.getMetadata().setResourceVersion(null);
+    delete(glue);
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "configmap1");
+      var s = get(Secret.class, "secret1");
+      assertThat(cm1).isNull();
+      assertThat(s).isNull();
+    });
+  }
+  //
+  // @Disabled("Not supported in current version")
+  // @Test
+  // void childInDifferentNamespaceAsPrimary() {
+  // Glue w = extension
+  // .create(TestUtils.loadResoureFlow("/resourceglue/ResourceInDifferentNamespace.yaml"));
+  //
+  // await().untilAsserted(() -> {
+  // var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
+  // .withName("configmap1");
+  // var cm2 = extension.get(ConfigMap.class, "configmap2");
+  //
+  // assertThat(cmDifferentNS).isNotNull();
+  // assertThat(cm2).isNotNull();
+  // });
+  //
+  // extension.delete(w);
+  //
+  // await().untilAsserted(() -> {
+  // var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
+  // .withName("configmap1");
+  // var cm2 = extension.get(ConfigMap.class, "configmap2");
+  //
+  // assertThat(cmDifferentNS).isNull();
+  // assertThat(cm2).isNull();
+  // });
+  //
+  // }
+
+  private List<Glue> testWorkflowList(int num) {
+    List<Glue> res = new ArrayList<>();
+    IntStream.range(0, num).forEach(index -> {
+      Glue w =
+          TestUtils.loadResoureFlow("/resourceglue/TemplateForConcurrency.yaml");
+      w.getMetadata().setName(w.getMetadata().getName() + index);
+      res.add(w);
+    });
+    return res;
+  }
 
 }
