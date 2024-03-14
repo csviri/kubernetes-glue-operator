@@ -1,4 +1,4 @@
-# Resource Glue Operator
+# Resource Glue Meta Operator
 
 Resource Glue Operator is a Kubernetes a powerful meta-operator that allows you to create other operators by simply
 applying a custom resource. And more...
