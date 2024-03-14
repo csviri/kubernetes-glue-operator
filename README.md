@@ -10,7 +10,13 @@ should be reconciled. Supports conditional resources in runtime, ordering of res
 
 ## Documentation
 
-Find detailed documentation [here](docs/index.md)
+[Getting started](/docs/getting-started.md)
+
+[Reference documentation](/docs/reference.md)
+
+[Samples](/docs/samples.yaml)
+
+[Rational and comparison with similar solutions](/docs/samples.yaml)
 
 ## Quick Introduction
 
