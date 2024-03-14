@@ -23,7 +23,7 @@
         <graalvm.version>23.0.3</graalvm.version>
         <mokito.version>5.11.0</mokito.version>
         <mustache.version>0.9.11</mustache.version>
-        <qosdk.version>6.6.2</qosdk.version>
+        <qosdk.version>6.6.4</qosdk.version>
         <assertj.version>3.25.3</assertj.version>
     </properties>
 
@@ -92,6 +92,11 @@
             <groupId>com.github.spullara.mustache.java</groupId>
             <artifactId>compiler</artifactId>
             <version>${mustache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
