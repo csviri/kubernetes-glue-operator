@@ -11,7 +11,7 @@ spec:
         metadata:
           name: cm1
         data:
-          key: "{{{related-configmap.data.key}}}"
+          key: "{related-configmap.data.key}"
   relatedResources:
     - name: related-configmap
       apiVersion: v1

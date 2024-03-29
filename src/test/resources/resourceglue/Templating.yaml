@@ -22,7 +22,7 @@ spec:
           name: templconfigmap2
         data:
           key: "v2"
-          valueFromCM1: "{{configMap1.data.key}}"
+          valueFromCM1: "{configMap1.data.key}"
 
 
 

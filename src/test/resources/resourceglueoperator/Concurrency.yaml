@@ -12,6 +12,6 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         data:
-          key: "{{parent.spec.value}}"
+          key: "{parent.spec.value}"

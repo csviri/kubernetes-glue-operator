@@ -18,7 +18,6 @@
     <fabric8-client.version>6.11.0</fabric8-client.version>
     <graalvm.version>24.0.0</graalvm.version>
     <mokito.version>5.11.0</mokito.version>
-    <mustache.version>0.9.11</mustache.version>
     <qosdk.version>6.6.7</qosdk.version>
     <assertj.version>3.25.3</assertj.version>
     <spotless.version>2.43.0</spotless.version>
@@ -102,11 +101,6 @@
       <version>${graalvm.version}</version>
       <type>pom</type>
       <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.spullara.mustache.java</groupId>
-      <artifactId>compiler</artifactId>
-      <version>${mustache.version}</version>
     </dependency>
     <dependency>
       <groupId>org.bouncycastle</groupId>

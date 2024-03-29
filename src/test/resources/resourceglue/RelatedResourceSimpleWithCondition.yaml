@@ -11,7 +11,7 @@ spec:
         metadata:
           name: cm1
         data:
-          key: "{{{secret1.data.key}}}"
+          key: "{secret1.data.key}"
     - name: configMap2
       resource:
         apiVersion: v1

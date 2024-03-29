@@ -11,8 +11,8 @@ spec:
         metadata:
           name: cm1
         data:
-          key1: "{{{secrets#test-secret1.data.key}}}"
-          key2: "{{{secrets#test-secret2.data.key}}}"
+          key1: "{secrets#test-secret1.data.key}"
+          key2: "{secrets#test-secret2.data.key}"
 
   relatedResources:
     - name: secrets

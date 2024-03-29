@@ -9,7 +9,7 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{glueMetadata.name}}-1"
+          name: "{glueMetadata.name}-1"
         data:
           key: "value1"
     - name: configMap2
@@ -19,10 +19,10 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{glueMetadata.name}}-2"
+          name: "{glueMetadata.name}-2"
         data:
           key: "v2"
-          valueFromCM1: "{{configMap1.data.key}}"
+          valueFromCM1: "{configMap1.data.key}"
 
 
 
