@@ -11,6 +11,7 @@ import io.fabric8.kubernetes.api.model.Namespace;
 import io.fabric8.kubernetes.api.model.NamespaceBuilder;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.KubernetesClient;
+import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 
 import jakarta.inject.Inject;
@@ -52,6 +53,11 @@ public class TestBase {
 
   protected <T extends HasMetadata> T create(T resource) {
     return client.resource(resource).inNamespace(testNamespace).create();
+  }
+
+  protected <T extends HasMetadata> T createOrUpdate(T resource) {
+    return client.resource(resource).inNamespace(testNamespace)
+        .createOr(NonDeletingOperation::update);
   }
 
   protected <T extends HasMetadata> T get(Class<T> clazz, String name) {
