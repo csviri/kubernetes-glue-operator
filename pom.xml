@@ -10,47 +10,79 @@
     <name>Resource Flow Operator</name>
     <packaging>jar</packaging>
 
+    <!--  TODO remove  -->
+    <repositories>
+        <repository>
+            <id>snapshots-repo</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
     <properties>
         <java.version>17</java.version>
         <maven.compiler.release>17</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
-        <josdk.version>4.8.2</josdk.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <junit.version>5.10.2</junit.version>
-        <log4j.version>2.23.1</log4j.version>
+        <surefire-plugin.version>3.2.5</surefire-plugin.version>
         <fabric8-client.version>6.11.0</fabric8-client.version>
         <directory-maven-plugin.version>1.0</directory-maven-plugin.version>
         <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
-        <graalvm.version>23.0.3</graalvm.version>
+        <graalvm.version>24.0.0</graalvm.version>
         <mokito.version>5.11.0</mokito.version>
         <mustache.version>0.9.11</mustache.version>
+        <qosdk.version>6.6.7</qosdk.version>
+        <assertj.version>3.25.3</assertj.version>
     </properties>
 
-<!--    <dependencyManagement>-->
-<!--        <dependencies>-->
-<!--            <dependency>-->
-<!--                <groupId>io.javaoperatorsdk</groupId>-->
-<!--                <artifactId>operator-framework-bom</artifactId>-->
-<!--                <version>${josdk.version}</version>-->
-<!--                <type>pom</type>-->
-<!--                <scope>import</scope>-->
-<!--            </dependency>-->
-<!--        </dependencies>-->
-<!--    </dependencyManagement>-->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client-bom</artifactId>
+                <version>${fabric8-client.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.operatorsdk</groupId>
+                <artifactId>quarkus-operator-sdk-bom</artifactId>
+                <version>${qosdk.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>kubernetes-client</artifactId>
-            <version>${fabric8-client.version}</version>
+            <groupId>io.quarkiverse.operatorsdk</groupId>
+            <artifactId>quarkus-operator-sdk</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>operator-framework</artifactId>
-            <version>${josdk.version}</version>
+            <groupId>io.quarkiverse.operatorsdk</groupId>
+            <artifactId>quarkus-operator-sdk-bundle-generator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-junit5-mockito</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jboss.slf4j</groupId>
+            <artifactId>slf4j-jboss-logmanager</artifactId>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
@@ -58,49 +90,24 @@
             <version>${fabric8-client.version}</version>
         </dependency>
         <dependency>
-            <groupId>io.fabric8</groupId>
-            <artifactId>crd-generator-apt</artifactId>
-            <version>${fabric8-client.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>operator-framework-junit-5</artifactId>
-            <version>${josdk.version}</version>
+            <groupId>org.awaitility</groupId>
+            <artifactId>awaitility</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-core</artifactId>
-            <version>${log4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-api</artifactId>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj.version}</version>
             <scope>test</scope>
-            <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
-            <version>${junit.version}</version>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-container-image-jib</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mokito.version}</version>
-            <scope>test</scope>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <version>${graalvm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.graalvm.js</groupId>
@@ -108,15 +115,27 @@
             <version>${graalvm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>js-community</artifactId>
             <version>${graalvm.version}</version>
+            <type>pom</type>
             <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>com.github.spullara.mustache.java</groupId>
             <artifactId>compiler</artifactId>
             <version>${mustache.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>crd-generator-apt</artifactId>
+            <scope>test</scope>
+            <version>${fabric8-client.version}</version>
         </dependency>
     </dependencies>
 
@@ -146,6 +165,47 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+                <configuration>
+                    <systemPropertyVariables>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${surefire-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <systemPropertyVariables>
+                        <native.image.path>${project.build.directory}/${project.build.finalName}-runner
+                        </native.image.path>
+                        <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
+                        <maven.home>${maven.home}</maven.home>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -178,7 +238,8 @@
                         </goals>
                         <configuration>
                             <!--suppress UnresolvedMavenProperty -->
-                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml</configFile>
+                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml
+                            </configFile>
                         </configuration>
                     </execution>
                 </executions>

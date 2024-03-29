@@ -37,13 +37,6 @@ jobs:
         java: [ 17 ]
         kubernetes: [ 'v1.26.12', 'v1.27.9', 'v1.28.5' ]
     steps:
-      - name: Set up Minikube
-        uses: manusa/actions-setup-minikube@v2.10.0
-        with:
-          minikube version: v1.31.2
-          kubernetes version: ${{ matrix.kubernetes }}
-          driver: 'docker'
-          github token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
       - name: Set up Java and Maven
         uses: actions/setup-java@v4
