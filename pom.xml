@@ -31,20 +31,26 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
-        <fabric8-client.version>6.11-SNAPSHOT</fabric8-client.version>
+        <fabric8-client.version>6.11.0</fabric8-client.version>
         <directory-maven-plugin.version>1.0</directory-maven-plugin.version>
         <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
         <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
-        <graalvm.version>23.0.3</graalvm.version>
+        <graalvm.version>24.0.0</graalvm.version>
         <mokito.version>5.11.0</mokito.version>
         <mustache.version>0.9.11</mustache.version>
-        <qosdk.version>6.6.4</qosdk.version>
+        <qosdk.version>6.6.7</qosdk.version>
         <assertj.version>3.25.3</assertj.version>
-        <java-operator-sdk.version>4.8.1</java-operator-sdk.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client-bom</artifactId>
+                <version>${fabric8-client.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>io.quarkiverse.operatorsdk</groupId>
                 <artifactId>quarkus-operator-sdk-bom</artifactId>
@@ -75,22 +81,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>operator-framework-core</artifactId>
-            <version>${java-operator-sdk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.javaoperatorsdk</groupId>
-            <artifactId>micrometer-support</artifactId>
-            <version>${java-operator-sdk.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.jboss.slf4j</groupId>
             <artifactId>slf4j-jboss-logmanager</artifactId>
         </dependency>
         <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>generator-annotations</artifactId>
+            <version>${fabric8-client.version}</version>
         </dependency>
         <dependency>
             <groupId>org.awaitility</groupId>
@@ -108,14 +105,20 @@
             <artifactId>quarkus-container-image-jib</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>polyglot</artifactId>
+            <version>${graalvm.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.graalvm.js</groupId>
             <artifactId>js-scriptengine</artifactId>
             <version>${graalvm.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.graalvm.js</groupId>
-            <artifactId>js</artifactId>
+            <groupId>org.graalvm.polyglot</groupId>
+            <artifactId>js-community</artifactId>
             <version>${graalvm.version}</version>
+            <type>pom</type>
             <scope>runtime</scope>
         </dependency>
         <dependency>

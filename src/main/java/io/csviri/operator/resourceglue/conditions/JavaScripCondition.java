@@ -2,6 +2,7 @@ package io.csviri.operator.resourceglue.conditions;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,11 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       Glue glue,
       Context<Glue> context) {
     try {
+      List<ScriptEngineFactory> engines = new ScriptEngineManager().getEngineFactories();
+      for (ScriptEngineFactory f : engines) {
+        System.out.println(f.getLanguageName() + " " + f.getEngineName() + " " + f.getNames());
+      }
+
       var start = LocalDateTime.now();
       ScriptEngineManager manager = new ScriptEngineManager();
       ScriptEngine engine = manager.getEngineByName("js");
