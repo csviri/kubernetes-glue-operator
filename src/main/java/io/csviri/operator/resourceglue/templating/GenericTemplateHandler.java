@@ -22,8 +22,8 @@ public class GenericTemplateHandler {
       Context<Glue> context) {
 
     Template hello = engine.parse(template);
-
-    return hello.data(createDataWithResources(primary, context)).render();
+    var data = createDataWithResources(primary, context);
+    return hello.data(data).render();
   }
 
   @SuppressWarnings("rawtypes")

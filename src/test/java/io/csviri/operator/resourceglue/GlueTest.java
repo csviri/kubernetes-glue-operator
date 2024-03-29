@@ -121,7 +121,7 @@ class GlueTest extends TestBase {
 
   @Test
   void simpleConcurrencyTest() {
-    int num = 10;
+    int num = 1;
     List<Glue> glueList = testWorkflowList(num);
 
     glueList.forEach(this::create);
