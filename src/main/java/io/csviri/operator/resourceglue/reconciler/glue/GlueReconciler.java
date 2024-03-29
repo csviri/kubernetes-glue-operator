@@ -44,6 +44,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
     log.debug("Reconciling glue. name: {} namespace: {}",
         primary.getMetadata().getName(), primary.getMetadata().getNamespace());
+    addFinalizersToParentResource(primary);
     registerRelatedResourceInformers(context, primary);
     if (ownersBeingDeleted(primary, context)) {
       return UpdateControl.noUpdate();
@@ -54,6 +55,13 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     informerRegister.deRegisterInformerOnResourceFlowChange(context, primary);
     result.throwAggregateExceptionIfErrorsPresent();
     return UpdateControl.noUpdate();
+  }
+
+  // todo issue, condition if resource exists (related resource exists)
+  // todo, also remove finalizer on cleanup
+  // add just
+  private void addFinalizersToParentResource(Glue primary) {
+
   }
 
   /**

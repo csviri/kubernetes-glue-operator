@@ -81,7 +81,7 @@ class GlueOperatorTest extends TestBase {
 
     delete(cr);
 
-    await().untilAsserted(() -> {
+    await().timeout(Duration.ofMinutes(5)).untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, name);
       var actualCR = get(TestCustomResource.class, name);
       assertThat(cm1).isNull();

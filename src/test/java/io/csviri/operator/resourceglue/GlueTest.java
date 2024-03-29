@@ -140,11 +140,10 @@ class GlueTest extends TestBase {
     }));
 
     glueList.forEach(this::delete);
-    await().timeout(Duration.ofMinutes(5))
-        .untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
-          var w = get(Glue.class, "testglue" + index);
-          assertThat(w).isNull();
-        }));
+    await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+      var w = get(Glue.class, "testglue" + index);
+      assertThat(w).isNull();
+    }));
   }
 
   @Test

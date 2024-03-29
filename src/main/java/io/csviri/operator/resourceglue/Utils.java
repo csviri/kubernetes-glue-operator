@@ -2,6 +2,9 @@ package io.csviri.operator.resourceglue;
 
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -13,6 +16,8 @@ import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEven
 import static io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY;
 
 public class Utils {
+
+  private static final Logger log = LoggerFactory.getLogger(Utils.class);
 
   public static final String RESOURCE_NAME_DELIMITER = "#";
 
@@ -38,6 +43,7 @@ public class Utils {
 
     glue.getSpec().getRelatedResources().forEach(r -> {
       var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
+      log.debug("Getting event source for gvk: {}", gvk);
       var es =
           (InformerEventSource<GenericKubernetesResource, Glue>) context
               .eventSourceRetriever()
