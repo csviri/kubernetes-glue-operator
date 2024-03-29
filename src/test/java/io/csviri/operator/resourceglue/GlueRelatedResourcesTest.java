@@ -5,7 +5,6 @@ import java.util.Base64;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.resourceglue.customresource.ClusterScopeTestCustomResource;
@@ -16,7 +15,6 @@ import io.quarkus.test.junit.QuarkusTest;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
-@Disabled("until fabric8 client patch release done")
 @QuarkusTest
 public class GlueRelatedResourcesTest extends TestBase {
 
