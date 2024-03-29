@@ -25,21 +25,19 @@
     </repositories>
 
     <properties>
-        <java.version>17</java.version>
-        <maven.compiler.release>17</maven.compiler.release>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <java.version>21</java.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <surefire-plugin.version>3.2.5</surefire-plugin.version>
         <fabric8-client.version>6.11.0</fabric8-client.version>
-        <directory-maven-plugin.version>1.0</directory-maven-plugin.version>
-        <impsort-maven-plugin.version>1.9.0</impsort-maven-plugin.version>
-        <formatter-maven-plugin.version>2.23.0</formatter-maven-plugin.version>
         <graalvm.version>24.0.0</graalvm.version>
         <mokito.version>5.11.0</mokito.version>
         <mustache.version>0.9.11</mustache.version>
         <qosdk.version>6.6.7</qosdk.version>
         <assertj.version>3.25.3</assertj.version>
+        <spotless.version>2.43.0</spotless.version>
     </properties>
 
     <dependencyManagement>
@@ -140,30 +138,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>net.revelc.code</groupId>
-                    <artifactId>impsort-maven-plugin</artifactId>
-                    <version>${impsort-maven-plugin.version}</version>
-                    <configuration>
-                        <cachedir>.cache</cachedir>
-                        <groups>java.,javax.,org.,io.,com.</groups>
-                        <staticGroups>*</staticGroups>
-                        <staticAfter>true</staticAfter>
-                        <removeUnused>true</removeUnused>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>net.revelc.code.formatter</groupId>
-                    <artifactId>formatter-maven-plugin</artifactId>
-                    <version>${formatter-maven-plugin.version}</version>
-                    <configuration>
-                        <cachedir>.cache</cachedir>
-                    </configuration>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>io.quarkus</groupId>
@@ -212,49 +186,27 @@
                 <version>3.13.0</version>
             </plugin>
             <plugin>
-                <groupId>org.commonjava.maven.plugins</groupId>
-                <artifactId>directory-maven-plugin</artifactId>
-                <version>${directory-maven-plugin.version}</version>
-                <executions>
-                    <execution>
-                        <id>directories</id>
-                        <goals>
-                            <goal>highest-basedir</goal>
-                        </goals>
-                        <phase>initialize</phase>
-                        <configuration>
-                            <property>resourceglueoperator.project.root</property>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code.formatter</groupId>
-                <artifactId>formatter-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>format</goal>
-                        </goals>
-                        <configuration>
-                            <!--suppress UnresolvedMavenProperty -->
-                            <configFile>${resourceglueoperator.project.root}/contributing/eclipse-google-style.xml
-                            </configFile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>net.revelc.code</groupId>
-                <artifactId>impsort-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>sort</id>
-                        <goals>
-                            <goal>sort</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <pom>
+                        <includes>
+                            <include>pom.xml</include>
+                            <inclide>./**/pom.xml</inclide>
+                        </includes>
+                        <sortPom></sortPom>
+                    </pom>
+                    <java>
+                        <eclipse>
+                            <file>contributing/eclipse-google-style.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <file>contributing/eclipse.importorder</file>
+                        </importOrder>
+                        <removeUnusedImports></removeUnusedImports>
+                    </java>
+                </configuration>
             </plugin>
         </plugins>
     </build>

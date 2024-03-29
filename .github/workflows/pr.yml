@@ -21,7 +21,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: 'maven'
       - name: Check code format
         run: |
@@ -32,17 +32,13 @@ jobs:
 
   build_with_integration_tests:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        java: [ 17 ]
-        kubernetes: [ 'v1.26.12', 'v1.27.9', 'v1.28.5' ]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java and Maven
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: ${{ matrix.java }}
+          java-version: 21
           cache: 'maven'
       - name: Run integration tests
         run: ./mvnw ${MAVEN_ARGS} clean install
