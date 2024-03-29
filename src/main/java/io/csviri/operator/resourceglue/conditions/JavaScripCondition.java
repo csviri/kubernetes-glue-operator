@@ -37,11 +37,6 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
       Glue glue,
       Context<Glue> context) {
     try {
-      List<ScriptEngineFactory> engines = new ScriptEngineManager().getEngineFactories();
-      for (ScriptEngineFactory f : engines) {
-        System.out.println(f.getLanguageName() + " " + f.getEngineName() + " " + f.getNames());
-      }
-
       var start = LocalDateTime.now();
       ScriptEngineManager manager = new ScriptEngineManager();
       ScriptEngine engine = manager.getEngineByName("js");
