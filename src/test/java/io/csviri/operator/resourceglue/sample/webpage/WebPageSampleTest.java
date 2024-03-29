@@ -2,7 +2,7 @@ package io.csviri.operator.resourceglue.sample.webpage;
 
 public class WebPageSampleTest {
 
-  // todo   
+  // todo
 
   // @RegisterExtension
   // LocallyRunOperatorExtension extension =
