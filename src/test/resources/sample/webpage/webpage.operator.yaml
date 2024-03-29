@@ -12,24 +12,24 @@ spec:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         data:
-          index.html: "{{{parent.spec.html}}}"
+          index.html: "{parent.spec.html}"
     - name: deployment
       resource:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         spec:
           selector:
             matchLabels:
-              app: "{{parent.metadata.name}}"
+              app: "{parent.metadata.name}"
           replicas: 1
           template:
             metadata:
               labels:
-                app: "{{parent.metadata.name}}"
+                app: "{parent.metadata.name}"
             spec:
               containers:
                 - name: nginx
@@ -42,16 +42,16 @@ spec:
               volumes:
                 - name: html-volume
                   configMap:
-                    name: "{{parent.metadata.name}}"
+                    name: "{parent.metadata.name}"
     - name: service
       resource:
         apiVersion: v1
         kind: Service
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         spec:
           selector:
-            app: "{{parent.metadata.name}}"
+            app: "{parent.metadata.name}"
           ports:
             - protocol: TCP
               port: 80
@@ -66,7 +66,7 @@ spec:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
           annotations:
             nginx.ingress.kubernetes.io/rewrite-target: /$1
         spec:
@@ -77,6 +77,6 @@ spec:
                     pathType: Prefix
                     backend:
                       service:
-                        name: "{{parent.metadata.name}}"
+                        name: "{parent.metadata.name}"
                         port:
                           number: 80
