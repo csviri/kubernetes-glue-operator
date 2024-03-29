@@ -121,8 +121,7 @@ class GlueTest extends TestBase {
 
   @Test
   void simpleConcurrencyTest() {
-    // todo set 10
-    int num = 1;
+    int num = 10;
     List<Glue> glueList = testWorkflowList(num);
 
     glueList.forEach(this::create);
@@ -136,13 +135,16 @@ class GlueTest extends TestBase {
 
       assertThat(cm1).isNotNull();
       assertThat(cm2).isNotNull();
+      assertThat(cm2.getData().get("valueFromCM1"))
+          .isEqualTo("value1");
     }));
 
     glueList.forEach(this::delete);
-    await().timeout(Duration.ofMinutes(5)).untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
-      var w = get(Glue.class, "testglue" + index);
-      assertThat(w).isNull();
-    }));
+    await().timeout(Duration.ofMinutes(5))
+        .untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
+          var w = get(Glue.class, "testglue" + index);
+          assertThat(w).isNull();
+        }));
   }
 
   @Test

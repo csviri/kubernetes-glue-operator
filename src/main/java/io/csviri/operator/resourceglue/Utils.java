@@ -10,6 +10,8 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
+import static io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY;
+
 public class Utils {
 
   public static final String RESOURCE_NAME_DELIMITER = "#";
@@ -24,7 +26,10 @@ public class Utils {
       var dependentSpec = glue.getSpec().getResources().stream()
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
-              && Utils.getName(r).equals(sr.getMetadata().getName())
+      // checking the name from annotation since it might be templated name
+      // therefore "Utils.getName(r).equals(sr.getMetadata().getName())" would not work
+              && r.getName()
+                  .equals(sr.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY))
       // namespace not compared here, it should be done it is just not trivial, now it is limited to
       // have one kind of resource in the workflow with the same resource name
       ).findFirst();
