@@ -26,10 +26,8 @@ jobs:
       - name: Check code format
         run: |
           ./mvnw ${MAVEN_ARGS} spotless:check --file pom.xml
-      - name: Run unit tests
-        run: ./mvnw ${MAVEN_ARGS} clean install
 
-  build_with_integration_tests:
+  build_with_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
