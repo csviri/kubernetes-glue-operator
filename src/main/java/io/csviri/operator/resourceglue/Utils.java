@@ -7,7 +7,9 @@ import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
+import io.csviri.operator.resourceglue.customresource.glue.RelatedResourceSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
@@ -32,7 +34,8 @@ public class Utils {
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
       // checking the name from annotation since it might be templated name
-      // therefore "Utils.getName(r).equals(sr.getMetadata().getName())" would not work
+      // therefore "Utils.getName(relatedResourceSpec).equals(sr.getMetadata().getName())" would not
+      // work
               && r.getName()
                   .equals(sr.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY))
       // namespace not compared here, it should be done it is just not trivial, now it is limited to
@@ -42,26 +45,51 @@ public class Utils {
     });
 
     glue.getSpec().getRelatedResources().forEach(r -> {
-      var gvk = new GroupVersionKind(r.getApiVersion(), r.getKind());
-      log.debug("Getting event source for gvk: {}", gvk);
-      var es =
-          (InformerEventSource<GenericKubernetesResource, Glue>) context
-              .eventSourceRetriever()
-              .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
-      var namespace =
-          r.getNamespace() == null ? glue.getMetadata().getNamespace() : r.getNamespace();
-      if (r.getResourceNames().size() == 1) {
-        es.get(new ResourceID(r.getResourceNames().get(0), namespace)).ifPresentOrElse(resource -> {
-          res.put(r.getName(), resource);
-        }, () -> res.put(r.getName(), null));
+      var relatedResources = getRelatedResources(glue, r, context);
+      if (relatedResources.size() == 1) {
+        var resourceEntry = relatedResources.entrySet().iterator().next();
+        res.put(r.getName(), resourceEntry.getValue());
+
       } else {
-        r.getResourceNames().forEach(resourceName -> es.get(new ResourceID(resourceName, namespace))
-            .ifPresentOrElse(
-                resource -> res.put(r.getName() + RESOURCE_NAME_DELIMITER + resourceName, resource),
-                () -> res.put(r.getName() + "#" + resourceName, null)));
+        relatedResources.forEach((resourceName, resource) -> res
+            .put(r.getName() + RESOURCE_NAME_DELIMITER + resourceName, resource));
       }
     });
 
+    return res;
+  }
+
+  @SuppressWarnings("unchecked")
+  public static Map<String, GenericKubernetesResource> getRelatedResources(Glue glue,
+      RelatedResourceSpec relatedResourceSpec,
+      Context<?> context) {
+    var gvk =
+        new GroupVersionKind(relatedResourceSpec.getApiVersion(), relatedResourceSpec.getKind());
+    log.debug("Getting event source for gvk: {}", gvk);
+    var es =
+        (InformerEventSource<GenericKubernetesResource, Glue>) context
+            .eventSourceRetriever()
+            .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
+    var namespace =
+        relatedResourceSpec.getNamespace() == null ? glue.getMetadata().getNamespace()
+            : relatedResourceSpec.getNamespace();
+
+    var res = new HashMap<String, GenericKubernetesResource>();
+
+    relatedResourceSpec.getResourceNames()
+        .forEach(r -> res.put(r, es.get(new ResourceID(r, namespace)).orElse(null)));
+    return res;
+  }
+
+  public static GenericKubernetesResource getResourceForSSAFrom(
+      GenericKubernetesResource resourceFromServer) {
+    var res = new GenericKubernetesResource();
+    res.setKind(resourceFromServer.getKind());
+    res.setApiVersion(resourceFromServer.getApiVersion());
+    res.setMetadata(new ObjectMetaBuilder()
+        .withName(resourceFromServer.getMetadata().getName())
+        .withNamespace(resourceFromServer.getMetadata().getNamespace())
+        .build());
     return res;
   }
 
