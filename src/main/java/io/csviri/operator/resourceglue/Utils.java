@@ -33,7 +33,7 @@ public class Utils {
       var dependentSpec = glue.getSpec().getResources().stream()
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
-      // checking the name from annotation since it might be templated name
+      // comparing the name from annotation since the resource name might be templated in spec
       // therefore "Utils.getName(relatedResourceSpec).equals(sr.getMetadata().getName())" would not
       // work
               && r.getName()

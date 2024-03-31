@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 
+import static io.csviri.operator.resourceglue.reconciler.glue.GlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.when;
 
 class JavaScripConditionTest {
 
+  public static final String DR_NAME = "secondary";
   Context<Glue> mockContext = mock(Context.class);
   DependentResource<GenericKubernetesResource, Glue> dr = mock(DependentResource.class);
   Glue dummyGlue = new Glue();
@@ -63,25 +65,27 @@ class JavaScripConditionTest {
     }
 
   @Test
-    void injectsSecondaryResourcesResource() {
-        when(mockContext.getSecondaryResources(any())).thenReturn(Set.of(configMap()));
-        when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(configMap()));
+  void injectsSecondaryResourcesResource() {
+    var cm = configMap();
+    cm.getMetadata().getAnnotations().put(DEPENDENT_NAME_ANNOTATION_KEY, DR_NAME);
+    when(mockContext.getSecondaryResources(any())).thenReturn(Set.of(cm));
+    when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(cm));
 
-        Glue glue = new Glue();
-        glue.setSpec(new ResourceGlueSpec());
-        glue.getSpec().setResources(new ArrayList<>());
-        var drSpec = new DependentResourceSpec();
-        drSpec.setName("secondary");
-        drSpec.setResource(configMap());
-        glue.getSpec().getResources().add(drSpec);
+    Glue glue = new Glue();
+    glue.setSpec(new ResourceGlueSpec());
+    glue.getSpec().setResources(new ArrayList<>());
+    var drSpec = new DependentResourceSpec();
+    drSpec.setName(DR_NAME);
+    drSpec.setResource(configMap());
+    glue.getSpec().getResources().add(drSpec);
 
-        var condition = new JavaScripCondition("""
-                    secondary.data.key1 == "val1";
-                """);
+    var condition = new JavaScripCondition("""
+            secondary.data.key1 == "val1";
+        """);
 
-        var res = condition.isMet(dr, glue, mockContext);
-        assertThat(res).isTrue();
-    }
+    var res = condition.isMet(dr, glue, mockContext);
+    assertThat(res).isTrue();
+  }
 
   private GenericKubernetesResource configMap() {
     try (InputStream is = JavaScripConditionTest.class.getResourceAsStream("/ConfigMap.yaml")) {
