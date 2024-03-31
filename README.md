@@ -62,20 +62,20 @@ spec:
     apiVersion: resourceglueoperator.sample/v1  # watches all the custom resource of type WebPage
     kind: WebPage
   resources:
-    - name: html-config-map
+    - name: htmlconfigmap
       resource:
         apiVersion: v1
         kind: ConfigMap
         metadata:
-          name: "{{parent.metadata.name}}"  # the parent resource (target webpage instance) can be referenced as "parent"
+          name: "{parent.metadata.name}"  # the parent resource (target webpage instance) can be referenced as "parent"
         data:
-          index.html: "{{{parent.spec.html}}}" # adding the html from spec to a config map
+          index.html: "{parent.spec.html}" # adding the html from spec to a config map
     - name: deployment
       resource:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         spec: # details omitted
           spec:
             containers:
@@ -87,13 +87,13 @@ spec:
             volumes:
               - name: html-volume
                 configMap:
-                  name: "{{parent.metadata.name}}" # mounting the html using the config map to nginx server
+                  name: "{parent.metadata.name}" # mounting the html using the config map to nginx server
     - name: service
       resource:
         apiVersion: v1
         kind: Service
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
         spec: # Omitted details
     - name: ingress
       condition:
@@ -104,7 +104,7 @@ spec:
         apiVersion: networking.k8s.io/v1
         kind: Ingress
         metadata:
-          name: "{{parent.metadata.name}}"
+          name: "{parent.metadata.name}"
       # Omitted Details
 ```
 
