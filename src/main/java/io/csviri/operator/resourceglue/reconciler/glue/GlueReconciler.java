@@ -45,6 +45,15 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
   private final InformerRegister informerRegister = new InformerRegister();
   private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
 
+  /**
+   * Handling finalizers for GlueOperator: Glue ids a finalizer to parent, that is necessary since
+   * on clean up the resource name might be calculated based on the parents name, and it this way
+   * makes sure that parent is not cleaned up until the Glue is cleaned up. The finalizer is removed
+   * during cleanup. On Glue side however it is important to make sure that if the parent is deleted
+   * glue gets deleted too, this is made sure in the reconcile method for glue explicitly deleting
+   * itself.
+   */
+
   @Override
   public UpdateControl<Glue> reconcile(Glue primary,
       Context<Glue> context) {
