@@ -11,7 +11,7 @@ import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.SecondaryToPrimaryMapper;
 import io.javaoperatorsdk.operator.processing.event.source.informer.Mappers;
 
-public class RelatedResourceSecondaryToPrimaryMapper
+public class RelatedAndOwnedResourceSecondaryToPrimaryMapper
     implements SecondaryToPrimaryMapper<GenericKubernetesResource> {
 
   private final Map<ResourceID, Set<ResourceID>> secondaryToPrimaryMap = new ConcurrentHashMap<>();

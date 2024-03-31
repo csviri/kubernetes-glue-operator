@@ -18,6 +18,7 @@ import io.csviri.operator.resourceglue.dependent.GenericDependentResource;
 import io.csviri.operator.resourceglue.dependent.GenericResourceDiscriminator;
 import io.csviri.operator.resourceglue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.HasMetadata;
 import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.PatchContext;
 import io.fabric8.kubernetes.client.dsl.base.PatchType;
@@ -51,6 +52,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     log.debug("Reconciling glue. name: {} namespace: {}",
         primary.getMetadata().getName(), primary.getMetadata().getNamespace());
     registerRelatedResourceInformers(context, primary);
+    if (deletedGlueIfParentMarkedForDeletion(context, primary)) {
+      return UpdateControl.noUpdate();
+    }
     addFinalizersToParentResource(primary, context);
     if (ownersBeingDeleted(primary, context)) {
       return UpdateControl.noUpdate();
@@ -61,6 +65,16 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     informerRegister.deRegisterInformerOnResourceFlowChange(context, primary);
     result.throwAggregateExceptionIfErrorsPresent();
     return UpdateControl.noUpdate();
+  }
+
+  private boolean deletedGlueIfParentMarkedForDeletion(Context<Glue> context, Glue primary) {
+    var parent = getParentRelatedResource(primary, context);
+    if (parent.map(HasMetadata::isMarkedForDeletion).orElse(false)) {
+      context.getClient().resource(primary).delete();
+      return true;
+    } else {
+      return false;
+    }
   }
 
 
@@ -217,25 +231,14 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
   // todo docs
   private void addFinalizersToParentResource(Glue primary, Context<Glue> context) {
-    var parentRelated = primary.getSpec().getRelatedResources().stream()
-        .filter(r -> r.getName().equals(PARENT_RELATED_RESOURCE_NAME))
-        .findAny();
-    parentRelated.ifPresent(r -> {
-      var relatedResources = Utils.getRelatedResources(primary, r, context);
-      if (relatedResources.size() > 1) {
-        throw new IllegalStateException(
-            "parent related resource contains more resourceNames for glue name: "
-                + primary.getMetadata().getName()
-                + " namespace: " + primary.getMetadata().getNamespace());
-      }
-      // theoretically can happen that parent was deleted meanwhile
-      if (relatedResources.isEmpty()) {
-        return;
-      }
-      var parent = relatedResources.entrySet().iterator().next().getValue();
+    var parent = getParentRelatedResource(primary, context);
+
+    parent.ifPresent(p -> {
+      log.warn("Adding finalizer to parent. Glue name: {} namespace: {}",
+          primary.getMetadata().getName(), primary.getMetadata().getNamespace());
       String finalizer = parentFinalizer(primary.getMetadata().getName());
-      if (!parent.getMetadata().getFinalizers().contains(finalizer)) {
-        var res = getResourceForSSAFrom(parent);
+      if (!p.getMetadata().getFinalizers().contains(finalizer)) {
+        var res = getResourceForSSAFrom(p);
         res.getMetadata().getFinalizers().add(finalizer);
         context.getClient().resource(res)
             .patch(new PatchContext.Builder()
@@ -248,10 +251,32 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
   }
 
   private void removeFinalizerForParent(Glue primary, Context<Glue> context) {
+    var parent = getParentRelatedResource(primary, context);
+    parent.ifPresentOrElse(p -> {
+      log.warn("Removing finalizer from parent. Glue name: {} namespace: {}",
+          primary.getMetadata().getName(), primary.getMetadata().getNamespace());
+      String finalizer = parentFinalizer(primary.getMetadata().getName());
+      if (p.getMetadata().getFinalizers().contains(finalizer)) {
+        var res = getResourceForSSAFrom(p);
+        context.getClient().resource(res)
+            .patch(new PatchContext.Builder()
+                .withFieldManager(context.getControllerConfiguration().fieldManager())
+                .withForce(true)
+                .withPatchType(PatchType.SERVER_SIDE_APPLY)
+                .build());
+      }
+    }, () -> log.warn(
+        "Parent resource expected to be present on cleanup. Glue name: {} namespace: {}",
+        primary.getMetadata().getName(), primary.getMetadata().getNamespace()));
+  }
+
+  private Optional<GenericKubernetesResource> getParentRelatedResource(Glue primary,
+      Context<Glue> context) {
     var parentRelated = primary.getSpec().getRelatedResources().stream()
         .filter(r -> r.getName().equals(PARENT_RELATED_RESOURCE_NAME))
         .findAny();
-    parentRelated.ifPresent(r -> {
+
+    return parentRelated.flatMap(r -> {
       var relatedResources = Utils.getRelatedResources(primary, r, context);
       if (relatedResources.size() > 1) {
         throw new IllegalStateException(
@@ -259,22 +284,10 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
                 + primary.getMetadata().getName()
                 + " namespace: " + primary.getMetadata().getNamespace());
       }
-      // theoretically can happen that parent was deleted meanwhile
       if (relatedResources.isEmpty()) {
-        log.warn("Parent resource expected to be present on cleanup. Glue name: {} namespace: {}",
-            primary.getMetadata().getName(), primary.getMetadata().getNamespace());
-        return;
-      }
-      var parent = relatedResources.entrySet().iterator().next().getValue();
-      String finalizer = parentFinalizer(primary.getMetadata().getName());
-      if (parent.getMetadata().getFinalizers().contains(finalizer)) {
-        var res = getResourceForSSAFrom(parent);
-        context.getClient().resource(res)
-            .patch(new PatchContext.Builder()
-                .withFieldManager(context.getControllerConfiguration().fieldManager())
-                .withForce(true)
-                .withPatchType(PatchType.SERVER_SIDE_APPLY)
-                .build());
+        return Optional.empty();
+      } else {
+        return Optional.of(relatedResources.entrySet().iterator().next().getValue());
       }
     });
   }

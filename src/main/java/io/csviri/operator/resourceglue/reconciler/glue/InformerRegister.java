@@ -24,7 +24,7 @@ class InformerRegister {
 
   private final Map<GroupVersionKind, Set<String>> gvkOfInformerToGlue = new HashMap<>();
   private final Map<String, Set<GroupVersionKind>> glueToInformerGVK = new HashMap<>();
-  private final Map<GroupVersionKind, RelatedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
+  private final Map<GroupVersionKind, RelatedAndOwnedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
 
   // todo test related resources deleting
@@ -71,9 +71,10 @@ class InformerRegister {
   public InformerEventSource<GenericKubernetesResource, Glue> registerInformer(
       Context<Glue> context, GroupVersionKind gvk, Glue glue) {
 
-    RelatedResourceSecondaryToPrimaryMapper mapper;
+    RelatedAndOwnedResourceSecondaryToPrimaryMapper mapper;
     synchronized (this) {
-      relatedResourceMappers.putIfAbsent(gvk, new RelatedResourceSecondaryToPrimaryMapper());
+      relatedResourceMappers.putIfAbsent(gvk,
+          new RelatedAndOwnedResourceSecondaryToPrimaryMapper());
       mapper = relatedResourceMappers.get(gvk);
       markEventSource(gvk, glue);
     }
