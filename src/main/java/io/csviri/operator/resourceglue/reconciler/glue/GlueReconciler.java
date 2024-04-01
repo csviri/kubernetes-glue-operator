@@ -65,9 +65,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       return UpdateControl.noUpdate();
     }
     addFinalizersToParentResource(primary, context);
-    if (ownersBeingDeleted(primary, context)) {
-      return UpdateControl.noUpdate();
-    }
+//    if (ownersBeingDeleted(primary, context)) {
+//      return UpdateControl.noUpdate();
+//    }
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     var result = actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
@@ -88,7 +88,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
 
   /**
-   * If a parent gets deleted, the glue is reconciled still, but we don't want that in that case.
+   * If a parent gets deleted, the glue is reconciled still, but we don't want it in that case.
    * Glue us deleted / marked for deleted eventually by the garbage collector but want to make the
    * best effort to prevent that.
    */
