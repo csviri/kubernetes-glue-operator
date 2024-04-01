@@ -238,7 +238,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     throw new IllegalStateException("Unknown condition: " + condition);
   }
 
-  // todo docs
   private void addFinalizersToParentResource(Glue primary, Context<Glue> context) {
     var parent = getParentRelatedResource(primary, context);
 
@@ -249,12 +248,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       if (!p.getMetadata().getFinalizers().contains(finalizer)) {
         var res = getResourceForSSAFrom(p);
         res.getMetadata().getFinalizers().add(finalizer);
-        context.getClient().resource(res)
-            .patch(new PatchContext.Builder()
-                .withFieldManager(context.getControllerConfiguration().fieldManager())
-                .withForce(true)
-                .withPatchType(PatchType.SERVER_SIDE_APPLY)
-                .build());
+        patchResource(res, context);
       }
     });
   }
@@ -267,16 +261,21 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       String finalizer = parentFinalizer(primary.getMetadata().getName());
       if (p.getMetadata().getFinalizers().contains(finalizer)) {
         var res = getResourceForSSAFrom(p);
-        context.getClient().resource(res)
-            .patch(new PatchContext.Builder()
-                .withFieldManager(context.getControllerConfiguration().fieldManager())
-                .withForce(true)
-                .withPatchType(PatchType.SERVER_SIDE_APPLY)
-                .build());
+        patchResource(res, context);
       }
     }, () -> log.warn(
         "Parent resource expected to be present on cleanup. Glue name: {} namespace: {}",
         primary.getMetadata().getName(), primary.getMetadata().getNamespace()));
+  }
+
+  private GenericKubernetesResource patchResource(GenericKubernetesResource res,
+      Context<Glue> context) {
+    return context.getClient().resource(res)
+        .patch(new PatchContext.Builder()
+            .withFieldManager(context.getControllerConfiguration().fieldManager())
+            .withForce(true)
+            .withPatchType(PatchType.SERVER_SIDE_APPLY)
+            .build());
   }
 
   private Optional<GenericKubernetesResource> getParentRelatedResource(Glue primary,
