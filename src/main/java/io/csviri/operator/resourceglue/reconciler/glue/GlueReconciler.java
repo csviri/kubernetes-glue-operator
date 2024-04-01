@@ -23,12 +23,9 @@ import io.fabric8.kubernetes.client.KubernetesClientException;
 import io.fabric8.kubernetes.client.dsl.base.PatchContext;
 import io.fabric8.kubernetes.client.dsl.base.PatchType;
 import io.javaoperatorsdk.operator.api.reconciler.*;
-import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.KubernetesResourceDeletedCondition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
-import io.javaoperatorsdk.operator.processing.event.ResourceID;
-import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import static io.csviri.operator.resourceglue.Utils.getResourceForSSAFrom;
 import static io.csviri.operator.resourceglue.reconciler.operator.GlueOperatorReconciler.PARENT_RELATED_RESOURCE_NAME;
@@ -65,9 +62,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       return UpdateControl.noUpdate();
     }
     addFinalizersToParentResource(primary, context);
-    if (ownersBeingDeleted(primary, context)) {
-      return UpdateControl.noUpdate();
-    }
     var actualWorkflow = buildWorkflowAndRegisterInformers(primary, context);
     var result = actualWorkflow.reconcile(primary, context);
     cleanupRemovedResourcesFromWorkflow(context, primary);
@@ -84,33 +78,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     } else {
       return false;
     }
-  }
-
-
-  /**
-   * If a parent gets deleted, the glue is reconciled still, but we don't want that in that case.
-   * Glue us deleted / marked for deleted eventually by the garbage collector but want to make the
-   * best effort to prevent that.
-   */
-  private boolean ownersBeingDeleted(Glue primary, Context<Glue> context) {
-    if (primary.getMetadata().getOwnerReferences().isEmpty()) {
-      return false;
-    }
-
-    var res = !primary.getMetadata().getOwnerReferences().stream().anyMatch(or -> {
-      var gvk = new GroupVersionKind(or.getApiVersion(), or.getKind());
-      var es = (InformerEventSource<GenericKubernetesResource, Glue>) context.eventSourceRetriever()
-          .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
-      var resource = es.get(new ResourceID(or.getName(), primary.getMetadata().getNamespace()));
-      return resource.map(r -> r.getMetadata().getDeletionTimestamp() == null).orElse(false);
-
-    });
-    if (res) {
-      log.debug("Skipping reconciliation since glue owners being deleted, name: {} namespace: {}",
-          primary.getMetadata().getName(),
-          primary.getMetadata().getNamespace());
-    }
-    return res;
   }
 
   @Override
