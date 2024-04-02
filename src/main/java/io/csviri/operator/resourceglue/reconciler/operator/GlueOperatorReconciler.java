@@ -40,7 +40,7 @@ public class GlueOperatorReconciler
   public UpdateControl<GlueOperator> reconcile(GlueOperator glueOperator,
       Context<GlueOperator> context) {
 
-    log.debug("Reconciling: {} in namespace: {}", glueOperator.getMetadata().getName(),
+    log.info("Reconciling GlueOperator {} in namespace: {}", glueOperator.getMetadata().getName(),
         glueOperator.getMetadata().getNamespace());
 
     var targetCREventSource = getOrRegisterCustomResourceEventSource(glueOperator, context);
