@@ -209,7 +209,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     var parent = getParentRelatedResource(primary, context);
 
     parent.ifPresent(p -> {
-      log.warn("Adding finalizer to parent. Glue name: {} namespace: {}",
+      log.debug("Adding finalizer to parent. Glue name: {} namespace: {}",
           primary.getMetadata().getName(), primary.getMetadata().getNamespace());
       String finalizer = parentFinalizer(primary.getMetadata().getName());
       if (!p.getMetadata().getFinalizers().contains(finalizer)) {
@@ -223,7 +223,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
   private void removeFinalizerForParent(Glue primary, Context<Glue> context) {
     var parent = getParentRelatedResource(primary, context);
     parent.ifPresentOrElse(p -> {
-      log.warn("Removing finalizer from parent. Glue name: {} namespace: {}",
+      log.debug("Removing finalizer from parent. Glue name: {} namespace: {}",
           primary.getMetadata().getName(), primary.getMetadata().getNamespace());
       String finalizer = parentFinalizer(primary.getMetadata().getName());
       if (p.getMetadata().getFinalizers().contains(finalizer)) {
