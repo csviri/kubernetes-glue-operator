@@ -17,6 +17,6 @@ jobs:
       - name: Build
         run:
           ./mvnw clean install -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default -Dquarkus.container-image.push=true
-      - assets-upload:
-          run: |
-            
+#      - assets-upload:
+#          run: |
+#            
