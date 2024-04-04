@@ -24,8 +24,7 @@ should be reconciled. Supports conditional resources in runtime, ordering of res
 
 The project introduces two Kubernetes custom resources `Glue` and `GlueOperator`.
 You can use `GlueOperator` to define your own operator.
-Let's take a look on an example, where we define an operator for WebPage custom resource, where we want to server
-a static website on the cluster (You can see the
+Let's take a look at an example, where we define an operator for WebPage custom resource, that represents a static website served from the Cluster. (You can see the
 [full example here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage)):
 
 ```yaml
