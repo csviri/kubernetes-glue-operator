@@ -3,6 +3,9 @@ on:
   release:
     types: [ released ]
 
+permissions:
+  packages: write
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -11,12 +14,13 @@ jobs:
       - name: Set up Java and Maven
         uses: actions/setup-java@v4
         with:
-          distribution: zulu
+          distribution: temurin
           java-version: 21
           cache: 'maven'
       - name: Build
-        run:
-          ./mvnw clean install -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default -Dquarkus.container-image.push=true
-#      - assets-upload:
-#          run: |
-#            
+        env:
+          QUARKUS_CONTAINER_IMAGE_USERNAME: ${{ github.actor }}
+          QUARKUS_CONTAINER_IMAGE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+#          skip tests remove?
+          ./mvnw clean install -DskipTests -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default -Dquarkus.container-image.push=true
