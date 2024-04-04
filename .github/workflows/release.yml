@@ -27,7 +27,13 @@ jobs:
           ./mvnw ${MAVEN_ARGS} -q build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT versions:commit
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Set new SNAPSHOT version into pom files." -a
+          git commit -m "Set new SNAPSHOT version into pom file(s)." -a
+      - name: Upload Assets
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: "target/kubernetes/*"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-tag: ${{ github.event.release.tag_name }}
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
