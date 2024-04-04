@@ -22,8 +22,8 @@ jobs:
           QUARKUS_CONTAINER_IMAGE_USERNAME: ${{ github.actor }}
           QUARKUS_CONTAINER_IMAGE_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./mvnw versions:set clean install versions:commit -DnewVersion="${RELEASE_VERSION}" -DskipTests -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default -Dquarkus.container-image.push=true 
-          ./mvnw ${MAVEN_ARGS} versions:set -DnewVersion="${RELEASE_VERSION}"
+          ./mvnw versions:set -DnewVersion="${RELEASE_VERSION}" versions:commit
+          ./mvnw clean install -DskipTests -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default -Dquarkus.container-image.push=true           
           ./mvnw ${MAVEN_ARGS} -q build-helper:parse-version versions:set -DnewVersion=\${parsedVersion.majorVersion}.\${parsedVersion.minorVersion}.\${parsedVersion.nextIncrementalVersion}-SNAPSHOT versions:commit
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
