@@ -108,12 +108,14 @@ spec:
       # Omitted Details
 ```
 
-There are multiple aspects to see here. When such resource created, the related four resource will be templated
-and applied to the cluster. In case anything changes in the custom resource or the managed resources the reconciliation
+There are multiple aspects to see here. If such a resource is created, the four related resources will be templated
+and applied to the cluster. If anything changes in the custom or managed resources, the reconciliation
 will be triggered again. 
 
-Note also the `condition` part for `Ingress` resource, there are multiple types of condition, here `JSCondition` is
-used, which allows to write conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
-is true, if the property is changed to `false` after, the resource is deleted.
+Note also the `condition` part for `Ingress` resource contains multiple types of conditions, `JSCondition` is
+used in this example, which allows writing conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
+is true. If the property is changed to `false` after, the resource is deleted.
 
 ### The `Glue` Resource
+
+`Glue` is very similar to `GlueOperator`, and has almost the same properties, but does not have a parent. Thus does not define an operator, just a set of resources to reconcile. 
