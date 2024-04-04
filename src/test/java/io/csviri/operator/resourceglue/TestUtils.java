@@ -4,6 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,12 +40,16 @@ public class TestUtils {
     }
   }
 
-  public static GenericKubernetesResource load(String path) {
+  public static <T extends HasMetadata> T load(String path, Class<T> clazz) {
     try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
-      return Serialization.unmarshal(is, GenericKubernetesResource.class);
+      return Serialization.unmarshal(is, clazz);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
+  }
+
+  public static GenericKubernetesResource load(String path) {
+    return load(path, GenericKubernetesResource.class);
   }
 
   public static GenericKubernetesResource createOrUpdate(KubernetesClient client, String path) {
@@ -53,6 +58,11 @@ public class TestUtils {
 
   public static void applyCrd(Class<? extends HasMetadata> resourceClass, KubernetesClient client) {
     applyCrd(ReconcilerUtils.getResourceTypeName(resourceClass), client);
+  }
+
+  public static void applyCrd(KubernetesClient client,
+      Class<? extends HasMetadata>... resourceClasses) {
+    Arrays.stream(resourceClasses).forEach(c -> applyCrd(c, client));
   }
 
   public static void applyCrd(String resourceTypeName, KubernetesClient client) {

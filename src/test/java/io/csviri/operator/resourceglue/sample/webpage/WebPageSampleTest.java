@@ -1,13 +1,11 @@
 package io.csviri.operator.resourceglue.sample.webpage;
 
-import java.util.HashMap;
 
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.resourceglue.TestBase;
 import io.csviri.operator.resourceglue.TestUtils;
 import io.fabric8.kubernetes.api.model.ConfigMap;
-import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
 import io.fabric8.kubernetes.api.model.networking.v1.Ingress;
@@ -21,10 +19,10 @@ public class WebPageSampleTest extends TestBase {
 
   @Test
   void webPageCRUD() {
-
     createOrUpdate(TestUtils.load("/sample/webpage/webpage.crd.yml"));
     createOrUpdate(TestUtils.load("/sample/webpage/webpage.operator.yaml"));
-    var webPage = createOrUpdate(TestUtils.load("/sample/webpage/webpage.sample.yaml"));
+    WebPage webPage =
+        createOrUpdate(TestUtils.load("/sample/webpage/webpage.sample.yaml", WebPage.class));
 
     await().untilAsserted(() -> {
       var deployment = get(Deployment.class, webPage.getMetadata().getName());
@@ -39,8 +37,17 @@ public class WebPageSampleTest extends TestBase {
       assertThat(configMap.getData().get("index.html")).contains("Hello World!");
     });
 
-    setExposed(webPage);
-    setNewHtml(webPage);
+    webPage.getSpec().setExposed(true);
+    webPage.getSpec().setHtml("""
+        <html>
+        <head>
+        <title>Hello Operator World</title>
+        </head>
+        <body>
+        Hello World 2!
+        </body>
+        </html>
+        """);
     update(webPage);
 
     await().untilAsserted(() -> {
@@ -57,22 +64,5 @@ public class WebPageSampleTest extends TestBase {
       var deployment = get(Deployment.class, webPage.getMetadata().getName());
       assertThat(deployment).isNull();
     });
-  }
-
-  private void setNewHtml(GenericKubernetesResource webPage) {
-    ((HashMap<String, Object>) webPage.getAdditionalProperties().get("spec")).put("html", """
-        <html>
-        <head>
-        <title>Hello Operator World</title>
-        </head>
-        <body>
-        Hello World 2!
-        </body>
-        </html>
-        """);
-  }
-
-  private void setExposed(GenericKubernetesResource webPage) {
-    ((HashMap<String, Object>) webPage.getAdditionalProperties().get("spec")).put("exposed", true);
   }
 }
