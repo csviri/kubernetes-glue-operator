@@ -10,7 +10,6 @@ spec:
         kind: Service
         metadata:
           name: pod-mutating-hook
-          namespace: default
         spec:
           ports:
             - name: https
@@ -23,13 +22,12 @@ spec:
           type: NodePort
     - name: deployment
       readyPostCondition:
-        type: PodsReady
+        type: ReadyCondition
       resource:
         apiVersion: apps/v1
         kind: Deployment
         metadata:
           name: pod-mutating-hook
-          namespace: default
         spec:
           replicas: 1
           selector:
@@ -86,7 +84,6 @@ spec:
           annotations:
             cert-manager.io/inject-ca-from: default/sample-pod-mutating-webhook
           name: pod-mutating-webhook
-          namespace: default
         webhooks:
           - admissionReviewVersions:
               - v1
