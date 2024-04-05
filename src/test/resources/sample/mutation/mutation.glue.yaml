@@ -92,7 +92,7 @@ spec:
                 name: pod-mutating-hook
                 namespace: default
                 path: /mutate
-            failurePolicy: Ignore
+            failurePolicy: Fail
             name: sample.mutating.webhook
             rules:
               - apiGroups:
