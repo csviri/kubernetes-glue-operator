@@ -224,10 +224,10 @@
             <version>${surefire-plugin.version}</version>
             <configuration>
               <includes>
-                <exclude>**/*E2E.java</exclude>
+                <include>**/*E2E.java</include>
               </includes>
               <excludes>
-                <include>**/*Test.java</include>
+                <exclude>**/*Test.java</exclude>
               </excludes>
               <systemPropertyVariables>
                 <java.util.logging.manager>org.jboss.logmanager.LogManager</java.util.logging.manager>
