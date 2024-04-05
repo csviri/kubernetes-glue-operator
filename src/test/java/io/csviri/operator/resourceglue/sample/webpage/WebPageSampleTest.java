@@ -19,7 +19,7 @@ public class WebPageSampleTest extends TestBase {
 
   @Test
   void webPageCRUD() {
-    createOrUpdate(TestUtils.load("/sample/webpage/webpage.crd.yml"));
+    createOrUpdate(TestUtils.load("/sample/webpage/webpage.crd.yaml"));
     createOrUpdate(TestUtils.load("/sample/webpage/webpage.operator.yaml"));
     WebPage webPage =
         createOrUpdate(TestUtils.load("/sample/webpage/webpage.sample.yaml", WebPage.class));

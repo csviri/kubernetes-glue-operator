@@ -56,5 +56,5 @@ jobs:
       - name: Run E2E tests
         run: |
           eval $(minikube -p minikube docker-env)
-          ./mvnw clean install -DskipTests -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default
+          ./mvnw clean install -DskipTests -Dquarkus.container-image.build=true
           ./mvnw test -Pe2e-tests

@@ -7,12 +7,12 @@ import org.slf4j.LoggerFactory;
 
 import io.csviri.operator.resourceglue.Utils;
 import io.csviri.operator.resourceglue.conditions.JavaScripCondition;
-import io.csviri.operator.resourceglue.conditions.PodsReadyCondition;
+import io.csviri.operator.resourceglue.conditions.ReadyCondition;
 import io.csviri.operator.resourceglue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
 import io.csviri.operator.resourceglue.customresource.glue.condition.ConditionSpec;
 import io.csviri.operator.resourceglue.customresource.glue.condition.JavaScriptConditionSpec;
-import io.csviri.operator.resourceglue.customresource.glue.condition.PodsReadyConditionSpec;
+import io.csviri.operator.resourceglue.customresource.glue.condition.ReadyConditionSpec;
 import io.csviri.operator.resourceglue.dependent.GCGenericDependentResource;
 import io.csviri.operator.resourceglue.dependent.GenericDependentResource;
 import io.csviri.operator.resourceglue.dependent.GenericResourceDiscriminator;
@@ -148,10 +148,11 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
       Map<String, GenericDependentResource> genericDependentResourceMap,
       WorkflowBuilder<Glue> builder, boolean leafDependent) {
 
+    // todo test processing ns not as template
     // todo test processing ns as template
     // name can reference related resources todo doc
     var targetNamespace = Utils.getNamespace(spec).map(ns -> genericTemplateHandler
-        .processTemplate(Utils.getName(spec), primary, context));
+        .processTemplate(ns, primary, context));
     var resourceInSameNamespaceAsPrimary =
         targetNamespace.map(n -> n.trim().equals(primary.getMetadata().getNamespace().trim()))
             .orElse(true);
@@ -197,8 +198,8 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
   @SuppressWarnings({"rawtypes"})
   private Condition toCondition(ConditionSpec condition) {
-    if (condition instanceof PodsReadyConditionSpec readyConditionSpec) {
-      return new PodsReadyCondition(readyConditionSpec.isNegated());
+    if (condition instanceof ReadyConditionSpec readyConditionSpec) {
+      return new ReadyCondition(readyConditionSpec.isNegated());
     } else if (condition instanceof JavaScriptConditionSpec jsCondition) {
       return new JavaScripCondition(jsCondition.getScript());
     }

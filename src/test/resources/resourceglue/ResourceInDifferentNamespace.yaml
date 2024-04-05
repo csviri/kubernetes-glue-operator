@@ -10,7 +10,6 @@ spec:
         kind: ConfigMap
         metadata:
           name: "configmap1"
-          namespace: default
         data:
           key: "v1"
     - name: configMap2

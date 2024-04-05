@@ -7,13 +7,13 @@ import io.javaoperatorsdk.operator.api.reconciler.Context;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.DependentResource;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 
-public class PodsReadyCondition<R extends HasMetadata> implements Condition<R, Glue> {
+public class ReadyCondition<R extends HasMetadata> implements Condition<R, Glue> {
 
   private final Readiness readiness = Readiness.getInstance();
 
   private final boolean negated;
 
-  public PodsReadyCondition(boolean negated) {
+  public ReadyCondition(boolean negated) {
     this.negated = negated;
   }
 
