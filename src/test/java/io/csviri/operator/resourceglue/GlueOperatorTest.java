@@ -31,8 +31,7 @@ class GlueOperatorTest extends TestBase {
 
   @BeforeEach
   void applyCRD() {
-    TestUtils.applyCrd(TestCustomResource.class, client);
-    TestUtils.applyCrd(TestCustomResource2.class, client);
+    TestUtils.applyTestCrd(client, TestCustomResource.class, TestCustomResource2.class);
   }
 
   @Test

@@ -65,7 +65,7 @@ public class Utils {
       Context<?> context) {
     var gvk =
         new GroupVersionKind(relatedResourceSpec.getApiVersion(), relatedResourceSpec.getKind());
-    log.debug("Getting event source for gvk: {}", gvk);
+    log.trace("Getting event source for gvk: {}", gvk);
     var es =
         (InformerEventSource<GenericKubernetesResource, Glue>) context
             .eventSourceRetriever()
