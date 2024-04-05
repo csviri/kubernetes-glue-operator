@@ -43,7 +43,7 @@ public class MutationWebhookDeploymentE2E {
     await().atMost(Duration.ofMinutes(5)).untilAsserted(() -> {
       var conf = client.admissionRegistration().v1().mutatingWebhookConfigurations()
           .withName("pod-mutating-webhook").get();
-      var deployment =  client.apps().deployments().withName("pod-mutating-hook").get();
+      var deployment = client.apps().deployments().withName("pod-mutating-hook").get();
       assertThat(conf).isNotNull();
       assertThat(deployment.getStatus().getReadyReplicas()).isGreaterThan(0);
     });
