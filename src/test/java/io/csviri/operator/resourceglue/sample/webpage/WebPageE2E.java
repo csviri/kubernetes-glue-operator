@@ -30,7 +30,7 @@ public class WebPageE2E {
   }
 
   @Test
-  void testDeployment() {
+  void testWebPageCRUDOperations() {
     client.resource(TestUtils.load("/sample/webpage/webpage.operator.yaml"))
         .createOr(NonDeletingOperation::update);
     var webPage = TestUtils.load("/sample/webpage/webpage.sample.yaml", WebPage.class);

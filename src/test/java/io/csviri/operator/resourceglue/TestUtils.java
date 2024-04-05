@@ -1,6 +1,7 @@
 package io.csviri.operator.resourceglue;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -144,4 +145,11 @@ public class TestUtils {
     applyAndWait(client, resources, transformer);
   }
 
+  public static void applyAndWait(KubernetesClient client, URL url) {
+    try (InputStream is = url.openStream()) {
+      applyAndWait(client, is);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
 }

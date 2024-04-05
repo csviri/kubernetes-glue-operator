@@ -1,0 +1,70 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: pod-mutating-hook
+  namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pkcs12-pass
+  namespace: default
+data:
+  password: c3VwZXJzZWNyZXQ=
+type: Opaque
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pod-mutating-hook-view
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  apiGroup: rbac.authorization.k8s.io
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: pod-mutating-hook
+    namespace: default
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: sample-pod-mutating-webhook
+  namespace: default
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: sample-pod-mutating-webhook
+  namespace: default
+spec:
+  dnsNames:
+    - pod-mutating-hook.default.svc
+    - localhost
+  duration: 7776000000000000ns
+  encodeUsagesInRequest: false
+  isCA: false
+  issuerRef:
+    name: sample-pod-mutating-webhook
+  keystores:
+    pkcs12:
+      create: true
+      passwordSecretRef:
+        key: password
+        name: pkcs12-pass
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+  renewBefore: 1296000000000000ns
+  secretName: tls-secret
+  subject:
+    organizations:
+      - Dekorate
+      - Community
+  usages:
+    - server auth
+    - client auth
