@@ -6,8 +6,6 @@ applying a custom resource.
 It provides facilities to create composed Kubernetes resources and describes how the resource
 should be reconciled. Supports conditional resources in runtime, ordering of resource reconciliation, and more...
 
-## Use Cases
-
 ## Documentation
 
 [Getting started](/docs/getting-started.md)
