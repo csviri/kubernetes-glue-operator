@@ -44,10 +44,10 @@ spec:
     </html>
 ```
 
-To create an operator (or more precisely the controller part) with `resource-glue-operator` we have to first apply
-the [CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
-Then to create the definition of how the `WebPage` should be reconciled, thus what resources should be created for
-a `WebPage`:
+To create an operator (or more precisely the controller part) with `resource-glue-operator` we have first apply
+the {CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
+To define how the `WebPage` should be reconciled, thus what resources should be created for
+a `WebPage`, we prepare a `GlueOperator`:
 
 ```yaml
 apiVersion: io.csviri.operator.resourceglue/v1beta1
