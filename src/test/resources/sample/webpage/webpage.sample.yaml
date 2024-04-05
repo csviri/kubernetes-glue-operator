@@ -1,7 +1,7 @@
 apiVersion: "resourceglueoperator.sample/v1"
 kind: WebPage
 metadata:
-  name: hellows
+  name: webpage1
 spec:
   exposed: false
   html: |

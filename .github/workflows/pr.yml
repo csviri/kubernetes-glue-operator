@@ -1,8 +1,5 @@
 name: Verify Pull Request
 
-env:
-  MAVEN_ARGS: -V -ntp -e
-
 concurrency:
   group: ${{ github.ref }}-${{ github.workflow }}
   cancel-in-progress: true
@@ -25,9 +22,9 @@ jobs:
           cache: 'maven'
       - name: Check code format
         run: |
-          ./mvnw ${MAVEN_ARGS} spotless:check --file pom.xml
+          ./mvnw spotless:check --file pom.xml
 
-  build_with_tests:
+  build_and_run_unit_and_integration_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -38,4 +35,26 @@ jobs:
           java-version: 21
           cache: 'maven'
       - name: Run integration tests
-        run: ./mvnw ${MAVEN_ARGS} clean install
+        run: ./mvnw clean install
+  run_e2e_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Java and Maven
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: 'maven'
+      - name: Setup minikube for E2E tests
+        uses: manusa/actions-setup-minikube@v2.10.0
+        with:
+          minikube version: v1.32.0
+          kubernetes version: v1.29.1
+          github token: ${{ secrets.GITHUB_TOKEN }}
+          driver: docker
+      - name: Run E2E tests
+        run: |
+          eval $(minikube -p minikube docker-env)
+          ./mvnw clean install -DskipTests -Dquarkus.container-image.build=true -Dquarkus.kubernetes.namespace=default
+          ./mvnw test -Pe2e-tests

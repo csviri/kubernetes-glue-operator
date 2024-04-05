@@ -27,7 +27,7 @@ public class GlueRelatedResourcesTest extends TestBase {
 
   @BeforeEach
   void applyCRD() {
-    TestUtils.applyCrd(ClusterScopeTestCustomResource.class, client);
+    TestUtils.applyTestCrd(client, ClusterScopeTestCustomResource.class);
   }
 
   @Test
