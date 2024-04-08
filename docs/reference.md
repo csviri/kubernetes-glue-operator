@@ -6,9 +6,9 @@ of [Java Operator SDK](https://github.com/operator-framework/java-operator-sdk) 
 Although it is limited only to Kubernetes resources it makes it very easy to use in language-independent 
 (DependentResources in JOSDK are also covering external resources) way. 
 
-## Glue resource
+## [Glue resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glues.io.csviri.operator.resourceglue-v1.yml)
 
-## GlueOperator resource
+## [GlueOperator resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glueoperators.io.csviri.operator.resourceglue-v1.yml)
 
 ## Deployment
 
@@ -33,7 +33,10 @@ See also the upcoming deployment modes/options: [sharding with label selectors](
 ## Implementation details and performance
 
 Informers are used optimally, in terms of that, for every resource type only one informer is registered in the background. Event there are more `Glue` or `GlueOperator`
-resources containing the same resource type.
+resources containing the same resource type. 
+
+The templating and some of the Javascript condition is probably the most time-consuming and resource-intensive part which will 
+be continuously improved in the followup releases. 
 
 ## Current Limitations
 
