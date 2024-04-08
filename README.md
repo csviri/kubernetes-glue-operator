@@ -119,13 +119,75 @@ Let's take a look at another example, that will show also additional features (b
 resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
 The following example shows how to deploy a [dynamic admission controller](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) that mutates 
 all the `Pods`, adding annotation on them. Note that this is a tricky situation since the endpoint for the `MutatingWebhookConfiguration` is also a `Pod`, thus it should be 
-first up and running before the configuration is applied, otherwise, the mutation webhook will block the changes on the pods, which would render the cluster unable to manage `Pods':
+first up and running before the configuration is applied, otherwise, the mutation webhook will block the changes on the pods, which would render the cluster unable to manage `Pods' 
+(irrelevant details are omitted, see the full version [here][https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml]): 
 
 ```yaml
-
-
-
-
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: Glue
+metadata:
+  name: mutation-webhook-deployment
+spec:
+  resources:
+    - name: service
+      resource:
+        apiVersion: v1
+        kind: Service
+        metadata:
+          name: pod-mutating-hook
+        spec:
+          # spec omitted       
+    - name: deployment  # webhook endpoint
+      readyPostCondition:
+        type: ReadyCondition  # ready post conditions determine when a Deployment is considered "ready", thus up and running.
+      resource:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: pod-mutating-hook
+        spec:
+          replicas: 2
+          template:            
+            spec:
+              containers:              
+                  image: ghcr.io/csviri/sample-pod-mutating-webhook:0.1.0                  
+                  name: pod-mutating-hook
+                  ports:
+                    - containerPort: 443
+                      name: https
+                      protocol: TCP
+                        
+    - name: mutation_hook_config
+      # dependsOn relation means, that the resource will be reconciled only if all the listed resources are already reconciled and ready (if ready post-condition is present).
+      # This resource will be applied, after the service and deployment are applied, and the deployment is ready, thus all the pods are started up and ready.
+      dependsOn:
+        - deployment
+        - service
+      resource:
+        apiVersion: admissionregistration.k8s.io/v1
+        kind: MutatingWebhookConfiguration
+        metadata:          
+          name: pod-mutating-webhook
+        webhooks:
+          - admissionReviewVersions:
+              - v1
+            clientConfig:
+              service:
+                name: pod-mutating-hook
+                namespace: default
+                path: /mutate
+            failurePolicy: Fail
+            name: sample.mutating.webhook
+            rules:
+              - apiGroups:
+                  - ""
+                apiVersions:
+                  - v1
+                operations:
+                  - UPDATE
+                  - CREATE
+                resources:
+                  - pods                         
 ```
 
 
