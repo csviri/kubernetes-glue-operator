@@ -6,9 +6,9 @@ of [Java Operator SDK](https://github.com/operator-framework/java-operator-sdk) 
 Although it is limited only to Kubernetes resources it makes it very easy to use in language-independent 
 (DependentResources in JOSDK are also covering external resources) way. 
 
-## Glue Resource
+## Glue resource
 
-## GlueOperator Resource
+## GlueOperator resource
 
 ## Deployment
 
@@ -30,12 +30,17 @@ The project is mainly tested with cluster-scoped deployment, however, QOSDK name
 See also the upcoming deployment modes/options: [sharding with label selectors](https://github.com/csviri/resource-glue-operator/issues/50),
 [watching only one custom resources type](https://github.com/csviri/resource-glue-operator/issues/54)
 
+## Implementation details and performance
+
+Informers are used optimally, in terms of that, for every resource type only one informer is registered in the background. Event there are more `Glue` or `GlueOperator`
+resources containing the same resource type.
+
 ## Current Limitations
 
 Note that none of the limitations are unsolvable, and will be continuously removed in the coming releases.
 
 1. Child resources and related resources are always namespace scoped resources, and in the same namespace as the
-   primary resource (`Glue` or the parent in case of `GlueOperator`)
+   primary resource (`Glue` or the parent in the case of `GlueOperator`)
 
 2. ~~Related resource changes are not triggering the reconciliation.
    Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
