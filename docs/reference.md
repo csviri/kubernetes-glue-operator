@@ -2,13 +2,22 @@
 
 ## Deployment
 
-Implementation is using [Quarkus Operator SDK](https://github.com/quarkiverse/quarkus-operator-sdk), 
+Implementation is using [Quarkus Operator SDK (QOSDK)](https://github.com/quarkiverse/quarkus-operator-sdk), 
 the default [configuration options](https://docs.quarkiverse.io/quarkus-operator-sdk/dev/includes/quarkus-operator-sdk.html) 
 defined by QOSDK can be overridden using environment variables.
 
-### Deployment Modes
+With every release, there are Kubernetes resources provided to make an initial deployment very simple.
+See `kubernetes.yml` in [release assets](https://github.com/csviri/resource-glue-operator/releases).
 
+Since the project is a meta-controller, it needs to have access rights to all the resources it manages. 
+When creating specialized roles for a deployment, roles should contain the union of required access rights
+for all the managed resource types, specifically: `["list", "watch", "create", "patch", "delete"]`
+and `["list", "watch"]` for related resources.
 
+The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
+
+See also the upcoming deployment modes / deployment options: [sharding with label selectors](https://github.com/csviri/resource-glue-operator/issues/50),
+[watching only one custom resources type](https://github.com/csviri/resource-glue-operator/issues/54)
 
 ## Glue Resource
 
