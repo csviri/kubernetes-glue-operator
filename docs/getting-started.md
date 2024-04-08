@@ -1,6 +1,6 @@
 # Getting Started
 
-## Start Minikube
+## Start Minikube/Kind
 
 ## Deploy the Operator
 
