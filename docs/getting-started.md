@@ -18,6 +18,8 @@ Deploy the `resource-glue-operator`:
 kubectl apply -f https://github.com/csviri/resource-glue-operator/releases/latest/download/kubernetes.yml
 ```
 
+Note that this deployment give the controller access to all the resource on the cluster, this not what you might want in production.
+
 ## Try out the WebPage Sample
 
 First apply the CustomResourceDefinition for `WebPage` :
@@ -37,3 +39,6 @@ Create a new static WebPage:
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.sample.yaml
 ```
+
+All done! Check the resources created, if using minikube you can open the served WebPage with `minikube service webpage1`.
+
