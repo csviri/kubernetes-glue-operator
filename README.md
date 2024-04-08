@@ -120,7 +120,7 @@ resources are applied, however, there are certain cases when this is needed also
 The following example shows how to deploy a [dynamic admission controller](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) that mutates 
 all the `Pods`, adding annotation on them. Note that this is a tricky situation since the endpoint for the `MutatingWebhookConfiguration` is also a `Pod`, thus it should be 
 first up and running before the configuration is applied, otherwise, the mutation webhook will block the changes on the pods, which would render the cluster unable to manage `Pods' 
-(irrelevant details are omitted, see the full version [here][https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml]): 
+(irrelevant details are omitted, see the full version [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml)): 
 
 ```yaml
 apiVersion: io.csviri.operator.resourceglue/v1beta1
