@@ -45,7 +45,7 @@ spec:
 ```
 
 To create an operator (or more precisely the controller part) with `resource-glue-operator` we have first apply
-the {CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
+the [CRD for WebPage](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.crd.yml).
 To define how the `WebPage` should be reconciled, thus what resources should be created for
 a `WebPage`, we prepare a `GlueOperator`:
 
@@ -137,7 +137,7 @@ spec:
           name: pod-mutating-hook
         spec:
           # spec omitted       
-    - name: deployment  # webhook endpoint
+    - name: deployment  # webhook web-service endpoint
       readyPostCondition:
         type: ReadyCondition  # ready post conditions determine when a Deployment is considered "ready", thus up and running.
       resource:
@@ -192,5 +192,5 @@ spec:
                   - pods                         
 ```
 
-
+See the full E2E test [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/java/io/csviri/operator/resourceglue/sample/mutation/MutationWebhookDeploymentE2E.java).
 
