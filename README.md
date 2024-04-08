@@ -141,7 +141,7 @@ spec:
         spec:
           # spec omitted       
     - name: deployment  # webhook web-service endpoint
-      # ready post conditions define when a Deployment is considered "ready",
+      # ready postconditions define when a Deployment is considered "ready",
       # thus up and running.
       readyPostCondition:
         type: ReadyCondition  
