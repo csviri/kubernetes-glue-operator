@@ -122,7 +122,8 @@ resources are applied, however, there are certain cases when this is needed also
 The following example shows how to deploy a [dynamic admission controller](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) that mutates 
 all the `Pods`, adding annotation on them. Note that this is a tricky situation since the endpoint for the `MutatingWebhookConfiguration` is also a `Pod`, thus 'Pods' should be 
 first up and running before the configuration is applied, otherwise, the mutation webhook will block the changes on the pods, which would render the cluster unable to manage `Pods'.
-(Irrelevant details are omitted, see the full version [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml))
+(Irrelevant details are omitted, see the full version [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml), 
+see the full E2E test [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/java/io/csviri/operator/resourceglue/sample/mutation/MutationWebhookDeploymentE2E.java))
 
 ```yaml
 apiVersion: io.csviri.operator.resourceglue/v1beta1
@@ -194,5 +195,5 @@ spec:
                   - pods                         
 ```
 
-See the full E2E test [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/java/io/csviri/operator/resourceglue/sample/mutation/MutationWebhookDeploymentE2E.java).
+The `dependsOn` relation is a useful concept in certain situations, that might be familiar from other infrustructure-as-a-code tools, `resource-glue-operator` adopts it to Kubernetes operators.
 
