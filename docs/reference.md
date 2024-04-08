@@ -2,11 +2,19 @@
 
 ## Deployment
 
+Implementation is using [Quarkus Operator SDK](https://github.com/quarkiverse/quarkus-operator-sdk), 
+the default [configuration options](https://docs.quarkiverse.io/quarkus-operator-sdk/dev/includes/quarkus-operator-sdk.html) 
+defined by QOSDK can be overridden using environment variables.
+
 ### Deployment Modes
+
+
 
 ## Glue Resource
 
 ## GlueOperator Resource
+
+
 
 # Current Limitations
 
