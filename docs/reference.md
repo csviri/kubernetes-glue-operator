@@ -8,6 +8,14 @@ Although it is limited only to Kubernetes resources it makes it very easy to use
 
 ## [Glue resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glues.io.csviri.operator.resourceglue-v1.yml)
 
+`Glue` is the hearth of the operator. Note that `GlueOperator` and related controller just creates a new `Glue` with a target related resource (see below), 
+for each parent custom resource. `Glue` defines `resources` (sometimes refered as managed resources) and `related resources`.
+
+### Managed resources
+
+### Related Resources
+
+
 ## [GlueOperator resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glueoperators.io.csviri.operator.resourceglue-v1.yml)
 
 ## Deployment
