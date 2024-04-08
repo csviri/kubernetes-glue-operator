@@ -8,6 +8,7 @@ defined by QOSDK can be overridden using environment variables.
 
 With every release, there are Kubernetes resources provided to make an initial deployment very simple.
 See `kubernetes.yml` in [release assets](https://github.com/csviri/resource-glue-operator/releases).
+While we will provide more options, users are encouraged to enhance/adjust this for their purposes.
 
 Since the project is a meta-controller, it needs to have access rights to all the resources it manages. 
 When creating specialized roles for a deployment, roles should contain the union of required access rights
@@ -16,7 +17,7 @@ and `["list", "watch"]` for related resources.
 
 The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
 
-See also the upcoming deployment modes / deployment options: [sharding with label selectors](https://github.com/csviri/resource-glue-operator/issues/50),
+See also the upcoming deployment modes/options: [sharding with label selectors](https://github.com/csviri/resource-glue-operator/issues/50),
 [watching only one custom resources type](https://github.com/csviri/resource-glue-operator/issues/54)
 
 ## Glue Resource
