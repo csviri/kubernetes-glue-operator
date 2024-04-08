@@ -1,5 +1,11 @@
 # Reference Documentation
 
+The implementation generalizes and extends [`DependentResource`](https://javaoperatorsdk.io/docs/dependent-resources) 
+and [`Workflow`](https://javaoperatorsdk.io/docs/workflows) features 
+of [Java Operator SDK](https://github.com/operator-framework/java-operator-sdk) and more.
+Although it is limited only to Kubernetes resources it makes it very easy to use in language-independent 
+(DependentResources in JOSDK are also covering external resources) way. 
+
 ## Glue Resource
 
 ## GlueOperator Resource
