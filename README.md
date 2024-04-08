@@ -105,9 +105,8 @@ spec:
       # Omitted Details
 ```
 
-There are multiple aspects to see here. If such a resource is created, the four related resources will be templated
-and applied to the cluster. If anything changes in the custom or managed resources, the reconciliation
-will be triggered again. 
+There are multiple aspects to see here. The four related resources will be templated
+and applied to the cluster if such a resource is created. The reconciliation will be triggered if anything changes in the custom or managed resources. 
 
 Note also the `condition` part for `Ingress` resource contains multiple types of conditions, `JSCondition` is
 used in this example, which allows writing conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
@@ -115,4 +114,19 @@ is true. If the property is changed to `false` after, the resource is deleted.
 
 ### The `Glue` Resource
 
-`Glue` is very similar to `GlueOperator`, and has almost the same properties, but does not have a parent. Thus does not define an operator, just a set of resources to reconcile. 
+`Glue` is very similar to `GlueOperator`, and has almost the same properties, but does not have a parent. Thus, it does not define an operator, just a set of resources to reconcile. 
+Let's take a look at another example, that will show also additional features (both for `Glue` and `GlueOperator`). Typically Kubernetes does not require ordering regarding how
+resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
+The following example shows how to deploy a [dynamic admission controller](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) that mutates 
+all the `Pods`, adding annotation on them. Note that this is a tricky situation since the endpoint for the `MutatingWebhookConfiguration` is also a `Pod`, thus it should be 
+first up and running before the configuration is applied, otherwise, the mutation webhook will block the changes on the pods, which would render the cluster unable to manage `Pods':
+
+```yaml
+
+
+
+
+```
+
+
+
