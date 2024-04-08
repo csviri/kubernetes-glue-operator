@@ -1,5 +1,9 @@
 # Reference Documentation
 
+## Glue Resource
+
+## GlueOperator Resource
+
 ## Deployment
 
 Implementation is using [Quarkus Operator SDK (QOSDK)](https://github.com/quarkiverse/quarkus-operator-sdk), 
@@ -20,13 +24,7 @@ The project is mainly tested with cluster-scoped deployment, however, QOSDK name
 See also the upcoming deployment modes/options: [sharding with label selectors](https://github.com/csviri/resource-glue-operator/issues/50),
 [watching only one custom resources type](https://github.com/csviri/resource-glue-operator/issues/54)
 
-## Glue Resource
-
-## GlueOperator Resource
-
-
-
-# Current Limitations
+## Current Limitations
 
 Note that none of the limitations are unsolvable, and will be continuously removed in the coming releases.
 
