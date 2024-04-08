@@ -6,7 +6,7 @@ Start a local Kubernetes cluster using for example [Minikube](https://minikube.s
 
 ## Deploy the Operator
 
-Apply custom resource definitions:
+Apply the CustomResourceDefinitions:
 
 ```bash
 kubectl apply -f https://github.com/csviri/resource-glue-operator/releases/latest/download/glues.io.csviri.operator.resourceglue-v1.yml -f https://github.com/csviri/resource-glue-operator/releases/latest/download/glueoperators.io.csviri.operator.resourceglue-v1.yml
@@ -20,4 +20,20 @@ kubectl apply -f https://github.com/csviri/resource-glue-operator/releases/lates
 
 ## Try out the WebPage Sample
 
+First apply the CustomResourceDefinition for `WebPage` :
 
+```bash
+kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.crd.yaml
+```
+
+Apply the `GlueOperator` for `WebPage`:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.operator.yaml
+```
+
+Create a new static WebPage:
+
+```bash
+kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.sample.yaml
+```
