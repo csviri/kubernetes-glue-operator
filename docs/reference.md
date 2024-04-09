@@ -17,7 +17,8 @@ for each parent custom resource. `Glue` defines `resources` (sometimes referred 
 
 The `resources` section is a list of resources to be reconciled. It has several attributes:
 
-- **`name`** - is a mandatory attribute. The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
+- **`name`** - is a mandatory unique (unique also regarding related resources) attribute.
+  The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
   If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
 - **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
   [qute templating engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
@@ -32,11 +33,41 @@ The `resources` section is a list of resources to be reconciled. It has several 
 - **`readyPostCondition`** - condition to check if the resource is considered to be ready. If a resource is ready all the resources, which depend on it
    can proceed in reconciliation.
 
+#### Built-in conditions
+
+At the moment there are two types of built-in conditions provided:
+
+- **`ReadyCondition`** - check if a resource is up and running. Use it only as a `readyPostCondition`. See sample usage [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml#L24-L25).
+- **`JSCondition`** - a generic condition, that allows writing conditions in JavaScript. As input, all the resources are available which
+  are either managed or related. The script should return a boolean value.
+  See accessing the related resource in [WebPage sample](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/sample/webpage/webpage.operator.yaml#L62-L64),
+  and cross-referencing resources [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglue/TwoResourcesAndCondition.yaml#L23-L28).
+
 ### Related resources
+
+Related resources are resources that are not managed (not created, updated, or deleted) during reconciliation, but serve as an input for it.
+See sample usage within `Glue` [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglue/RelatedResourceSimpleWithCondition.yaml)
+The following attributes can be defined for a related resource:
+
+- **`name`** - same as for managed resource, unique identifier, used to reference the resource.
+- **`apiVersion`** - Kubernetes resource API Version of the resource
+- **`kind`** - Kubernetes kind property of the resource
+- **`resourceNames`** - list of string of the resource names within the same namespace as `Glue`.  
 
 ### Referencing other resources
 
-### Built-in conditions
+Both in `JSCondition` and resource templates other resources can be referenced by the name. 
+
+If there are more `resourceNames` specified for a related resource, the resource is referenced in a form
+`[related resource name]#[resource name]`. See sample [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglue/MultiNameRelatedResource.yaml).
+
+When a resource `B` references another resource `A`, resource `A` will be guaranteed to be in the cache - especially for initial reconciliation when the resource is created -
+only if `B` depends on `A` on it. This is natural, in other words, after reconciliation up-to-date version of the resource is guaranteed to be in the cache after reconciliation.
+See sample resource cross-referencing [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglue/CrossReferenceResource.yaml).
+
+The metadata of `Glue` can be referenced under `glueMetadata`, see sample [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglue/TemplateForConcurrency.yaml#L12-L12)
+
+In addition to that in `GlueOperator` the **`parent`** attribute can be used to reference the parent resource on which behalf the resources are created. See sample [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglueoperator/Templating.yaml).
 
 ### Reconciliation notes
 
@@ -48,6 +79,12 @@ for a resource that depends on it.
 The `DependentResource` implementation of JOSDK makes all kinds of optimizations on the reconciliation which are utilized (or will be also here). 
 
 ## [GlueOperator resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glueoperators.io.csviri.operator.resourceglue-v1.yml)
+
+The specs of `GlueOperator` are almost identical to `Glue`, it just adds one additional attribute **`parent`**, 
+which has two sub-attributes: **`apiVersion`** and **`kind`**. This structure specifies the resource 
+types - usually but not necessarily custom resources - watched. 
+
+See minimal `GlueOperator` [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglueoperator/Templating.yaml).
 
 ## Deployment
 
