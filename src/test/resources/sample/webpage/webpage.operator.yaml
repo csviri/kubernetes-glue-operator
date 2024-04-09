@@ -7,7 +7,6 @@ spec:
     apiVersion: resourceglueoperator.sample/v1
     kind: WebPage
   resources:
-#    todo add to docs that name must be a valid javascript variable name if used in js condition
     - name: htmlconfigmap
       resource:
         apiVersion: v1
