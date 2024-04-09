@@ -178,8 +178,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
         .ifPresent(c -> builder.withReadyPostcondition(toCondition(c)));
     Optional.ofNullable(spec.getCondition())
         .ifPresent(c -> builder.withReconcilePrecondition(toCondition(c)));
-    Optional.ofNullable(spec.getDeletePostCondition())
-        .ifPresent(c -> builder.withDeletePostcondition(toCondition(c)));
   }
 
   private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
