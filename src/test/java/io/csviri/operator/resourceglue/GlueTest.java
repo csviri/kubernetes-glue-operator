@@ -128,10 +128,10 @@ class GlueTest extends TestBase {
 
     await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
 
-      var w = get(Glue.class, "testglue" + index);
+      var w = get(Glue.class, "concurrencysample" + index);
       assertThat(w).isNotNull();
-      var cm1 = get(ConfigMap.class, "testglue" + index + "-1");
-      var cm2 = get(ConfigMap.class, "testglue" + index + "-2");
+      var cm1 = get(ConfigMap.class, "concurrencysample" + index + "-1");
+      var cm2 = get(ConfigMap.class, "concurrencysample" + index + "-2");
 
       assertThat(cm1).isNotNull();
       assertThat(cm2).isNotNull();
@@ -141,7 +141,7 @@ class GlueTest extends TestBase {
 
     glueList.forEach(this::delete);
     await().untilAsserted(() -> IntStream.range(0, num).forEach(index -> {
-      var w = get(Glue.class, "testglue" + index);
+      var w = get(Glue.class, "concurrencysample" + index);
       assertThat(w).isNull();
     }));
   }

@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceglue/v1beta1
 kind: Glue
 metadata:
-  name: resourceglue1
+  name: two-resource-cross-condition
 spec:
   resources:
     - name: configMap1

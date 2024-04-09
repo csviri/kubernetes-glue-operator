@@ -32,7 +32,7 @@ public class MutationWebhookDeploymentE2E {
             "https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml")
             .toURL());
     TestUtils.applyAndWait(client, "target/kubernetes/kubernetes.yml");
-    TestUtils.applyAndWait(client, "src/test/resources/sample/mutation/related.resource.yaml");
+    TestUtils.applyAndWait(client, "src/test/resources/sample/mutation/supporting.resource.yaml");
   }
 
   @Test

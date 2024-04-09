@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceglue/v1beta1
 kind: Glue
 metadata:
-  name: rf-templating-sample
+  name: resource-templating-sample
 spec:
   resources:
     - name: configMap1
