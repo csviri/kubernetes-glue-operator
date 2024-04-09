@@ -3,6 +3,7 @@ package io.csviri.operator.resourceglue;
 import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ import static com.oracle.truffle.js.builtins.ObjectFunctionBuiltins.ObjectFuncti
 
 public class TestUtils {
 
-  public static final int GC_WAIT_TIMEOUT_SECOND = 30;
+  public static final Duration GC_WAIT_TIMEOUT_SECOND = Duration.ofSeconds(30);
 
   public static final int CRD_READY_WAIT = 1000;
 

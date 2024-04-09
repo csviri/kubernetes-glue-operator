@@ -140,7 +140,7 @@ class GlueOperatorTest extends TestBase {
     crs.forEach(this::delete);
     cr2s.forEach(this::delete);
 
-    await().timeout(Duration.ofSeconds(GC_WAIT_TIMEOUT_SECOND))
+    await().timeout(GC_WAIT_TIMEOUT_SECOND)
         .untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
           var cm = get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
           assertThat(cm).isNull();

@@ -1,12 +1,12 @@
-package io.csviri.operator.resourceglue;
+package io.csviri.operator.resourceglue.sample.webpage;
 
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import io.csviri.operator.resourceglue.TestUtils;
 import io.csviri.operator.resourceglue.customresource.glue.Glue;
 import io.csviri.operator.resourceglue.customresource.operator.GlueOperator;
-import io.csviri.operator.resourceglue.sample.webpage.WebPage;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
@@ -15,6 +15,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 
+import static io.csviri.operator.resourceglue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -61,7 +62,7 @@ public class WebPageE2E {
 
     client.resource(createdWebPage).delete();
 
-    await().untilAsserted(() -> {
+    await().timeout(GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
       var deployment =
           client.resources(Deployment.class).withName(webPage.getMetadata().getName()).get();
       var configMap =
