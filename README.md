@@ -114,7 +114,7 @@ is true. If the property is changed to `false` after, the resource is deleted.
 
 ### The `Glue` Resource
 
-`Glue` is very similar to `GlueOperator`, and has almost the same properties, but does not have a parent. Thus, it does not define an operator, just a set of resources to reconcile. 
+`Glue` is very similar to `GlueOperator`, with identical properties, except it does not have a parent. Thus, it does not define a controller, just a set of resources to reconcile. 
 
 Let's take a look at another example, that will show also additional features (available both for `Glue` and `GlueOperator`). Typically Kubernetes does not require ordering regarding how
 resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
