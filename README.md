@@ -8,11 +8,11 @@ should be reconciled. Supports conditional resources in runtime, ordering of res
 
 ## Documentation
 
-[Getting started](/docs/getting-started.md)
+[Getting Started](/docs/getting-started.md)
 
-[Reference documentation](/docs/reference.md)
+[Reference Documentation](/docs/reference.md)
 
-[Rational and comparison with similar solutions](/docs/samples.yaml)
+[Rational and Comparison with Similar Solutions](/docs/samples.yaml)
 
 ## Quick Introduction
 
