@@ -27,9 +27,6 @@ public class DependentResourceSpec {
   @PreserveUnknownFields
   private ConditionSpec condition;
 
-  @PreserveUnknownFields
-  private ConditionSpec deletePostCondition;
-
   public String getName() {
     return name;
   }
@@ -76,15 +73,6 @@ public class DependentResourceSpec {
     return this;
   }
 
-  public ConditionSpec getDeletePostCondition() {
-    return deletePostCondition;
-  }
-
-  public DependentResourceSpec setDeletePostCondition(ConditionSpec deletePostConditionSpec) {
-    this.deletePostCondition = deletePostConditionSpec;
-    return this;
-  }
-
   public String getResourceTemplate() {
     return resourceTemplate;
   }
@@ -105,13 +93,11 @@ public class DependentResourceSpec {
         && Objects.equals(resourceTemplate, that.resourceTemplate)
         && Objects.equals(resource, that.resource) && Objects.equals(dependsOn, that.dependsOn)
         && Objects.equals(readyPostCondition, that.readyPostCondition)
-        && Objects.equals(condition, that.condition)
-        && Objects.equals(deletePostCondition, that.deletePostCondition);
+        && Objects.equals(condition, that.condition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, resourceTemplate, resource, dependsOn, readyPostCondition, condition,
-        deletePostCondition);
+    return Objects.hash(name, resourceTemplate, resource, dependsOn, readyPostCondition, condition);
   }
 }
