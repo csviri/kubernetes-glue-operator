@@ -18,9 +18,9 @@ Deploy the `resource-glue-operator`:
 kubectl apply -f https://github.com/csviri/resource-glue-operator/releases/latest/download/kubernetes.yml
 ```
 
-Note that this deployment give the controller access to all the resource on the cluster, this not what you might want in production.
+Note that this deployment gives the controller access to all the resources on the cluster, this is not what you might want in production.
 
-## Try out the WebPage Sample
+## Try out the [WebPage Sample](https://github.com/csviri/resource-workflow-operator/tree/main/src/test/resources/sample/webpage)
 
 First apply the CustomResourceDefinition for `WebPage` :
 
@@ -34,7 +34,7 @@ Apply the `GlueOperator` for `WebPage`:
 kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.operator.yaml
 ```
 
-Create a new static WebPage:
+Create a new static `WebPage`:
 
 ```bash
 kubectl apply -f https://raw.githubusercontent.com/csviri/resource-glue-operator/main/src/test/resources/sample/webpage/webpage.sample.yaml
