@@ -18,6 +18,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.quarkus.test.junit.QuarkusTest;
 
+import static io.csviri.operator.resourceglue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
 import static io.csviri.operator.resourceglue.customresource.TestCustomResource.CR_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -139,12 +140,13 @@ class GlueOperatorTest extends TestBase {
     crs.forEach(this::delete);
     cr2s.forEach(this::delete);
 
-    await().untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
-      var cm = get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
-      assertThat(cm).isNull();
-      var cm2 = get(ConfigMap.class, TEST_RESOURCE2_PREFIX + n);
-      assertThat(cm2).isNull();
-    }));
+    await().timeout(Duration.ofSeconds(GC_WAIT_TIMEOUT_SECOND))
+        .untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
+          var cm = get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
+          assertThat(cm).isNull();
+          var cm2 = get(ConfigMap.class, TEST_RESOURCE2_PREFIX + n);
+          assertThat(cm2).isNull();
+        }));
   }
 
   TestCustomResource testCustomResource() {

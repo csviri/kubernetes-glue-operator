@@ -25,6 +25,8 @@ import static com.oracle.truffle.js.builtins.ObjectFunctionBuiltins.ObjectFuncti
 
 public class TestUtils {
 
+  public static final int GC_WAIT_TIMEOUT_SECOND = 30;
+
   public static final int CRD_READY_WAIT = 1000;
 
   private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
