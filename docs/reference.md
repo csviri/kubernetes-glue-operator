@@ -17,19 +17,19 @@ for each parent custom resource. `Glue` defines `resources` (sometimes referred 
 
 The `resources` section is a list of resources to be reconciled. It has several attributes:
 
-- `name` - is a mandatory attribute. The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
+- **`name`** - is a mandatory attribute. The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
   If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
-- `resource` - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
+- **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
   [Qute Templating Engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
   There is a restriction, that the managed resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
   (and/or parent for `GlueOperator`), so the `namespace` field in resource **metadata should not be specified**.
-- `dependsOn` - is a list of names of other managed resources (not related resources). The resource is not reconciled until all the resources
+- **`dependsOn`** - is a list of names of other managed resources (not related resources). The resource is not reconciled until all the resources
    which it depends on are not reconciled and ready (if there is a `readyPostCondition` present). 
    Note that during the cleanup phase (when a `Glue` is deleted) resources are cleaned up in reverse order.
-- `condition` - a condition to specify if the resource should be there or not, thus even if the condition is evaluated to be `true`
+- **`condition`** - a condition to specify if the resource should be there or not, thus even if the condition is evaluated to be `true`
    and the resource is created, if one of the following reconciliations the condition is evaluated to `false` the resource is deleted.
    (Same as `reconcilePrecondition` in Java Operator SDK)
-- `readyPostCondition` - condition to check if the resource is considered to be ready. If a resource is ready all the resources, which depend on it
+- **`readyPostCondition`** - condition to check if the resource is considered to be ready. If a resource is ready all the resources, which depend on it
    can proceed in reconciliation.
 
 #### Reconciliation
