@@ -98,7 +98,7 @@ While we will provide more options, users are encouraged to enhance/adjust this 
 
 Since the project is a meta-controller, it needs to have access rights to all the resources it manages. 
 When creating specialized roles for a deployment, roles should contain the union of required access rights
-for all the managed resource types, specifically: `["list", "watch", "create", "patch", "delete"]`
+for all the managed resources, specifically: `["list", "watch", "create", "patch", "delete"]`
 and `["list", "watch"]` for related resources.
 
 The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
