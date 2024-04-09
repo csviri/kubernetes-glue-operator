@@ -20,7 +20,7 @@ The `resources` section is a list of resources to be reconciled. It has several 
 - **`name`** - is a mandatory attribute. The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
   If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
 - **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
-  [Qute Templating Engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
+  [qute templating engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
   There is a restriction, that the managed resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
   (and/or parent for `GlueOperator`), so the `namespace` field in resource **metadata should not be specified**.
 - **`dependsOn`** - is a list of names of other managed resources (not related resources). The resource is not reconciled until all the resources
@@ -32,18 +32,20 @@ The `resources` section is a list of resources to be reconciled. It has several 
 - **`readyPostCondition`** - condition to check if the resource is considered to be ready. If a resource is ready all the resources, which depend on it
    can proceed in reconciliation.
 
-#### Reconciliation
+### Related resources
 
+### Referencing other resources
 
+### Built-in conditions
 
-#### Referencing Other Resources
+### Reconciliation notes
 
-#### Conditions
+The reconciliation is triggered either on a change of the `Glue` or any managed or related resources. 
 
+On every reconciliation, each managed resource is reconciled, and if a resource is updated, it is added to a cache, so it is available for templating
+for a resource that depends on it.
 
-### Related Resources
-
-
+The `DependentResource` implementation of JOSDK makes all kinds of optimizations on the reconciliation which are utilized (or will be also here). 
 
 ## [GlueOperator resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glueoperators.io.csviri.operator.resourceglue-v1.yml)
 
@@ -75,7 +77,7 @@ resources containing the same resource type.
 The templating and some of the Javascript condition is probably the most time-consuming and resource-intensive part which will 
 be continuously improved in the follow-up releases. 
 
-## Current Limitations
+## Current limitations
 
 Note that none of the limitations are unsolvable, and will be continuously removed in the coming releases.
 
@@ -86,7 +88,7 @@ Note that none of the limitations are unsolvable, and will be continuously remov
    Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
    https://github.com/fabric8io/kubernetes-client/issues/5729~~
 
-## Related Documents
+## Related documents
 
 - [Dependent Resources documentation in Java Operator SDK](https://javaoperatorsdk.io/docs/dependent-resources)
 - [Workflows documentation in Java Operator SDK](https://javaoperatorsdk.io/docs/workflows)
