@@ -59,6 +59,45 @@ class GlueTest extends TestBase {
     });
   }
 
+
+  @Test
+  void crossReferenceResource() {
+    Glue glue =
+        TestUtils.loadResoureFlow("/resourceglue/CrossReferenceResource.yaml");
+    glue = create(glue);
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "cm-1");
+      var cm2 = get(ConfigMap.class, "cm-2");
+      assertThat(cm1).isNotNull();
+      assertThat(cm2).isNotNull();
+
+      assertThat(cm2.getData()).containsEntry("valueFromCM1", "value1");
+    });
+
+    var resourceTemplate =
+        glue.getSpec().getResources().stream().filter(r -> r.getName().equals("configMap1"))
+            .findAny().orElseThrow().getResource();
+    // set new value
+    ((Map<String, String>) resourceTemplate.getAdditionalProperties().get("data")).put("key",
+        "value2");
+    glue = update(glue);
+
+    await().untilAsserted(() -> {
+      var cm2 = get(ConfigMap.class, "cm-2");
+      assertThat(cm2.getData()).containsEntry("valueFromCM1", "value2");
+    });
+
+    delete(glue);
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, "cm-1");
+      var cm2 = get(ConfigMap.class, "cm-2");
+      assertThat(cm1).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
+
   @SuppressWarnings("unchecked")
   @Test
   void javaScriptCondition() {

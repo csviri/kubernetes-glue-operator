@@ -1,0 +1,27 @@
+apiVersion: io.csviri.operator.resourceglue/v1beta1
+kind: Glue
+metadata:
+  name: "crossreference"
+spec:
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: "cm-1"
+        data:
+          key: "value1"
+    - name: configMap2
+      dependsOn:
+        - configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: "cm-2"
+        data:
+          valueFromCM1: "{configMap1.data.key}"
+
+
+
