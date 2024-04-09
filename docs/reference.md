@@ -8,10 +8,15 @@ Although it is limited only to Kubernetes resources it makes it very easy to use
 
 ## [Glue resource](https://github.com/csviri/resource-glue-operator/releases/latest/download/glues.io.csviri.operator.resourceglue-v1.yml)
 
-`Glue` is the hearth of the operator. Note that `GlueOperator` and related controller just creates a new `Glue` with a target related resource (see below), 
+`Glue` is the heart of the operator. Note that `GlueOperator` and related controller just creates a new `Glue` with a target related resource (see below), 
 for each parent custom resource. `Glue` defines `resources` (sometimes refered as managed resources) and `related resources`:
 
 ### Managed resources
+
+The `resources` section is a list of resources to be reconciled. It has several attributes:
+
+- `name` - is a mandatory attribute. The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
+  If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
 
 ### Related Resources
 
