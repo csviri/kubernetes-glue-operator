@@ -125,7 +125,7 @@ Note that none of the limitations are unsolvable, and will be continuously remov
    Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
    https://github.com/fabric8io/kubernetes-client/issues/5729~~
 
-## Samples:
+## Samples
 
 1. [WebPage](https://github.com/csviri/resource-glue-operator/tree/main/src/test/resources/sample/webpage) `GlueOperator`, serves a static website from the cluster.
    To achieve this, it creates three resources a `Deployment` running Nginx, a `ConfigMap` that contains the HTML file an mounted to nginx, a `Service` and an optional `Ingress`
