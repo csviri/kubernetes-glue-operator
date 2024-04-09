@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceglue/v1beta1
 kind: GlueOperator
 metadata:
-  name: rfo-templating-sample
+  name: templating-sample
 spec:
   parent:
     apiVersion: io.csviri.operator.resourceglue/v1
