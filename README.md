@@ -12,7 +12,7 @@ should be reconciled. Supports conditional resources in runtime, ordering of res
 
 [Reference Documentation](/docs/reference.md)
 
-[Rational and Comparison with Similar Solutions](/docs/samples.yaml)
+[Rational and Comparison with Similar Solutions](/docs/comparison.md)
 
 ## Quick Introduction
 
