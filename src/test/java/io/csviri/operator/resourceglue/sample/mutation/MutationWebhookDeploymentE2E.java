@@ -16,6 +16,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 
+import static io.csviri.operator.resourceglue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -37,7 +38,7 @@ public class MutationWebhookDeploymentE2E {
 
   @Test
   void testMutationHookDeployment() {
-    client.resource(TestUtils.load("/sample/mutation/mutation.glue.yaml"))
+    var glue = client.resource(TestUtils.load("/sample/mutation/mutation.glue.yaml"))
         .createOr(NonDeletingOperation::update);
 
     await().atMost(Duration.ofMinutes(5)).untilAsserted(() -> {
@@ -51,6 +52,13 @@ public class MutationWebhookDeploymentE2E {
     var pod = client.resource(testPod()).create();
     assertThat(pod.getMetadata().getAnnotations()).containsEntry("sample.annotation.present",
         "true");
+
+    client.resource(glue).delete();
+
+    await().timeout(GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
+      var deployment = client.apps().deployments().withName("pod-mutating-hook").get();
+      assertThat(deployment).isNull();
+    });
   }
 
   Pod testPod() {
