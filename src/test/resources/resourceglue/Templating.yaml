@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.resourceglue/v1beta1
 kind: Glue
 metadata:
-  name: wf-templating-sample
+  name: templating-sample
 spec:
   resources:
     - name: configMap1
