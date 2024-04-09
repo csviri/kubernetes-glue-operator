@@ -86,7 +86,7 @@ types - usually but not necessarily custom resources - watched.
 
 See minimal `GlueOperator` [here](https://github.com/csviri/resource-workflow-operator/blob/main/src/test/resources/resourceglueoperator/Templating.yaml).
 
-## Deployment
+## Deploying `resource-glue-operator`
 
 Implementation is using [Quarkus Operator SDK (QOSDK)](https://github.com/quarkiverse/quarkus-operator-sdk), 
 the default [configuration options](https://docs.quarkiverse.io/quarkus-operator-sdk/dev/includes/quarkus-operator-sdk.html) 
@@ -124,6 +124,15 @@ Note that none of the limitations are unsolvable, and will be continuously remov
 2. ~~Related resource changes are not triggering the reconciliation.
    Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
    https://github.com/fabric8io/kubernetes-client/issues/5729~~
+
+## Samples:
+
+1. [WebPage](https://github.com/csviri/resource-glue-operator/tree/main/src/test/resources/sample/webpage) `GlueOperator`, serves a static website from the cluster.
+   To achieve this, it creates three resources a `Deployment` running Nginx, a `ConfigMap` that contains the HTML file an mounted to nginx, a `Service` and an optional `Ingress`
+   to expose the static web page.
+3. [Muatation Hook Deployment](https://github.com/csviri/resource-workflow-operator/tree/main/src/test/resources/sample/mutation), described on the project home page.
+4. [Additional `Glue` samples](https://github.com/csviri/resource-workflow-operator/tree/main/src/test/resources/resourceglue), note that these are used for integration testing.
+5. [Additional `GlueOperator` samples](https://github.com/csviri/resource-workflow-operator/tree/main/src/test/resources/resourceglueoperator), also used for integration testing.
 
 ## Related documents
 
