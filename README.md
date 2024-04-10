@@ -14,6 +14,10 @@ should be reconciled. Supports conditional resources in runtime, ordering of res
 
 [Rational and Comparison with Similar Solutions](/docs/comparison.md)
 
+## Contact Us
+
+Either in the discussion section here on GitHub or at [Kubernetes Slack Operator Channel](https://kubernetes.slack.com/archives/CAW0GV7A5).
+
 ## Quick Introduction
 
 ### The `GlueOperator` Resource
