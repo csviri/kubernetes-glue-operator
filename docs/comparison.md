@@ -46,5 +46,4 @@ As mentioned before there are solutions that are comparable to ours, and all of 
   does not handle related resources, and does not support ordering. In this terms is a bit more limited
   than *resource-glue-operator*.
 
-## [Crossplane Composition](https://docs.crossplane.io/latest/concepts/compositions/)
-TODO
+- [Crossplane Composition](https://docs.crossplane.io/latest/concepts/compositions/) TODO
