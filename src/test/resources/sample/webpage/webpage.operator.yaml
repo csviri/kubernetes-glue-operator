@@ -1,10 +1,10 @@
-apiVersion: io.csviri.operator.resourceglue/v1beta1
+apiVersion: io.csviri.operator.glue/v1beta1
 kind: GlueOperator
 metadata:
   name: webpage-operator
 spec:
   parent:
-    apiVersion: resourceglueoperator.sample/v1
+    apiVersion: glueoperator.sample/v1
     kind: WebPage
   resources:
     - name: htmlconfigmap

@@ -4,7 +4,7 @@ kind: CustomResourceDefinition
 metadata:
   name: webpages.resourceglueoperator.sample
 spec:
-  group: resourceglueoperator.sample
+  group: glueoperator.sample
   names:
     kind: WebPage
     plural: webpages

@@ -1,4 +1,4 @@
-apiVersion: "resourceglueoperator.sample/v1"
+apiVersion: "glueoperator.sample/v1"
 kind: WebPage
 metadata:
   name: webpage1

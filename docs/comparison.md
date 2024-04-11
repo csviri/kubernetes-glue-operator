@@ -1,8 +1,8 @@
 # Rational and Comparison to Similar Solutions
 
-There are other solutions comparable to *resource-glue-operator* that work (or limited to work) on top
+There are other solutions comparable to *kubernetes-glue-operator* that work (or limited to work) on top
 of Kubernetes resources in a language-independent way and try to simplify the operator
-development but make some compromises. *resource-glue-operator* has some nice properties:
+development but make some compromises. *kubernetes-glue-operator* has some nice properties:
 
 1. **input is only a custom resource** (`Glue` or `GlueOperator`) that makes it very easy to set up, maintain,
    and start with. You don't have to build the project, all you have to manage is `yaml` files (CRD, inputs, deployment)
@@ -25,7 +25,7 @@ this is probably the most elegant way to go.
 As mentioned before there are solutions that are comparable to ours, and all of them have advantages and disadvantages:
 
 - [**metacontroller**](https://github.com/metacontroller/metacontroller) - it a very interesting solution that allows
-  to implement controller is any language programming language, just like in the case of *resource-glue-operator* takes a custom resource as an input, which
+  to implement controller is any language programming language, just like in the case of *kubernetes-glue-operator* takes a custom resource as an input, which
   describes the Kubernetes resources that we are interested in - or watched/managed for a custom resource.
   However, it does not describe the desired state that is up to you to implement in the form of a web service endpoint,
   where all the inputs are received and the output is a list of desired resources. 
@@ -37,13 +37,13 @@ As mentioned before there are solutions that are comparable to ours, and all of 
   
   In summary *metacontroller* is a bit more generic solution this moment,
   but with additional complexity to manage, and much harder to start with.
-  The main practical difference is in supporting ["bulk resources"](https://github.com/csviri/resource-glue-operator/issues/75)
+  The main practical difference is in supporting ["bulk resources"](https://github.com/csviri/kubernetes-glue-operator/issues/75)
   we will also support it in future versions.
 
 - [Helm Operators](https://sdk.operatorframework.io/docs/building-operators/helm/tutorial/) - are a very efficient
   way to convert a helm chart into a controller. It also makes it very easy to start and use.
   However, the controller still needs to be build (the helm chart is not just an input configuration),
   does not handle related resources, and does not support ordering. In this terms is a bit more limited
-  than *resource-glue-operator*.
+  than *kubernetes-glue-operator*.
 
 - [Crossplane Composition](https://docs.crossplane.io/latest/concepts/compositions/) TODO
