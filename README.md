@@ -1,10 +1,11 @@
 # Kubernetes Glue Operator
 
-Kubernetes Glue Operator is a powerful Kubernetes meta operator that allows you to create other operators by simply
-applying a custom resource.
+Kubernetes Glue Operator is a powerful Kubernetes **meta operator** that allows you to create other **operators in a declarative** way by **simply
+applying a custom resource**. 
 
-It provides facilities to create composed Kubernetes resources and describes how the resource
-should be reconciled. Supports conditional resources in runtime, ordering of resource reconciliation, and more...
+It provides facilities to compose Kubernetes resources and describes how the resource
+should be reconciled. Supports conditional resources in runtime, and ordering of resource reconciliation.
+In other words, it also allows you to write **workflows** over resources in a **GitOps** friendly way. 
 
 ## Documentation
 
@@ -117,6 +118,8 @@ is true. If the property is changed to `false` after, the resource is deleted.
 ### The `Glue` Resource
 
 `Glue` is very similar to `GlueOperator`, with identical properties, except it does not have a parent. Thus, it does not define a controller, just a set of resources to reconcile. 
+Why is this useful? Note the **`dependsOn`** and **`readyPostCondition`** features, this allows you to write workflows on resources in a GitOps friendly way. Thus to make sure
+that resources are reconciled in a certain order, after some conditions are met.
 
 Let's take a look at another example, that will show also additional features (available both for `Glue` and `GlueOperator`). Typically Kubernetes does not require ordering regarding how
 resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
