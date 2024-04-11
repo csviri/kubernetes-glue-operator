@@ -1,11 +1,11 @@
 # Resource Glue Operator
 
-Resource Glue Operator is a powerful Kubernetes meta operator that allows you to create other operators in a declarative way by simply
-applying a custom resource. 
+Resource Glue Operator is a powerful Kubernetes **meta operator** that allows you to create other **operators in a declarative** way by **simply
+applying a custom resource**. 
 
-It provides facilities to create composed Kubernetes resources and describes how the resource
+It provides facilities to compose Kubernetes resources and describes how the resource
 should be reconciled. Supports conditional resources in runtime, and ordering of resource reconciliation.
-In other words, it allows you to write **workflows** over resources in a **GitOps** friendly way. 
+In other words, it also allows you to write **workflows** over resources in a **GitOps** friendly way. 
 
 ## Documentation
 
