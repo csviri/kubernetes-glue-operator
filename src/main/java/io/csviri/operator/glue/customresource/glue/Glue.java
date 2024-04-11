@@ -6,9 +6,9 @@ import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.ShortNames;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Group("io.csviri.operator.resourceglue")
+@Group("io.csviri.operator.glue")
 @Version("v1beta1")
-@ShortNames("rg")
-public class Glue extends CustomResource<ResourceGlueSpec, ResourceGlueStatus>
+@ShortNames("g")
+public class Glue extends CustomResource<GlueSpec, GlueStatus>
     implements Namespaced {
 }

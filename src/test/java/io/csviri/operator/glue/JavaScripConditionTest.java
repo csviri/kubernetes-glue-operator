@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import io.csviri.operator.glue.conditions.JavaScripCondition;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.glue.Glue;
-import io.csviri.operator.glue.customresource.glue.ResourceGlueSpec;
+import io.csviri.operator.glue.customresource.glue.GlueSpec;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.client.utils.Serialization;
 import io.javaoperatorsdk.operator.api.reconciler.Context;
@@ -33,7 +33,7 @@ class JavaScripConditionTest {
 
   @BeforeEach
   void setup() {
-    dummyGlue.setSpec(new ResourceGlueSpec());
+    dummyGlue.setSpec(new GlueSpec());
   }
 
   @Test
@@ -72,7 +72,7 @@ class JavaScripConditionTest {
     when(dr.getSecondaryResource(any(), any())).thenReturn(Optional.of(cm));
 
     Glue glue = new Glue();
-    glue.setSpec(new ResourceGlueSpec());
+    glue.setSpec(new GlueSpec());
     glue.getSpec().setResources(new ArrayList<>());
     var drSpec = new DependentResourceSpec();
     drSpec.setName(DR_NAME);

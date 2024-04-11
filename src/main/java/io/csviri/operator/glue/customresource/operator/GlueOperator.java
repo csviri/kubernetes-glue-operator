@@ -6,10 +6,10 @@ import io.fabric8.kubernetes.model.annotation.Group;
 import io.fabric8.kubernetes.model.annotation.ShortNames;
 import io.fabric8.kubernetes.model.annotation.Version;
 
-@Group("io.csviri.operator.resourceglue")
+@Group("io.csviri.operator.glue")
 @Version("v1beta1")
-@ShortNames("rgo")
+@ShortNames("go")
 public class GlueOperator
-    extends CustomResource<ResourceGlueOperatorSpec, ResourceFlowOperatorStatus>
+    extends CustomResource<GlueOperatorSpec, ResourceFlowOperatorStatus>
     implements Namespaced {
 }

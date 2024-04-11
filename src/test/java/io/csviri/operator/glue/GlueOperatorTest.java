@@ -12,8 +12,8 @@ import io.csviri.operator.glue.customresource.TestCustomResource2;
 import io.csviri.operator.glue.customresource.TestCustomResourceSpec;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
+import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.Parent;
-import io.csviri.operator.glue.customresource.operator.ResourceGlueOperatorSpec;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.quarkus.test.junit.QuarkusTest;
@@ -36,7 +36,7 @@ class GlueOperatorTest extends TestBase {
   }
 
   @Test
-  void smokeTestResourceGlueOperator() {
+  void smokeTest() {
     create(testWorkflowOperator());
     var cr = create(testCustomResource());
 
@@ -178,7 +178,7 @@ class GlueOperatorTest extends TestBase {
     wo.setMetadata(new ObjectMetaBuilder()
         .withName("wo1")
         .build());
-    var spec = new ResourceGlueOperatorSpec();
+    var spec = new GlueOperatorSpec();
     wo.setSpec(spec);
     spec.setParent(new Parent(CR_GROUP + "/v1", TestCustomResource.class.getSimpleName()));
 

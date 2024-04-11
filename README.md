@@ -1,6 +1,6 @@
-# Resource Glue Operator
+# Kubernetes Glue Operator
 
-Resource Glue Operator is a powerful Kubernetes meta operator that allows you to create other operators by simply
+Kubernetes Glue Operator is a powerful Kubernetes meta operator that allows you to create other operators by simply
 applying a custom resource.
 
 It provides facilities to create composed Kubernetes resources and describes how the resource
@@ -29,7 +29,7 @@ Let's take a look at an example, where we define an operator for WebPage custom 
 
 ```yaml
 
-apiVersion: "resourceglueoperator.sample/v1"
+apiVersion: "glueoperator.sample/v1"
 kind: WebPage
 metadata:
   name: hellows
@@ -58,7 +58,7 @@ metadata:
   name: webpage-operator
 spec:
   parent:
-    apiVersion: resourceglueoperator.sample/v1  # watches all the custom resource of type WebPage
+    apiVersion: glueoperator.sample/v1  # watches all the custom resource of type WebPage
     kind: WebPage
   resources:
     - name: htmlconfigmap

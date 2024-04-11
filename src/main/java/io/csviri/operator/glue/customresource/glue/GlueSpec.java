@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ResourceGlueSpec {
+public class GlueSpec {
 
   private List<DependentResourceSpec> resources = new ArrayList<>();
 
@@ -22,14 +22,14 @@ public class ResourceGlueSpec {
     return relatedResources;
   }
 
-  public ResourceGlueSpec setRelatedResources(List<RelatedResourceSpec> relatedResources) {
+  public GlueSpec setRelatedResources(List<RelatedResourceSpec> relatedResources) {
     this.relatedResources = relatedResources;
     return this;
   }
 
   @Override
   public String toString() {
-    return "ResourceGlueSpec{" +
+    return "GlueSpec{" +
         "resources=" + resources +
         '}';
   }
@@ -40,7 +40,7 @@ public class ResourceGlueSpec {
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    ResourceGlueSpec that = (ResourceGlueSpec) o;
+    GlueSpec that = (GlueSpec) o;
     return Objects.equals(resources, that.resources);
   }
 

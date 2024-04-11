@@ -2,10 +2,10 @@ package io.csviri.operator.glue.customresource.operator;
 
 import java.util.Objects;
 
-import io.csviri.operator.glue.customresource.glue.ResourceGlueSpec;
+import io.csviri.operator.glue.customresource.glue.GlueSpec;
 import io.fabric8.generator.annotation.Required;
 
-public class ResourceGlueOperatorSpec extends ResourceGlueSpec {
+public class GlueOperatorSpec extends GlueSpec {
 
   @Required
   private Parent parent;
@@ -14,7 +14,7 @@ public class ResourceGlueOperatorSpec extends ResourceGlueSpec {
     return parent;
   }
 
-  public ResourceGlueOperatorSpec setParent(Parent parent) {
+  public GlueOperatorSpec setParent(Parent parent) {
     this.parent = parent;
     return this;
   }
@@ -27,7 +27,7 @@ public class ResourceGlueOperatorSpec extends ResourceGlueSpec {
       return false;
     if (!super.equals(o))
       return false;
-    ResourceGlueOperatorSpec that = (ResourceGlueOperatorSpec) o;
+    GlueOperatorSpec that = (GlueOperatorSpec) o;
     return Objects.equals(parent, that.parent);
   }
 

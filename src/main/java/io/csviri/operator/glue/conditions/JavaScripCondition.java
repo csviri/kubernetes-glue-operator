@@ -10,7 +10,7 @@ import javax.script.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.csviri.operator.glue.ResourceGlueException;
+import io.csviri.operator.glue.GlueException;
 import io.csviri.operator.glue.Utils;
 import io.csviri.operator.glue.customresource.glue.Glue;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
@@ -54,7 +54,7 @@ public class JavaScripCondition implements Condition<GenericKubernetesResource, 
           ChronoUnit.MILLIS.between(start, LocalDateTime.now()));
       return res;
     } catch (ScriptException e) {
-      throw new ResourceGlueException(e);
+      throw new GlueException(e);
     }
   }
 
