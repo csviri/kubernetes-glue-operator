@@ -21,7 +21,7 @@ import static org.awaitility.Awaitility.await;
 
 public class TestBase {
 
-  public static final int GC_TIMEOUT_SEC = 30;
+  public static final int GC_TIMEOUT_SEC = 45;
 
   @Inject
   protected KubernetesClient client;

@@ -60,7 +60,7 @@ public class WebPageSampleTest extends TestBase {
 
     delete(webPage);
 
-    await().untilAsserted(() -> {
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
       var deployment = get(Deployment.class, webPage.getMetadata().getName());
       assertThat(deployment).isNull();
     });
