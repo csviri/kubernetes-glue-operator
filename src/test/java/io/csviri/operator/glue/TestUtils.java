@@ -24,7 +24,7 @@ import io.javaoperatorsdk.operator.ReconcilerUtils;
 
 public class TestUtils {
 
-  public static final Duration GC_WAIT_TIMEOUT_SECOND = Duration.ofSeconds(30);
+  public static final Duration GC_WAIT_TIMEOUT_SECOND = Duration.ofSeconds(45);
 
   public static final int CRD_READY_WAIT = 1000;
 
