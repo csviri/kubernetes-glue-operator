@@ -41,12 +41,12 @@ At the moment there are two types of built-in conditions provided:
 - **`JSCondition`** - a generic condition, that allows writing conditions in JavaScript. As input, all the resources are available which
   are either managed or related. The script should return a boolean value.
   See accessing the related resource in [WebPage sample](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/sample/webpage/webpage.operator.yaml#L62-L64),
-  and cross-referencing resources [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglue/TwoResourcesAndCondition.yaml#L23-L28).
+  and cross-referencing resources [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/TwoResourcesAndCondition.yaml#L23-L28).
 
 ### Related resources
 
 Related resources are resources that are not managed (not created, updated, or deleted) during reconciliation, but serve as an input for it.
-See sample usage within `Glue` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglue/RelatedResourceSimpleWithCondition.yaml)
+See sample usage within `Glue` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/RelatedResourceSimpleWithCondition.yaml)
 The following attributes can be defined for a related resource:
 
 - **`name`** - same as for managed resource, unique identifier, used to reference the resource.
@@ -59,15 +59,15 @@ The following attributes can be defined for a related resource:
 Both in `JSCondition` and resource templates other resources can be referenced by the name. 
 
 If there are more `resourceNames` specified for a related resource, the resource is referenced in a form
-`[related resource name]#[resource name]`. See sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglue/MultiNameRelatedResource.yaml).
+`[related resource name]#[resource name]`. See sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/MultiNameRelatedResource.yaml).
 
 When a resource `B` references another resource `A`, resource `A` will be guaranteed to be in the cache - especially for initial reconciliation when the resource is created -
 only if `B` depends on `A` on it. This is natural, in other words, after reconciliation up-to-date version of the resource is guaranteed to be in the cache after reconciliation.
-See sample resource cross-referencing [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglue/CrossReferenceResource.yaml).
+See sample resource cross-referencing [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/CrossReferenceResource.yaml).
 
-The metadata of `Glue` can be referenced under `glueMetadata`, see sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglue/TemplateForConcurrency.yaml#L12-L12)
+The metadata of `Glue` can be referenced under `glueMetadata`, see sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/TemplateForConcurrency.yaml#L12-L12)
 
-In addition to that in `GlueOperator` the **`parent`** attribute can be used to reference the parent resource on which behalf the resources are created. See sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglueoperator/Templating.yaml).
+In addition to that in `GlueOperator` the **`parent`** attribute can be used to reference the parent resource on which behalf the resources are created. See sample [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/Templating.yaml).
 
 ### Reconciliation notes
 
@@ -84,7 +84,7 @@ The specs of `GlueOperator` are almost identical to `Glue`, it just adds one add
 which has two sub-attributes: **`apiVersion`** and **`kind`**. This structure specifies the resource 
 types - usually but not necessarily custom resources - watched. 
 
-See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/resourceglueoperator/Templating.yaml).
+See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/Templating.yaml).
 
 ## Deploying `kubernetes-glue-operator`
 
@@ -131,8 +131,8 @@ Note that none of the limitations are unsolvable, and will be continuously remov
    To achieve this, it creates three resources a `Deployment` running Nginx, a `ConfigMap` that contains the HTML file an mounted to nginx, a `Service` and an optional `Ingress`
    to expose the static web page.
 3. [Muatation Hook Deployment](https://github.com/csviri/kubernetes-glue-operator/tree/main/src/test/resources/sample/mutation), described on the project home page.
-4. [Additional `Glue` samples](https://github.com/csviri/kubernetes-glue-operator/tree/main/src/test/resources/resourceglue), note that these are used for integration testing.
-5. [Additional `GlueOperator` samples](https://github.com/csviri/kubernetes-glue-operator/tree/main/src/test/resources/resourceglueoperator), also used for integration testing.
+4. [Additional `Glue` samples](https://github.com/csviri/kubernetes-glue-operator/tree/main/src/test/resources/glue), note that these are used for integration testing.
+5. [Additional `GlueOperator` samples](https://github.com/csviri/kubernetes-glue-operator/tree/main/src/test/resources/glueoperator), also used for integration testing.
 
 ## Related documents
 

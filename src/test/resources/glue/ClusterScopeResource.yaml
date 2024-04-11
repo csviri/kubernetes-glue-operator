@@ -1,7 +1,7 @@
 apiVersion: io.csviri.operator.glue/v1beta1
 kind: Glue
 metadata:
-  name: "testresourceglue"
+  name: "glue1"
 spec:
   resources:
     - name: cluster-scoped-resource
