@@ -1,0 +1,30 @@
+apiVersion: io.csviri.operator.glue/v1beta1
+kind: Glue
+metadata:
+  name: two-resource-cross-condition
+spec:
+  resources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap1
+        data:
+          createOther: "false"
+    - name: configMap2
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap2
+        data:
+          key: value
+      dependsOn:
+        - configMap1
+      condition:
+        type: JSCondition
+        script: |
+          configMap1.data.createOther == "true";
+
+
