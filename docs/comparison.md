@@ -24,7 +24,7 @@ this is probably the most elegant way to go.
 
 As mentioned before there are solutions that are comparable to ours, and all of them have advantages and disadvantages:
 
-- [**metacontroller**](https://github.com/metacontroller/metacontroller) - it a very interesting solution that allows
+- [metacontroller](https://github.com/metacontroller/metacontroller) - it a very interesting solution that allows
   to implement controller is any language programming language, just like in the case of *kubernetes-glue-operator* takes a custom resource as an input, which
   describes the Kubernetes resources that we are interested in - or watched/managed for a custom resource.
   However, it does not describe the desired state that is up to you to implement in the form of a web service endpoint,
