@@ -119,7 +119,8 @@ is true. If the property is changed to `false` after, the resource is deleted.
 
 `Glue` is very similar to `GlueOperator`, with identical properties, except it does not have a parent. Thus, it does not define a controller, just a set of resources to reconcile. 
 Why is this useful? Note the **`dependsOn`** and **`readyPostCondition`** features, this allows you to write workflows on resources in a GitOps friendly way. Thus to make sure
-that resources are reconciled in a certain order, after some conditions are met.
+that resources are reconciled in a certain order after some conditions are met. To understand this better, see use cases like [this](https://github.com/kubernetes/kubernetes/issues/106802) in 
+Kubernetes, are typically meant to be solved by `Glue`.
 
 Let's take a look at another example, that will show also additional features (available both for `Glue` and `GlueOperator`). Typically Kubernetes does not require ordering regarding how
 resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
