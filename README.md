@@ -122,8 +122,8 @@ Why is this useful? Note the **`dependsOn`** and **`readyPostCondition`** featur
 that resources are reconciled in a certain order after some conditions are met. To understand this better, see use cases like [this](https://github.com/kubernetes/kubernetes/issues/106802) in 
 Kubernetes, are typically meant to be solved by `Glue`.
 
-Let's take a look at another example, that will show also additional features (available both for `Glue` and `GlueOperator`). Typically Kubernetes does not require ordering regarding how
-resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when external resources are managed by Kubernetes controllers.
+Let's look at another example, that will show the mentioned features (available both for `Glue` and `GlueOperator`). Again, Kubernetes does not require ordering regarding how
+resources are applied, however, there are certain cases when this is needed also for Kubernetes, but especially useful when Kubernetes controllers manage external resources.
 
 The following example shows how to deploy a [dynamic admission controller](https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/) that mutates 
 all the `Pods`, adding annotation on them. Note that this is a tricky situation since the endpoint for the `MutatingWebhookConfiguration` is also a `Pod`, thus 'Pods' should be 
