@@ -57,6 +57,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
     log.debug("Reconciling glue. name: {} namespace: {}",
         primary.getMetadata().getName(), primary.getMetadata().getNamespace());
+
+
+
     registerRelatedResourceInformers(context, primary);
     if (deletedGlueIfParentMarkedForDeletion(context, primary)) {
       return UpdateControl.noUpdate();
