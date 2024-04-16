@@ -33,7 +33,7 @@ public class ValidationAndErrorHandler {
       resource.getStatus()
           .setErrorMessage("Non unique names found: " + String.join(",", ex.getDuplicates()));
     } else {
-      resource.getStatus().setErrorMessage("Error. See controller logs");
+      resource.getStatus().setErrorMessage("Error during reconciliation");
     }
     return ErrorStatusUpdateControl.updateStatus(resource);
   }
