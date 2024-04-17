@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +13,7 @@ import io.csviri.operator.glue.customresource.glue.GlueSpec;
 import io.csviri.operator.glue.customresource.glue.RelatedResourceSpec;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
+import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;

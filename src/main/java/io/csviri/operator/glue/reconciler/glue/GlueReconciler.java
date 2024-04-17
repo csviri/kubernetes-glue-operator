@@ -2,8 +2,6 @@ package io.csviri.operator.glue.reconciler.glue;
 
 import java.util.*;
 
-import io.csviri.operator.glue.customresource.glue.GlueStatus;
-import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +10,7 @@ import io.csviri.operator.glue.conditions.JavaScripCondition;
 import io.csviri.operator.glue.conditions.ReadyCondition;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.glue.Glue;
+import io.csviri.operator.glue.customresource.glue.GlueStatus;
 import io.csviri.operator.glue.customresource.glue.condition.ConditionSpec;
 import io.csviri.operator.glue.customresource.glue.condition.JavaScriptConditionSpec;
 import io.csviri.operator.glue.customresource.glue.condition.ReadyConditionSpec;
