@@ -21,7 +21,10 @@ import jakarta.inject.Singleton;
 
 @Singleton
 public class ValidationAndErrorHandler {
+
   private static final Logger log = LoggerFactory.getLogger(ValidationAndErrorHandler.class);
+
+  public static final String NON_UNIQUE_NAMES_FOUND_PREFIX = "Non unique names found: ";
 
   public <T extends CustomResource<?, ? extends AbstractStatus>> ErrorStatusUpdateControl<T> updateStatusErrorMessage(
       Exception e,
@@ -31,7 +34,7 @@ public class ValidationAndErrorHandler {
         e);
     if (e instanceof ValidationAndErrorHandler.NonUniqueNameException ex) {
       resource.getStatus()
-          .setErrorMessage("Non unique names found: " + String.join(",", ex.getDuplicates()));
+          .setErrorMessage(NON_UNIQUE_NAMES_FOUND_PREFIX + String.join(",", ex.getDuplicates()));
     } else {
       resource.getStatus().setErrorMessage("Error during reconciliation");
     }
