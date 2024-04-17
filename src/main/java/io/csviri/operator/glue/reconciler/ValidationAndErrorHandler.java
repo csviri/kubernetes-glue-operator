@@ -35,10 +35,11 @@ public class ValidationAndErrorHandler {
     if (e instanceof ValidationAndErrorHandler.NonUniqueNameException ex) {
       resource.getStatus()
           .setErrorMessage(NON_UNIQUE_NAMES_FOUND_PREFIX + String.join(",", ex.getDuplicates()));
+      return ErrorStatusUpdateControl.updateStatus(resource).withNoRetry();
     } else {
       resource.getStatus().setErrorMessage("Error during reconciliation");
+      return ErrorStatusUpdateControl.updateStatus(resource);
     }
-    return ErrorStatusUpdateControl.updateStatus(resource);
   }
 
   public void checkIfNamesAreUnique(GlueSpec glueSpec) {
@@ -58,7 +59,6 @@ public class ValidationAndErrorHandler {
     if (!duplicates.isEmpty()) {
       throw new NonUniqueNameException(duplicates);
     }
-
   }
 
   public static class NonUniqueNameException extends GlueException {

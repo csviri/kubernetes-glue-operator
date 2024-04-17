@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,6 +140,9 @@ public class GlueOperatorReconciler
   @Override
   public ErrorStatusUpdateControl<GlueOperator> updateErrorStatus(GlueOperator resource,
       Context<GlueOperator> context, Exception e) {
+    if (resource.getStatus() == null) {
+      resource.setStatus(new ResourceFlowOperatorStatus());
+    }
     return validationAndErrorHandler.updateStatusErrorMessage(e, resource);
   }
 

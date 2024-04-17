@@ -2,6 +2,8 @@ package io.csviri.operator.glue.reconciler.glue;
 
 import java.util.*;
 
+import io.csviri.operator.glue.customresource.glue.GlueStatus;
+import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -282,6 +284,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   @Override
   public ErrorStatusUpdateControl<Glue> updateErrorStatus(Glue resource, Context<Glue> context,
       Exception e) {
+    if (resource.getStatus() == null) {
+      resource.setStatus(new GlueStatus());
+    }
     return validationAndErrorHandler.updateStatusErrorMessage(e, resource);
   }
 }
