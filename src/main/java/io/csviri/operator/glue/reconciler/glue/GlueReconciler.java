@@ -126,7 +126,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
     context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
       String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
       // dependent name is null for related resources
-      if (dependentName != null && primary.getSpec().getResources().stream()
+      if (dependentName != null && primary.getSpec().getChildResources().stream()
           .filter(pr -> pr.getName().equals(dependentName)).findAny().isEmpty()) {
         try {
           log.debug("Deleting resource with name: {}", dependentName + "for resource flow: {} "
@@ -146,7 +146,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
     Set<String> leafDependentNames = Utils.leafResourceNames(primary);
 
     Map<String, GenericDependentResource> genericDependentResourceMap = new HashMap<>();
-    primary.getSpec().getResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
+    primary.getSpec().getChildResources().forEach(spec -> createAndAddDependentToWorkflow(primary,
         context, spec, genericDependentResourceMap, builder,
         leafDependentNames.contains(spec.getName())));
 

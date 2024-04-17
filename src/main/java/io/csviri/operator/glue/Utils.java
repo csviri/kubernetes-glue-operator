@@ -30,7 +30,7 @@ public class Utils {
     var secondaryResources = context.getSecondaryResources(GenericKubernetesResource.class);
     Map<String, GenericKubernetesResource> res = new HashMap<>();
     secondaryResources.forEach(sr -> {
-      var dependentSpec = glue.getSpec().getResources().stream()
+      var dependentSpec = glue.getSpec().getChildResources().stream()
           .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
               && Utils.getKind(r).equals(sr.getKind())
       // comparing the name from annotation since the resource name might be templated in spec
@@ -139,8 +139,8 @@ public class Utils {
 
   public static Set<String> leafResourceNames(Glue glue) {
     Set<String> result = new HashSet<>();
-    glue.getSpec().getResources().forEach(r -> result.add(r.getName()));
-    glue.getSpec().getResources().forEach(r -> {
+    glue.getSpec().getChildResources().forEach(r -> result.add(r.getName()));
+    glue.getSpec().getChildResources().forEach(r -> {
       r.getDependsOn().forEach(result::remove);
     });
     return result;

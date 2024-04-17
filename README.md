@@ -61,7 +61,7 @@ spec:
   parent:
     apiVersion: glueoperator.sample/v1  # watches all the custom resource of type WebPage
     kind: WebPage
-  resources:
+  childResources:
     - name: htmlconfigmap
       resource:
         apiVersion: v1
@@ -109,7 +109,7 @@ spec:
 ```
 
 There are multiple aspects to see here. The four related resources will be templated
-and applied to the cluster if such a resource is created. The reconciliation will be triggered if anything changes in the custom or managed resources. 
+and applied to the cluster if such a resource is created. The reconciliation will be triggered if anything changes in the custom or child resources. 
 
 Note also the `condition` part for `Ingress` resource contains multiple types of conditions, `JSCondition` is
 used in this example, which allows writing conditions in Javascript. The `Ingress` will be created if the `.spec.exposed` property
@@ -137,7 +137,7 @@ kind: Glue
 metadata:
   name: mutation-webhook-deployment
 spec:
-  resources:
+  childResources:
     - name: service
       resource:
         apiVersion: v1

@@ -9,22 +9,23 @@ Although it is limited only to Kubernetes resources it makes it very easy to use
 ## [Glue resource](https://github.com/csviri/kubernetes-glue-operator/releases/latest/download/glues.glue-v1.yml)
 
 `Glue` is the heart of the operator. Note that `GlueOperator` controller just creates a new `Glue` with a related resource, 
-for each parent custom resource. `Glue` defines `resources` (sometimes referred to as managed resources) and `related resources`:
+for each parent custom resource. `Glue` defines `childResources` (sometimes referred to as managed resources) and `related resources`:
 
-### Managed resources
+### Child Resources
 
 #### Attributes
 
-The `resources` section is a list of resources to be reconciled. It has several attributes:
+The `childResources` section is a list of resources to be reconciled (created, updated, deleted by controller). 
+It has several attributes:
 
 - **`name`** - is a mandatory unique (unique also regarding related resources) attribute.
   The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
   If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
 - **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
   [qute templating engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
-  There is a restriction, that the managed resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
+  There is a restriction, that the child resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
   (and/or parent for `GlueOperator`), so the `namespace` field in resource **metadata should not be specified**.
-- **`dependsOn`** - is a list of names of other managed resources (not related resources). The resource is not reconciled until all the resources
+- **`dependsOn`** - is a list of names of other child resources (not related resources). The resource is not reconciled until all the resources
    which it depends on are not reconciled and ready (if there is a `readyPostCondition` present). 
    Note that during the cleanup phase (when a `Glue` is deleted) resources are cleaned up in reverse order.
 - **`condition`** - a condition to specify if the resource should be there or not, thus even if the condition is evaluated to be `true`
@@ -39,17 +40,17 @@ At the moment there are two types of built-in conditions provided:
 
 - **`ReadyCondition`** - check if a resource is up and running. Use it only as a `readyPostCondition`. See sample usage [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/sample/mutation/mutation.glue.yaml#L24-L25).
 - **`JSCondition`** - a generic condition, that allows writing conditions in JavaScript. As input, all the resources are available which
-  are either managed or related. The script should return a boolean value.
+  are either child or related. The script should return a boolean value.
   See accessing the related resource in [WebPage sample](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/sample/webpage/webpage.operator.yaml#L62-L64),
   and cross-referencing resources [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/TwoResourcesAndCondition.yaml#L23-L28).
 
 ### Related resources
 
-Related resources are resources that are not managed (not created, updated, or deleted) during reconciliation, but serve as an input for it.
+Related resources are resources that are not reconciled (not created, updated, or deleted) during reconciliation, but serve as an input for it.
 See sample usage within `Glue` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glue/RelatedResourceSimpleWithCondition.yaml)
 The following attributes can be defined for a related resource:
 
-- **`name`** - same as for managed resource, unique identifier, used to reference the resource.
+- **`name`** - same as for child resource, unique identifier, used to reference the resource.
 - **`apiVersion`** - Kubernetes resource API Version of the resource
 - **`kind`** - Kubernetes kind property of the resource
 - **`resourceNames`** - list of string of the resource names within the same namespace as `Glue`.  
@@ -71,9 +72,9 @@ In addition to that in `GlueOperator` the **`parent`** attribute can be used to 
 
 ### Reconciliation notes
 
-The reconciliation is triggered either on a change of the `Glue` or any managed or related resources. 
+The reconciliation is triggered either on a change of the `Glue` or any child or related resources. 
 
-On every reconciliation, each managed resource is reconciled, and if a resource is updated, it is added to a cache, so it is available for templating
+On every reconciliation, each child resource is reconciled, and if a resource is updated, it is added to a cache, so it is available for templating
 for a resource that depends on it.
 
 The `DependentResource` implementation of JOSDK makes all kinds of optimizations on the reconciliation which are utilized (or will be also here). 
@@ -98,7 +99,7 @@ While we will provide more options, users are encouraged to enhance/adjust this 
 
 Since the project is a meta-controller, it needs to have access rights to all the resources it manages. 
 When creating specialized roles for a deployment, roles should contain the union of required access rights
-for all the managed resources, specifically: `["list", "watch", "create", "patch", "delete"]`
+for all the child resources, specifically: `["list", "watch", "create", "patch", "delete"]`
 and `["list", "watch"]` for related resources.
 
 The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.

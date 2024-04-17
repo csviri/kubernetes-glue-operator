@@ -3,7 +3,7 @@ kind: Glue
 metadata:
   name: resource-templating-sample
 spec:
-  resources:
+  childResources:
     - name: configMap1
       resourceTemplate: |
         apiVersion: v1

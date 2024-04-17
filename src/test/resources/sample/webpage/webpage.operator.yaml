@@ -6,7 +6,7 @@ spec:
   parent:
     apiVersion: glueoperator.sample/v1
     kind: WebPage
-  resources:
+  childResources:
     - name: htmlconfigmap
       resource:
         apiVersion: v1

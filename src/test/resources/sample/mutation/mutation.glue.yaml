@@ -3,7 +3,7 @@ kind: Glue
 metadata:
   name: mutation-webhook-deployment
 spec:
-  resources:
+  childResources:
     - name: service
       resource:
         apiVersion: v1

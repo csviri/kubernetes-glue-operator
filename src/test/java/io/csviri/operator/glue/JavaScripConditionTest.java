@@ -73,11 +73,11 @@ class JavaScripConditionTest {
 
     Glue glue = new Glue();
     glue.setSpec(new GlueSpec());
-    glue.getSpec().setResources(new ArrayList<>());
+    glue.getSpec().setChildResources(new ArrayList<>());
     var drSpec = new DependentResourceSpec();
     drSpec.setName(DR_NAME);
     drSpec.setResource(configMap());
-    glue.getSpec().getResources().add(drSpec);
+    glue.getSpec().getChildResources().add(drSpec);
 
     var condition = new JavaScripCondition("""
             secondary.data.key1 == "val1";

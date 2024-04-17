@@ -33,7 +33,7 @@ class InformerRegister {
     var registeredGVKSet =
         new HashSet<>(glueToInformerGVK.get(primary.getMetadata().getName()));
 
-    var currentGVKSet = primary.getSpec().getResources().stream()
+    var currentGVKSet = primary.getSpec().getChildResources().stream()
         .map(Utils::getGVK)
         .collect(Collectors.toSet());
 

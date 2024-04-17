@@ -6,16 +6,16 @@ import java.util.Objects;
 
 public class GlueSpec {
 
-  private List<DependentResourceSpec> resources = new ArrayList<>();
+  private List<DependentResourceSpec> childResources = new ArrayList<>();
 
   private List<RelatedResourceSpec> relatedResources = new ArrayList<>();
 
-  public List<DependentResourceSpec> getResources() {
-    return resources;
+  public List<DependentResourceSpec> getChildResources() {
+    return childResources;
   }
 
-  public void setResources(List<DependentResourceSpec> resources) {
-    this.resources = resources;
+  public void setChildResources(List<DependentResourceSpec> childResources) {
+    this.childResources = childResources;
   }
 
   public List<RelatedResourceSpec> getRelatedResources() {
@@ -30,7 +30,7 @@ public class GlueSpec {
   @Override
   public String toString() {
     return "GlueSpec{" +
-        "resources=" + resources +
+        "resources=" + childResources +
         '}';
   }
 
@@ -41,11 +41,11 @@ public class GlueSpec {
     if (o == null || getClass() != o.getClass())
       return false;
     GlueSpec that = (GlueSpec) o;
-    return Objects.equals(resources, that.resources);
+    return Objects.equals(childResources, that.childResources);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(resources);
+    return Objects.hash(childResources);
   }
 }

@@ -3,7 +3,7 @@ kind: Glue
 metadata:
   name: related-resource-test1
 spec:
-  resources:
+  childResources:
     - name: configMap1
       resource:
         apiVersion: v1

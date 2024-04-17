@@ -197,9 +197,9 @@ class GlueOperatorTest extends TestBase {
     wo.setSpec(spec);
     spec.setParent(new Parent(CR_GROUP + "/v1", TestCustomResource.class.getSimpleName()));
 
-    spec.setResources(new ArrayList<>());
+    spec.setChildResources(new ArrayList<>());
     DependentResourceSpec drs = new DependentResourceSpec();
-    spec.getResources().add(drs);
+    spec.getChildResources().add(drs);
     drs.setResource(TestUtils.load("/ConfigMap.yaml"));
     drs.setName("configMap1");
     return wo;
