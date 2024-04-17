@@ -10,12 +10,14 @@ import io.csviri.operator.glue.conditions.JavaScripCondition;
 import io.csviri.operator.glue.conditions.ReadyCondition;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.glue.Glue;
+import io.csviri.operator.glue.customresource.glue.GlueStatus;
 import io.csviri.operator.glue.customresource.glue.condition.ConditionSpec;
 import io.csviri.operator.glue.customresource.glue.condition.JavaScriptConditionSpec;
 import io.csviri.operator.glue.customresource.glue.condition.ReadyConditionSpec;
 import io.csviri.operator.glue.dependent.GCGenericDependentResource;
 import io.csviri.operator.glue.dependent.GenericDependentResource;
 import io.csviri.operator.glue.dependent.GenericResourceDiscriminator;
+import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.csviri.operator.glue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -27,15 +29,20 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.KubernetesResourceDeletedCondition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
+import jakarta.inject.Inject;
+
 import static io.csviri.operator.glue.Utils.getResourceForSSAFrom;
 import static io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler.PARENT_RELATED_RESOURCE_NAME;
 
 @ControllerConfiguration
-public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
+public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorStatusHandler<Glue> {
 
   private static final Logger log = LoggerFactory.getLogger(GlueReconciler.class);
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.resourceflow/name";
   public static final String PARENT_GLUE_FINALIZER_PREFIX = "io.csviri.operator.resourceflow.glue/";
+
+  @Inject
+  ValidationAndErrorHandler validationAndErrorHandler;
 
   private final KubernetesResourceDeletedCondition deletePostCondition =
       new KubernetesResourceDeletedCondition();
@@ -57,6 +64,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
 
     log.debug("Reconciling glue. name: {} namespace: {}",
         primary.getMetadata().getName(), primary.getMetadata().getNamespace());
+
+    validationAndErrorHandler.checkIfNamesAreUnique(primary.getSpec());
+
     registerRelatedResourceInformers(context, primary);
     if (deletedGlueIfParentMarkedForDeletion(context, primary)) {
       return UpdateControl.noUpdate();
@@ -270,5 +280,12 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue> {
     return PARENT_GLUE_FINALIZER_PREFIX + glueName;
   }
 
-
+  @Override
+  public ErrorStatusUpdateControl<Glue> updateErrorStatus(Glue resource, Context<Glue> context,
+      Exception e) {
+    if (resource.getStatus() == null) {
+      resource.setStatus(new GlueStatus());
+    }
+    return validationAndErrorHandler.updateStatusErrorMessage(e, resource);
+  }
 }

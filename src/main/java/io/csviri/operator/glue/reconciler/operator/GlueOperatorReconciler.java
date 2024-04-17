@@ -13,6 +13,8 @@ import io.csviri.operator.glue.customresource.glue.GlueSpec;
 import io.csviri.operator.glue.customresource.glue.RelatedResourceSpec;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
+import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
+import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
@@ -23,16 +25,21 @@ import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
+import jakarta.inject.Inject;
+
 @ControllerConfiguration
 public class GlueOperatorReconciler
     implements Reconciler<GlueOperator>, EventSourceInitializer<GlueOperator>,
-    Cleaner<GlueOperator> {
+    Cleaner<GlueOperator>, ErrorStatusHandler<GlueOperator> {
 
   private static final Logger log = LoggerFactory.getLogger(GlueOperatorReconciler.class);
 
   public static final String GLUE_LABEL_KEY = "foroperator";
   public static final String GLUE_LABEL_VALUE = "true";
   public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
+
+  @Inject
+  ValidationAndErrorHandler validationAndErrorHandler;
 
   private InformerEventSource<Glue, GlueOperator> resourceFlowEventSource;
 
@@ -42,6 +49,8 @@ public class GlueOperatorReconciler
 
     log.info("Reconciling GlueOperator {} in namespace: {}", glueOperator.getMetadata().getName(),
         glueOperator.getMetadata().getNamespace());
+
+    validationAndErrorHandler.checkIfNamesAreUnique(glueOperator.getSpec());
 
     var targetCREventSource = getOrRegisterCustomResourceEventSource(glueOperator, context);
     targetCREventSource.list().forEach(cr -> {
@@ -129,6 +138,15 @@ public class GlueOperatorReconciler
   }
 
   @Override
+  public ErrorStatusUpdateControl<GlueOperator> updateErrorStatus(GlueOperator resource,
+      Context<GlueOperator> context, Exception e) {
+    if (resource.getStatus() == null) {
+      resource.setStatus(new ResourceFlowOperatorStatus());
+    }
+    return validationAndErrorHandler.updateStatusErrorMessage(e, resource);
+  }
+
+  @Override
   public DeleteControl cleanup(GlueOperator glueOperator,
       Context<GlueOperator> context) {
     var spec = glueOperator.getSpec();
@@ -140,5 +158,6 @@ public class GlueOperatorReconciler
   private static String glueName(GenericKubernetesResource cr) {
     return KubernetesResourceUtil.sanitizeName(cr.getMetadata().getName() + "-" + cr.getKind());
   }
+
 
 }

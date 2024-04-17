@@ -1,7 +1,7 @@
 package io.csviri.operator.glue.customresource.glue;
 
-import io.javaoperatorsdk.operator.api.ObservedGenerationAwareStatus;
+import io.csviri.operator.glue.customresource.AbstractStatus;
 
-public class GlueStatus extends ObservedGenerationAwareStatus {
+public class GlueStatus extends AbstractStatus {
 
 }

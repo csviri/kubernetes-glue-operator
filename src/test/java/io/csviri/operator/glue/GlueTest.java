@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.glue.Glue;
+import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.Secret;
 import io.quarkus.test.junit.QuarkusTest;
@@ -222,6 +223,21 @@ class GlueTest extends TestBase {
       assertThat(s).isNull();
     });
   }
+
+  @Test
+  void nonUniqueNameResultsInErrorMessageOnStatus() {
+    Glue glue = create(TestUtils.loadResoureFlow("/glue/NonUniqueName.yaml"));
+
+    await().untilAsserted(() -> {
+      var actualGlue = get(Glue.class, glue.getMetadata().getName());
+
+      assertThat(actualGlue.getStatus()).isNotNull();
+      assertThat(actualGlue.getStatus().getErrorMessage())
+          .startsWith(ValidationAndErrorHandler.NON_UNIQUE_NAMES_FOUND_PREFIX);
+    });
+  }
+
+
   //
   // @Disabled("Not supported in current version")
   // @Test
