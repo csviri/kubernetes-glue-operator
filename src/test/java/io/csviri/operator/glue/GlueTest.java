@@ -39,7 +39,7 @@ class GlueTest extends TestBase {
       assertThat(cm2.getData().get("valueFromCM1")).isEqualTo("value1");
     });
 
-    ((Map<String, String>) glue.getSpec().getResources().get(0).getResource()
+    ((Map<String, String>) glue.getSpec().getChildResources().get(0).getResource()
         .getAdditionalProperties().get("data"))
         .put("key", CHANGED_VALUE);
 
@@ -77,7 +77,7 @@ class GlueTest extends TestBase {
     });
 
     var resourceTemplate =
-        glue.getSpec().getResources().stream().filter(r -> r.getName().equals("configMap1"))
+        glue.getSpec().getChildResources().stream().filter(r -> r.getName().equals("configMap1"))
             .findAny().orElseThrow().getResource();
     // set new value
     ((Map<String, String>) resourceTemplate.getAdditionalProperties().get("data")).put("key",
@@ -113,7 +113,7 @@ class GlueTest extends TestBase {
       assertThat(cm2).isNull();
     });
 
-    Map<String, String> map = (Map<String, String>) glue.getSpec().getResources()
+    Map<String, String> map = (Map<String, String>) glue.getSpec().getChildResources()
         .get(0).getResource().getAdditionalProperties().get("data");
     map.put("createOther", "true");
 
@@ -197,8 +197,8 @@ class GlueTest extends TestBase {
       assertThat(cm2).isNotNull();
     });
 
-    glue.getSpec().getResources().remove(1);
-    glue.getSpec().getResources().add(new DependentResourceSpec()
+    glue.getSpec().getChildResources().remove(1);
+    glue.getSpec().getChildResources().add(new DependentResourceSpec()
         .setName("secret")
         .setResource(TestUtils.load("/Secret.yaml")));
 

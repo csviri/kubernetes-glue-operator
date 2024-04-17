@@ -3,7 +3,7 @@ kind: Glue
 metadata:
   name: two-resource-cross-condition
 spec:
-  resources:
+  childResources:
     - name: configMap1
       resource:
         apiVersion: v1

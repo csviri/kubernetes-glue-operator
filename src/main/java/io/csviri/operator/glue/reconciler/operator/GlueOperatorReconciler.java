@@ -99,7 +99,7 @@ public class GlueOperatorReconciler
 
   private GlueSpec toWorkflowSpec(GlueOperatorSpec spec) {
     var res = new GlueSpec();
-    res.setResources(new ArrayList<>(spec.getResources()));
+    res.setChildResources(new ArrayList<>(spec.getChildResources()));
     res.setRelatedResources(new ArrayList<>(spec.getRelatedResources()));
     return res;
   }

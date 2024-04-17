@@ -3,7 +3,7 @@ kind: Glue
 metadata:
   name: "glue1"
 spec:
-  resources:
+  childResources:
     - name: cluster-scoped-resource
       resource:
         apiVersion: io.csviri.operator.glue/v1

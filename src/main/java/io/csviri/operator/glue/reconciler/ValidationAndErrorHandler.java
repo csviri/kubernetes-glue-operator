@@ -53,7 +53,7 @@ public class ValidationAndErrorHandler {
         seen.add(n);
       }
     };
-    glueSpec.getResources().stream().map(DependentResourceSpec::getName).forEach(deduplicate);
+    glueSpec.getChildResources().stream().map(DependentResourceSpec::getName).forEach(deduplicate);
     glueSpec.getRelatedResources().stream().map(RelatedResourceSpec::getName).forEach(deduplicate);
 
     if (!duplicates.isEmpty()) {
