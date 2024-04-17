@@ -14,6 +14,7 @@ import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.Parent;
+import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.quarkus.test.junit.QuarkusTest;
@@ -147,6 +148,20 @@ class GlueOperatorTest extends TestBase {
           var cm2 = get(ConfigMap.class, TEST_RESOURCE2_PREFIX + n);
           assertThat(cm2).isNull();
         }));
+  }
+
+  @Test
+  void nonUniqueNameTest() {
+    var go = create(TestUtils
+        .loadResourceFlowOperator("/glueoperator/NonUniqueName.yaml"));
+
+    await().untilAsserted(() -> {
+      var actual = get(GlueOperator.class, go.getMetadata().getName());
+
+      assertThat(actual.getStatus()).isNotNull();
+      assertThat(actual.getStatus().getErrorMessage())
+          .startsWith(ValidationAndErrorHandler.NON_UNIQUE_NAMES_FOUND_PREFIX);
+    });
   }
 
   TestCustomResource testCustomResource() {
