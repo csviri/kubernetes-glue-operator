@@ -63,7 +63,6 @@ public class GlueOperatorLabelSelectorTest extends TestBase {
           testCR.getKind()));
       assertThat(glue).isNull();
     });
-    delete(go);
   }
 
   public static class GlueOperatorLabelSelectorTestProfile implements QuarkusTestProfile {

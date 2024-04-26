@@ -139,11 +139,17 @@ public class GlueOperatorReconciler
           .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
       es.start();
     } catch (IllegalArgumentException e) {
-      es = new InformerEventSource<>(InformerConfiguration.from(gvk,
+      var configBuilder = InformerConfiguration.from(gvk,
           context.eventSourceRetriever().eventSourceContextForDynamicRegistration())
           .withSecondaryToPrimaryMapper(
-              resource -> Set.of(ResourceID.fromResource(glueOperator)))
-          .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
+              resource -> Set.of(ResourceID.fromResource(glueOperator)));
+
+      if (spec.getParent().getLabelSelector() != null) {
+        configBuilder.withLabelSelector(spec.getParent().getLabelSelector());
+      }
+
+      es = new InformerEventSource<>(configBuilder.build(),
+          context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
       context.eventSourceRetriever().dynamicallyRegisterEventSource(gvk.toString(), es);
     }
     return es;

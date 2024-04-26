@@ -1,0 +1,18 @@
+apiVersion: io.csviri.operator.glue/v1beta1
+kind: GlueOperator
+metadata:
+  name: templating-sample
+spec:
+  parent:
+    apiVersion: io.csviri.operator.glue/v1
+    kind: TestCustomResource
+    labelSelector: "mylabel=value"
+  childResources:
+    - name: configMap1
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: "{parent.metadata.name}"
+        data:
+          key: "{parent.spec.value}"

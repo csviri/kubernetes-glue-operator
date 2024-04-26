@@ -82,8 +82,11 @@ The `DependentResource` implementation of JOSDK makes all kinds of optimizations
 ## [GlueOperator resource](https://github.com/csviri/kubernetes-glue-operator/releases/latest/download/glueoperators.glue-v1.yml)
 
 The specs of `GlueOperator` are almost identical to `Glue`, it just adds one additional attribute **`parent`**, 
-which has two sub-attributes: **`apiVersion`** and **`kind`**. This structure specifies the resource 
-types - usually but not necessarily custom resources - watched. 
+which has the following sub-attributes: 
+ - **`apiVersion`** and **`kind`** - specifies the resources to reconciler according to the spec. 
+   Targets are usually custom resources but not necessarily, it also works with built-in Kubernetes
+   resources.
+ - **`labelSelector`** - an optional label selector for the target resources
 
 See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/Templating.yaml).
 
