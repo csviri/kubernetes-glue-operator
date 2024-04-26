@@ -37,8 +37,7 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
         .loadResourceFlowOperator("/glueoperator/SimpleGlueOperator.yaml"));
 
     var testCR = create(TestData.testCustomResource());
-    update(go);
-
+    
     await().untilAsserted(() -> {
       assertThat(get(ConfigMap.class, testCR.getMetadata().getName())).isNotNull();
       var glue = get(Glue.class, GlueOperatorReconciler.glueName(testCR.getMetadata().getName(),
