@@ -27,8 +27,6 @@ import static org.awaitility.Awaitility.await;
 @QuarkusTest
 class GlueOperatorTest extends TestBase {
 
-
-
   @BeforeEach
   void applyCRD() {
     TestUtils.applyTestCrd(client, TestCustomResource.class, TestCustomResource2.class);
@@ -162,6 +160,33 @@ class GlueOperatorTest extends TestBase {
     });
   }
 
+  @Test
+  void parentWithLabelSelector() {
+    create(TestUtils
+        .loadResourceFlowOperator("/glueoperator/ParentLabelSelector.yaml"));
+
+    var cr = create(testCustomResource());
+    String name = cr.getMetadata().getName();
+
+    await().pollDelay(TestUtils.INITIAL_RECONCILE_WAIT_TIMEOUT).untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, name);
+      assertThat(cm1).isNull();
+    });
+
+    cr.getMetadata().getLabels().put("mylabel", "value");
+    update(cr);
+
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, name);
+      assertThat(cm1).isNotNull();
+    });
+
+    delete(cr);
+    await().untilAsserted(() -> {
+      var cm1 = get(ConfigMap.class, name);
+      assertThat(cm1).isNull();
+    });
+  }
 
 
   GlueOperator testWorkflowOperator() {

@@ -54,7 +54,6 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
           testCR.getKind()));
       assertThat(glue).isNull();
     });
-    delete(go);
   }
 
   public static class GlueOperatorComplexLabelSelectorTestProfile implements QuarkusTestProfile {
