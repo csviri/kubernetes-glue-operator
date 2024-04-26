@@ -104,7 +104,7 @@ and `["list", "watch"]` for related resources.
 
 The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
 
-### Sharding with Label Selectors
+### Sharding with label selectors
 
 The operator can be deployed to only target certain `Glue` or `GlueOperator` resources based on [label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
 You can use simply the [configuration](https://docs.quarkiverse.io/quarkus-operator-sdk/dev/includes/quarkus-operator-sdk.html#quarkus-operator-sdk_quarkus-operator-sdk-controllers-controllers-selector)
