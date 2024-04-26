@@ -6,6 +6,8 @@ public class Parent {
   private String kind;
   private String labelSelector;
 
+  public Parent() {}
+
   public Parent(String apiVersion, String kind) {
     this.apiVersion = apiVersion;
     this.kind = kind;
