@@ -132,9 +132,10 @@ config key (which is a type of map). Therefore, for a label selector that specif
 
 `quarkus.operator-sdk.controllers.glue.selector=mylabel1=value1,mylabel2=value2`
 
-the following two configuration params needs to be added:
+you need to add the following configuration params:
 
 `glue.operator.glue-operator-managed-glue-labels.mylabel1=value1`
+
 `glue.operator.glue-operator-managed-glue-labels.mylabel2=value2`
 
 This will ensure that the labels are added correctly to the `Glue`. See the related 
