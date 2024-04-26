@@ -88,7 +88,7 @@ which has the following sub-attributes:
    resources.
  - **`labelSelector`** - an optional label selector for the target resources
 
-See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/Templating.yaml).
+See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/SimpleGlueOperator.yaml).
 
 ## Deployment
 
