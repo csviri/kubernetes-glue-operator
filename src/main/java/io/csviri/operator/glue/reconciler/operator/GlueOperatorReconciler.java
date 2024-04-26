@@ -1,13 +1,13 @@
 package io.csviri.operator.glue.reconciler.operator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.glue.ControllerConfig;
+import io.csviri.operator.glue.GlueException;
 import io.csviri.operator.glue.customresource.glue.Glue;
 import io.csviri.operator.glue.customresource.glue.GlueSpec;
 import io.csviri.operator.glue.customresource.glue.RelatedResourceSpec;
@@ -25,9 +25,12 @@ import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-@ControllerConfiguration
+import static io.csviri.operator.glue.reconciler.glue.GlueReconciler.GLUE_RECONCILER_NAME;
+
+@ControllerConfiguration(name = GlueOperatorReconciler.GLUE_OPERATOR_RECONCILER_NAME)
 public class GlueOperatorReconciler
     implements Reconciler<GlueOperator>, EventSourceInitializer<GlueOperator>,
     Cleaner<GlueOperator>, ErrorStatusHandler<GlueOperator> {
@@ -37,11 +40,25 @@ public class GlueOperatorReconciler
   public static final String GLUE_LABEL_KEY = "foroperator";
   public static final String GLUE_LABEL_VALUE = "true";
   public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
+  public static final String GLUE_OPERATOR_RECONCILER_NAME = "glue-operator";
 
   @Inject
   ValidationAndErrorHandler validationAndErrorHandler;
 
+  @ConfigProperty(name = "quarkus.operator-sdk.controllers." + GLUE_RECONCILER_NAME + ".selector")
+  Optional<String> glueLabelSelector;
+
+  @Inject
+  ControllerConfig controllerConfig;
+
+  private Map<String, String> defaultGlueLabels;
+
   private InformerEventSource<Glue, GlueOperator> resourceFlowEventSource;
+
+  @PostConstruct
+  void init() {
+    defaultGlueLabels = initDefaultLabelsToAddToGlue();
+  }
 
   @Override
   public UpdateControl<GlueOperator> reconcile(GlueOperator glueOperator,
@@ -56,7 +73,7 @@ public class GlueOperatorReconciler
     targetCREventSource.list().forEach(cr -> {
       var actualResourceFlow = resourceFlowEventSource
           .get(new ResourceID(glueName(cr), cr.getMetadata().getNamespace()));
-      var desiredResourceFlow = createResourceFlow(cr, glueOperator);
+      var desiredResourceFlow = createGlue(cr, glueOperator);
       if (actualResourceFlow.isEmpty()) {
         context.getClient().resource(desiredResourceFlow).serverSideApply();
       } else if (!actualResourceFlow.orElseThrow().getSpec()
@@ -72,7 +89,7 @@ public class GlueOperatorReconciler
     return UpdateControl.noUpdate();
   }
 
-  private Glue createResourceFlow(GenericKubernetesResource targetParentResource,
+  private Glue createGlue(GenericKubernetesResource targetParentResource,
       GlueOperator glueOperator) {
     var glue = new Glue();
 
@@ -82,6 +99,10 @@ public class GlueOperatorReconciler
         .withLabels(Map.of(GLUE_LABEL_KEY, GLUE_LABEL_VALUE))
         .build());
     glue.setSpec(toWorkflowSpec(glueOperator.getSpec()));
+
+    if (!defaultGlueLabels.isEmpty()) {
+      glue.getMetadata().getLabels().putAll(defaultGlueLabels);
+    }
 
     var parent = glueOperator.getSpec().getParent();
     RelatedResourceSpec parentRelatedSpec = new RelatedResourceSpec();
@@ -159,5 +180,30 @@ public class GlueOperatorReconciler
     return KubernetesResourceUtil.sanitizeName(cr.getMetadata().getName() + "-" + cr.getKind());
   }
 
+  private Map<String, String> initDefaultLabelsToAddToGlue() {
+    Map<String, String> res = new HashMap<>();
+    if (!controllerConfig.glueOperatorManagedGlueLabels().isEmpty()) {
+      res.putAll(controllerConfig.glueOperatorManagedGlueLabels());
+    } else {
+      glueLabelSelector.ifPresent(ls -> {
+        if (ls.contains(",") || ls.contains("(")) {
+          throw new GlueException(
+              "Glue reconciler label selector contains non-simple label selector: " + ls +
+                  ". Specify Glue label selector in simple form ('key=value' or 'key') " +
+                  "or configure 'glue.operator.glue-operator-managed-glue-labels'");
+        }
+        String[] labelSelectorParts = ls.split("=");
+        if (labelSelectorParts.length > 2) {
+          throw new GlueException("Invalid label selector: " + ls);
+        }
+        if (labelSelectorParts.length == 1) {
+          res.put(labelSelectorParts[0], "");
+        } else {
+          res.put(labelSelectorParts[0], labelSelectorParts[1]);
+        }
+      });
+    }
+    return res;
+  }
 
 }
