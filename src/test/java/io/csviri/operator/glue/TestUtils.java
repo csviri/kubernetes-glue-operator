@@ -25,8 +25,10 @@ import io.javaoperatorsdk.operator.ReconcilerUtils;
 public class TestUtils {
 
   public static final Duration GC_WAIT_TIMEOUT_SECOND = Duration.ofSeconds(45);
+  public static final Duration INITIAL_RECONCILE_WAIT_TIMEOUT = Duration.ofMillis(150);
 
   public static final int CRD_READY_WAIT = 1000;
+
 
   private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 

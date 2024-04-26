@@ -104,8 +104,41 @@ and `["list", "watch"]` for related resources.
 
 The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
 
-See also the upcoming deployment modes/options: [sharding with label selectors](https://github.com/csviri/kubernetes-glue-operator/issues/50),
-[watching only one custom resources type](https://github.com/csviri/kubernetes-glue-operator/issues/54)
+### Sharding with Label Selectors
+
+The operator can be deployed to only target certain `Glue` or `GlueOperator` resources based on [label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
+You can use simply the [configuration](https://docs.quarkiverse.io/quarkus-operator-sdk/dev/includes/quarkus-operator-sdk.html#quarkus-operator-sdk_quarkus-operator-sdk-controllers-controllers-selector)
+from Quarkus Operator SDK to set the label selector for the reconciler.
+
+The configuration for `Glue` looks like:
+
+`quarkus.operator-sdk.controllers.glue.selector=mylabel=myvalue`
+
+for `GlueOperator`:
+
+`quarkus.operator-sdk.controllers.glue-operator.selector=mylabel=myvalue`
+
+This will work with any label selector for `GlueOperator` and with simple label selectors for `Glue`,
+thus in `key=value` or just `key` form. 
+
+
+With `Glue` there is a caveat. `GlueOperator` works in a way that it creates a `Glue` resource for every 
+custom resource tracked, so if there is a label selector defined for `Glue` it needs to add this label
+to the `Glue` resource when it is created. Since it is not trivial to parse label selectors, in more 
+complex forms of label selectors (other the ones mentioned above), the labels to add to the `Glue` resources
+by a `GlueOperator` needs to be specified explicitly using 
+[`glue.operator.glue-operator-managed-glue-labels`](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/main/java/io/csviri/operator/glue/ControllerConfig.java#L10-L10) 
+config key (which is a type of map). Therefore, for a label selector that specified two values for a glue:
+
+`quarkus.operator-sdk.controllers.glue.selector=mylabel1=value1,mylabel2=value2`
+
+the following two configuration params needs to be added:
+
+`glue.operator.glue-operator-managed-glue-labels.mylabel1=value1`
+`glue.operator.glue-operator-managed-glue-labels.mylabel2=value2`
+
+This will ensure that the labels are added correctly to the `Glue`. See the related 
+[integration test](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/java/io/csviri/operator/glue/GlueOperatorComplexLabelSelectorTest.java#L23-L23).
 
 ## Implementation details and performance
 

@@ -34,12 +34,13 @@ import jakarta.inject.Inject;
 import static io.csviri.operator.glue.Utils.getResourceForSSAFrom;
 import static io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler.PARENT_RELATED_RESOURCE_NAME;
 
-@ControllerConfiguration
+@ControllerConfiguration(name = GlueReconciler.GLUE_RECONCILER_NAME)
 public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorStatusHandler<Glue> {
 
   private static final Logger log = LoggerFactory.getLogger(GlueReconciler.class);
   public static final String DEPENDENT_NAME_ANNOTATION_KEY = "io.csviri.operator.resourceflow/name";
   public static final String PARENT_GLUE_FINALIZER_PREFIX = "io.csviri.operator.resourceflow.glue/";
+  public static final String GLUE_RECONCILER_NAME = "glue";
 
   @Inject
   ValidationAndErrorHandler validationAndErrorHandler;
