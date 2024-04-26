@@ -53,7 +53,7 @@ public class GlueOperatorReconciler
 
   private Map<String, String> defaultGlueLabels;
 
-  private InformerEventSource<Glue, GlueOperator> resourceFlowEventSource;
+  private InformerEventSource<Glue, GlueOperator> glueEventSource;
 
   @PostConstruct
   void init() {
@@ -71,8 +71,9 @@ public class GlueOperatorReconciler
 
     var targetCREventSource = getOrRegisterCustomResourceEventSource(glueOperator, context);
     targetCREventSource.list().forEach(cr -> {
-      var actualResourceFlow = resourceFlowEventSource
-          .get(new ResourceID(glueName(cr), cr.getMetadata().getNamespace()));
+      var actualResourceFlow = glueEventSource
+          .get(new ResourceID(glueName(cr.getMetadata().getName(), cr.getKind()),
+              cr.getMetadata().getNamespace()));
       var desiredResourceFlow = createGlue(cr, glueOperator);
       if (actualResourceFlow.isEmpty()) {
         context.getClient().resource(desiredResourceFlow).serverSideApply();
@@ -94,7 +95,8 @@ public class GlueOperatorReconciler
     var glue = new Glue();
 
     glue.setMetadata(new ObjectMetaBuilder()
-        .withName(glueName(targetParentResource))
+        .withName(
+            glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
         .withNamespace(targetParentResource.getMetadata().getNamespace())
         .withLabels(Map.of(GLUE_LABEL_KEY, GLUE_LABEL_VALUE))
         .build());
@@ -150,12 +152,12 @@ public class GlueOperatorReconciler
   @Override
   public Map<String, EventSource> prepareEventSources(
       EventSourceContext<GlueOperator> eventSourceContext) {
-    resourceFlowEventSource = new InformerEventSource<>(
+    glueEventSource = new InformerEventSource<>(
         InformerConfiguration.from(Glue.class, eventSourceContext)
             .withLabelSelector(GLUE_LABEL_KEY + "=" + GLUE_LABEL_VALUE)
             .build(),
         eventSourceContext);
-    return EventSourceInitializer.nameEventSources(resourceFlowEventSource);
+    return EventSourceInitializer.nameEventSources(glueEventSource);
   }
 
   @Override
@@ -176,8 +178,8 @@ public class GlueOperatorReconciler
     return DeleteControl.defaultDelete();
   }
 
-  private static String glueName(GenericKubernetesResource cr) {
-    return KubernetesResourceUtil.sanitizeName(cr.getMetadata().getName() + "-" + cr.getKind());
+  public static String glueName(String name, String kind) {
+    return KubernetesResourceUtil.sanitizeName(name + "-" + kind);
   }
 
   private Map<String, String> initDefaultLabelsToAddToGlue() {

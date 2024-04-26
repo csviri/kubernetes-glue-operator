@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.glue.customresource.TestCustomResource;
 import io.csviri.operator.glue.customresource.TestCustomResource2;
-import io.csviri.operator.glue.customresource.TestCustomResourceSpec;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
@@ -19,6 +18,7 @@ import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.quarkus.test.junit.QuarkusTest;
 
+import static io.csviri.operator.glue.TestData.*;
 import static io.csviri.operator.glue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
 import static io.csviri.operator.glue.customresource.TestCustomResource.CR_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,9 +27,7 @@ import static org.awaitility.Awaitility.await;
 @QuarkusTest
 class GlueOperatorTest extends TestBase {
 
-  public static final String TEST_RESOURCE_VALUE = "val";
-  public static final String TEST_RESOURCE_PREFIX = "testcr";
-  public static final String TEST_RESOURCE2_PREFIX = "testcr2";
+
 
   @BeforeEach
   void applyCRD() {
@@ -58,9 +56,9 @@ class GlueOperatorTest extends TestBase {
 
   @Test
   void templating() {
-    var wo = TestUtils
-        .loadResourceFlowOperator("/glueoperator/Templating.yaml");
-    create(wo);
+    create(TestUtils
+        .loadResourceFlowOperator("/glueoperator/SimpleGlueOperator.yaml"));
+
     var cr = create(testCustomResource());
     String initialValue = cr.getSpec().getValue();
     String name = cr.getMetadata().getName();
@@ -164,29 +162,7 @@ class GlueOperatorTest extends TestBase {
     });
   }
 
-  TestCustomResource testCustomResource() {
-    return testCustomResource(1);
-  }
 
-  TestCustomResource testCustomResource(int index) {
-    var res = new TestCustomResource();
-    res.setMetadata(new ObjectMetaBuilder()
-        .withName(TEST_RESOURCE_PREFIX + index)
-        .build());
-    res.setSpec(new TestCustomResourceSpec());
-    res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
-    return res;
-  }
-
-  TestCustomResource2 testCustomResource2(int index) {
-    var res = new TestCustomResource2();
-    res.setMetadata(new ObjectMetaBuilder()
-        .withName(TEST_RESOURCE2_PREFIX + index)
-        .build());
-    res.setSpec(new TestCustomResourceSpec());
-    res.getSpec().setValue(TEST_RESOURCE_VALUE + index);
-    return res;
-  }
 
   GlueOperator testWorkflowOperator() {
     var wo = new GlueOperator();
