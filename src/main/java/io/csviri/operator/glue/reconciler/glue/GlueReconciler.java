@@ -29,8 +29,6 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.Condition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.KubernetesResourceDeletedCondition;
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
-import jakarta.inject.Inject;
-
 import static io.csviri.operator.glue.Utils.getResourceForSSAFrom;
 import static io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler.PARENT_RELATED_RESOURCE_NAME;
 
@@ -42,13 +40,21 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   public static final String PARENT_GLUE_FINALIZER_PREFIX = "io.csviri.operator.resourceflow.glue/";
   public static final String GLUE_RECONCILER_NAME = "glue";
 
-  @Inject
-  ValidationAndErrorHandler validationAndErrorHandler;
+
+  private final ValidationAndErrorHandler validationAndErrorHandler;
+  private final InformerRegister informerRegister;
 
   private final KubernetesResourceDeletedCondition deletePostCondition =
       new KubernetesResourceDeletedCondition();
-  private final InformerRegister informerRegister = new InformerRegister();
+
   private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
+
+
+  public GlueReconciler(ValidationAndErrorHandler validationAndErrorHandler,
+      InformerRegister informerRegister) {
+    this.validationAndErrorHandler = validationAndErrorHandler;
+    this.informerRegister = informerRegister;
+  }
 
   /**
    * Handling finalizers for GlueOperator: Glue ids a finalizer to parent, that is necessary since

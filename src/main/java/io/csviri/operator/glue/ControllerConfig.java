@@ -9,4 +9,6 @@ public interface ControllerConfig {
 
   Map<String, String> glueOperatorManagedGlueLabels();
 
+  Map<String, String> resourceLabelSelector();
+
 }
