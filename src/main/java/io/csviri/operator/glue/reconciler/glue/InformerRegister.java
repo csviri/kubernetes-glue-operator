@@ -31,11 +31,16 @@ public class InformerRegister {
   private final Map<GroupVersionKind, RelatedAndOwnedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
 
+
+  private final InformerProducer informerProducer;
   private final ControllerConfig controllerConfig;
 
-  public InformerRegister(ControllerConfig controllerConfig) {
+
+  public InformerRegister(InformerProducer informerProducer, ControllerConfig controllerConfig) {
+    this.informerProducer = informerProducer;
     this.controllerConfig = controllerConfig;
   }
+
 
   // todo test related resources deleting
   public synchronized void deRegisterInformerOnResourceFlowChange(Context<Glue> context,
@@ -93,12 +98,11 @@ public class InformerRegister {
         .withSecondaryToPrimaryMapper(mapper);
     labelSelectorForGVK(gvk).ifPresent(configBuilder::withLabelSelector);
 
-    var newES = new InformerEventSource<>(configBuilder.build(),
-        context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
+    var newInformer = informerProducer.createInformer(configBuilder.build(), context);
 
     return (InformerEventSource<GenericKubernetesResource, Glue>) context
         .eventSourceRetriever()
-        .dynamicallyRegisterEventSource(gvk.toString(), newES);
+        .dynamicallyRegisterEventSource(gvk.toString(), newInformer);
 
   }
 
