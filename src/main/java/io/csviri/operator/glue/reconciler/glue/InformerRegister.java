@@ -96,7 +96,10 @@ public class InformerRegister {
 
     var configBuilder = InformerConfiguration.<GenericKubernetesResource>from(gvk)
         .withSecondaryToPrimaryMapper(mapper);
-    labelSelectorForGVK(gvk).ifPresent(configBuilder::withLabelSelector);
+    labelSelectorForGVK(gvk).ifPresent(ls -> {
+      log.debug("Registering label selector: {} for informer for gvk: {}", ls, gvk);
+      configBuilder.withLabelSelector(ls);
+    });
 
     var newInformer = informerProducer.createInformer(configBuilder.build(), context);
 
