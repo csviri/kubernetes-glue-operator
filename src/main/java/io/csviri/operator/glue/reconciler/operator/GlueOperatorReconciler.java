@@ -190,15 +190,15 @@ public class GlueOperatorReconciler
 
   private Map<String, String> initDefaultLabelsToAddToGlue() {
     Map<String, String> res = new HashMap<>();
-    if (!controllerConfig.glueOperatorManagedGlueLabels().isEmpty()) {
-      res.putAll(controllerConfig.glueOperatorManagedGlueLabels());
+    if (!controllerConfig.glueOperatorManagedGlueLabel().isEmpty()) {
+      res.putAll(controllerConfig.glueOperatorManagedGlueLabel());
     } else {
       glueLabelSelector.ifPresent(ls -> {
         if (ls.contains(",") || ls.contains("(")) {
           throw new GlueException(
               "Glue reconciler label selector contains non-simple label selector: " + ls +
                   ". Specify Glue label selector in simple form ('key=value' or 'key') " +
-                  "or configure 'glue.operator.glue-operator-managed-glue-labels'");
+                  "or configure 'glue.operator.glue-operator-managed-glue-label'");
         }
         String[] labelSelectorParts = ls.split("=");
         if (labelSelectorParts.length > 2) {
