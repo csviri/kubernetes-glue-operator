@@ -64,8 +64,8 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
           // complex label selector with 2 values checked
           GLUE_LABEL_KEY1 + "=" + LABEL_VALUE + "," + GLUE_LABEL_KEY2 + "=" + LABEL_VALUE,
           // explicit labels added to glue
-          "glue.operator.glue-operator-managed-glue-labels." + GLUE_LABEL_KEY1, LABEL_VALUE,
-          "glue.operator.glue-operator-managed-glue-labels." + GLUE_LABEL_KEY2, LABEL_VALUE);
+          "glue.operator.glue-operator-managed-glue-label." + GLUE_LABEL_KEY1, LABEL_VALUE,
+          "glue.operator.glue-operator-managed-glue-label." + GLUE_LABEL_KEY2, LABEL_VALUE);
     }
   }
 

@@ -130,16 +130,16 @@ custom resource tracked, so if there is a label selector defined for `Glue` it n
 to the `Glue` resource when it is created. Since it is not trivial to parse label selectors, in more 
 complex forms of label selectors (other the ones mentioned above), the labels to add to the `Glue` resources
 by a `GlueOperator` needs to be specified explicitly using 
-[`glue.operator.glue-operator-managed-glue-labels`](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/main/java/io/csviri/operator/glue/ControllerConfig.java#L10-L10) 
+[`glue.operator.glue-operator-managed-glue-label`](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/main/java/io/csviri/operator/glue/ControllerConfig.java#L10-L10) 
 config key (which is a type of map). Therefore, for a label selector that specified two values for a glue:
 
 `quarkus.operator-sdk.controllers.glue.selector=mylabel1=value1,mylabel2=value2`
 
 you need to add the following configuration params:
 
-`glue.operator.glue-operator-managed-glue-labels.mylabel1=value1`
+`glue.operator.glue-operator-managed-glue-label.mylabel1=value1`
 
-`glue.operator.glue-operator-managed-glue-labels.mylabel2=value2`
+`glue.operator.glue-operator-managed-glue-label.mylabel2=value2`
 
 This will ensure that the labels are added correctly to the `Glue`. See the related 
 [integration test](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/java/io/csviri/operator/glue/GlueOperatorComplexLabelSelectorTest.java#L23-L23).
