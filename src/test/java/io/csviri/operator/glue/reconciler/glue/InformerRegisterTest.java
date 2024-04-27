@@ -29,7 +29,6 @@ class InformerRegisterTest {
     var config = mock(ControllerConfig.class);
     when(config.resourceLabelSelector()).thenReturn(labelSelectors);
     var informerProducer = mock(InformerProducer.class);
-
     var register = new InformerRegister(informerProducer, config);
     var mockContext = mock(Context.class);
     var mockEventSourceRetriever = mock(EventSourceRetriever.class);
@@ -38,7 +37,6 @@ class InformerRegisterTest {
     register.registerInformer(mockContext, gvk, testGlue());
 
     verify(informerProducer).createInformer(argThat(c -> {
-
       assertThat(c.getLabelSelector()).isEqualTo(LABEL_SELECTOR);
       return true;
     }), any());
