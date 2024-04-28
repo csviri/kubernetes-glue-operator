@@ -107,6 +107,12 @@ and `["list", "watch"]` for related resources.
 
 Cluster and various (single or multiple) namespace-scoped deployments are supported.
 
+### Passing configuration values
+
+To pass configuration values use [environment variables](https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/) for the `Deployment`.
+
+Use the format that is defined in [quarkus](https://quarkus.io/guides/config-reference#environment-variables`).
+
 ### Sharding with label selectors
 
 The operator can be deployed to only target certain `Glue` or `GlueOperator` resources based on [label selectors](https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/).
@@ -115,7 +121,7 @@ from Quarkus Operator SDK to set the label selector for the reconciler.
 
 The configuration for `Glue` looks like:
 
-`quarkus.operator-sdk.controllers.glue.selector=mylabel=myvalue`
+`quarkus.operator-sdk.controllers.glue.selector=mylabel=myvalue` 
 
 for `GlueOperator`:
 
