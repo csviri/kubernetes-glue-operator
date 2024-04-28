@@ -105,7 +105,7 @@ When creating specialized roles for a deployment, roles should contain the union
 for all the child resources, specifically: `["list", "watch", "create", "patch", "delete"]`
 and `["list", "watch"]` for related resources.
 
-The project is mainly tested with cluster-scoped deployment, however, QOSDK namespace-scoped deployments are also supported.
+Cluster and various (single or multiple) namespace-scoped deployments are supported.
 
 ### Sharding with label selectors
 
@@ -143,6 +143,23 @@ you need to add the following configuration params:
 
 This will ensure that the labels are added correctly to the `Glue`. See the related 
 [integration test](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/java/io/csviri/operator/glue/GlueOperatorComplexLabelSelectorTest.java#L23-L23).
+
+### Label selectors for informers
+
+Because of efficiency reasons, there is always one informer registered for a single resource type, even if there are more `Glue`-s or `GlueOperators` 
+handled by a deployment that contains resources for the same type. For example, if there are multiple `Glues` managing `ConfigMaps` there will always be
+just one informer for a `ConfigMap`.Therefore, label selectors can be configured only per resource type, not per `Glue` or `GlueOperator`.
+
+To configure a label selector for a resource use `glue.operator.resource-label-selector` (Map), which is followed by the identifier of the resource type in the key,
+and the value is the label selector itself. The resource type is in the form: `[group/]version#kind`.
+For example to define a label selector for ConfigMaps set:
+
+`glue.operator.resource-label-selector.v1#ConfigMap=mylabel=samplevalue`
+
+or for Deployment:
+
+`glue.operator.resource-label-selector.apps/v1#Deployment=mylabel=samplevalue`
+
 
 ## Implementation details and performance
 
