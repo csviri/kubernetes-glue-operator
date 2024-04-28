@@ -150,9 +150,9 @@ you need to add the following configuration params:
 This will ensure that the labels are added correctly to the `Glue`. See the related 
 [integration test](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/java/io/csviri/operator/glue/GlueOperatorComplexLabelSelectorTest.java#L23-L23).
 
-### Label selectors for informers
+### Label selectors managed resources
 
-Because of efficiency reasons, there is always one informer registered for a single resource type, even if there are more `Glue`-s or `GlueOperators` 
+For efficiency reasons, there is always one informer registered for a single resource type, even if there are more `Glue`-s or `GlueOperators` 
 handled by a deployment that contains resources for the same type. For example, if there are multiple `Glues` managing `ConfigMaps` there will always be
 just one informer for a `ConfigMap`.Therefore, label selectors can be configured only per resource type, not per `Glue` or `GlueOperator`.
 
