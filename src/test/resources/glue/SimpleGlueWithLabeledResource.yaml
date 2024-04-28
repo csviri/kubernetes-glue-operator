@@ -1,0 +1,17 @@
+# Invalid GLUE, presents resources with non-unique name
+apiVersion: io.csviri.operator.glue/v1beta1
+kind: Glue
+metadata:
+  name: glue
+spec:
+  childResources:
+    - name: configMap
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: configmap
+          labels:
+            test-glue: true
+        data:
+          key: "value1"

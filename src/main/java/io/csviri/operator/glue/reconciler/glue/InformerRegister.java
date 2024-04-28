@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.csviri.operator.glue.ControllerConfig;
 import io.csviri.operator.glue.Utils;
 import io.csviri.operator.glue.customresource.glue.Glue;
 import io.csviri.operator.glue.customresource.glue.RelatedResourceSpec;
@@ -17,8 +18,11 @@ import io.javaoperatorsdk.operator.processing.GroupVersionKind;
 import io.javaoperatorsdk.operator.processing.event.ResourceID;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
+import jakarta.inject.Singleton;
+
 // todo unit test
-class InformerRegister {
+@Singleton
+public class InformerRegister {
 
   private static final Logger log = LoggerFactory.getLogger(InformerRegister.class);
 
@@ -26,6 +30,17 @@ class InformerRegister {
   private final Map<String, Set<GroupVersionKind>> glueToInformerGVK = new HashMap<>();
   private final Map<GroupVersionKind, RelatedAndOwnedResourceSecondaryToPrimaryMapper> relatedResourceMappers =
       new ConcurrentHashMap<>();
+
+
+  private final InformerProducer informerProducer;
+  private final ControllerConfig controllerConfig;
+
+
+  public InformerRegister(InformerProducer informerProducer, ControllerConfig controllerConfig) {
+    this.informerProducer = informerProducer;
+    this.controllerConfig = controllerConfig;
+  }
+
 
   // todo test related resources deleting
   public synchronized void deRegisterInformerOnResourceFlowChange(Context<Glue> context,
@@ -78,13 +93,19 @@ class InformerRegister {
       mapper = relatedResourceMappers.get(gvk);
       markEventSource(gvk, glue);
     }
-    var newES = new InformerEventSource<>(InformerConfiguration.<GenericKubernetesResource>from(gvk)
-        .withSecondaryToPrimaryMapper(mapper)
-        .build(), context.eventSourceRetriever().eventSourceContextForDynamicRegistration());
+
+    var configBuilder = InformerConfiguration.<GenericKubernetesResource>from(gvk)
+        .withSecondaryToPrimaryMapper(mapper);
+    labelSelectorForGVK(gvk).ifPresent(ls -> {
+      log.debug("Registering label selector: {} for informer for gvk: {}", ls, gvk);
+      configBuilder.withLabelSelector(ls);
+    });
+
+    var newInformer = informerProducer.createInformer(configBuilder.build(), context);
 
     return (InformerEventSource<GenericKubernetesResource, Glue>) context
         .eventSourceRetriever()
-        .dynamicallyRegisterEventSource(gvk.toString(), newES);
+        .dynamicallyRegisterEventSource(gvk.toString(), newInformer);
 
   }
 
@@ -145,6 +166,16 @@ class InformerRegister {
 
   private String workflowId(Glue glue) {
     return glue.getMetadata().getName() + "#" + glue.getMetadata().getNamespace();
+  }
+
+  public Optional<String> labelSelectorForGVK(GroupVersionKind gvk) {
+    return Optional.ofNullable(controllerConfig.resourceLabelSelector().get(toSimpleString(gvk)));
+  }
+
+  public static String toSimpleString(GroupVersionKind gvk) {
+    String groupVersion =
+        gvk.getGroup() == null ? gvk.getVersion() : gvk.getGroup() + "/" + gvk.getVersion();
+    return groupVersion + "#" + gvk.getKind();
   }
 
 }
