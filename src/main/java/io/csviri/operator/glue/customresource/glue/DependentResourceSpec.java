@@ -14,10 +14,12 @@ public class DependentResourceSpec {
   @Required
   private String name;
 
-  private String resourceTemplate;
+  private boolean clusterScoped = Boolean.FALSE;
 
   @PreserveUnknownFields
   private GenericKubernetesResource resource;
+
+  private String resourceTemplate;
 
   private List<String> dependsOn = new ArrayList<>();
 
@@ -82,6 +84,14 @@ public class DependentResourceSpec {
     return this;
   }
 
+  public boolean isClusterScoped() {
+    return clusterScoped;
+  }
+
+  public void setClusterScoped(boolean clusterScoped) {
+    this.clusterScoped = clusterScoped;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -89,15 +99,17 @@ public class DependentResourceSpec {
     if (o == null || getClass() != o.getClass())
       return false;
     DependentResourceSpec that = (DependentResourceSpec) o;
-    return Objects.equals(name, that.name)
+    return clusterScoped == that.clusterScoped && Objects.equals(name, that.name)
+        && Objects.equals(resource, that.resource)
         && Objects.equals(resourceTemplate, that.resourceTemplate)
-        && Objects.equals(resource, that.resource) && Objects.equals(dependsOn, that.dependsOn)
+        && Objects.equals(dependsOn, that.dependsOn)
         && Objects.equals(readyPostCondition, that.readyPostCondition)
         && Objects.equals(condition, that.condition);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, resourceTemplate, resource, dependsOn, readyPostCondition, condition);
+    return Objects.hash(name, clusterScoped, resource, resourceTemplate, dependsOn,
+        readyPostCondition, condition);
   }
 }
