@@ -32,7 +32,7 @@ public class TestUtils {
 
   private static final Logger log = LoggerFactory.getLogger(TestUtils.class);
 
-  public static Glue loadResoureFlow(String path) {
+  public static Glue loadGlue(String path) {
     try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, Glue.class);
     } catch (IOException e) {
@@ -40,7 +40,7 @@ public class TestUtils {
     }
   }
 
-  public static GlueOperator loadResourceFlowOperator(String path) {
+  public static GlueOperator loadGlueOperator(String path) {
     try (InputStream is = TestUtils.class.getResourceAsStream(path)) {
       return Serialization.unmarshal(is, GlueOperator.class);
     } catch (IOException e) {

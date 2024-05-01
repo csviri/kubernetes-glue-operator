@@ -34,7 +34,7 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
   @Test
   void testGlueOperatorLabelSelector() {
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/SimpleGlueOperator.yaml"));
+        .loadGlueOperator("/glueoperator/SimpleGlueOperator.yaml"));
 
     var testCR = create(TestData.testCustomResource());
 

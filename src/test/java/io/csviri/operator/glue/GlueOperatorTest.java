@@ -55,7 +55,7 @@ class GlueOperatorTest extends TestBase {
   @Test
   void templating() {
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/SimpleGlueOperator.yaml"));
+        .loadGlueOperator("/glueoperator/SimpleGlueOperator.yaml"));
 
     var cr = create(testCustomResource());
     String initialValue = cr.getSpec().getValue();
@@ -91,7 +91,7 @@ class GlueOperatorTest extends TestBase {
   void simpleConcurrencyTest() {
     int num = 10;
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/Concurrency.yaml"));
+        .loadGlueOperator("/glueoperator/Concurrency.yaml"));
 
     var resources =
         IntStream.range(0, num).mapToObj(n -> create(testCustomResource(n))).toList();
@@ -115,9 +115,9 @@ class GlueOperatorTest extends TestBase {
   void simpleConcurrencyForMultipleOperatorTest() {
     int num = 10;
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/Concurrency.yaml"));
+        .loadGlueOperator("/glueoperator/Concurrency.yaml"));
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/Concurrency2.yaml"));
+        .loadGlueOperator("/glueoperator/Concurrency2.yaml"));
 
     var crs =
         IntStream.range(0, num).mapToObj(n -> create(testCustomResource(n))).toList();
@@ -149,7 +149,7 @@ class GlueOperatorTest extends TestBase {
   @Test
   void nonUniqueNameTest() {
     var go = create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/NonUniqueName.yaml"));
+        .loadGlueOperator("/glueoperator/NonUniqueName.yaml"));
 
     await().untilAsserted(() -> {
       var actual = get(GlueOperator.class, go.getMetadata().getName());
@@ -163,7 +163,7 @@ class GlueOperatorTest extends TestBase {
   @Test
   void parentWithLabelSelector() {
     create(TestUtils
-        .loadResourceFlowOperator("/glueoperator/ParentLabelSelector.yaml"));
+        .loadGlueOperator("/glueoperator/ParentLabelSelector.yaml"));
 
     var cr = create(testCustomResource());
     String name = cr.getMetadata().getName();

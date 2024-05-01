@@ -27,7 +27,7 @@ public class GlueLabelSelectorTest extends TestBase {
   @Test
   void testLabelSelectorHandling() {
     Glue glue =
-        TestUtils.loadResoureFlow("/glue/SimpleGlue.yaml");
+        TestUtils.loadGlue("/glue/SimpleGlue.yaml");
     glue = create(glue);
 
     await().pollDelay(INITIAL_RECONCILE_WAIT_TIMEOUT).untilAsserted(() -> {
