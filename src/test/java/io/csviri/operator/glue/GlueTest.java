@@ -27,7 +27,7 @@ class GlueTest extends TestBase {
   @Test
   void simpleTemplating() {
     Glue glue =
-        TestUtils.loadResoureFlow("/glue/Templating.yaml");
+        TestUtils.loadGlue("/glue/Templating.yaml");
     glue = create(glue);
 
     await().untilAsserted(() -> {
@@ -64,7 +64,7 @@ class GlueTest extends TestBase {
   @Test
   void crossReferenceResource() {
     Glue glue =
-        TestUtils.loadResoureFlow("/glue/CrossReferenceResource.yaml");
+        TestUtils.loadGlue("/glue/CrossReferenceResource.yaml");
     glue = create(glue);
 
     await().untilAsserted(() -> {
@@ -103,7 +103,7 @@ class GlueTest extends TestBase {
   @Test
   void javaScriptCondition() {
     Glue glue =
-        TestUtils.loadResoureFlow("/glue/TwoResourcesAndCondition.yaml");
+        TestUtils.loadGlue("/glue/TwoResourcesAndCondition.yaml");
     create(glue);
 
     await().pollDelay(Duration.ofMillis(150)).untilAsserted(() -> {
@@ -138,7 +138,7 @@ class GlueTest extends TestBase {
 
   @Test
   void stringTemplate() {
-    Glue glue = create(TestUtils.loadResoureFlow("/glue/ResourceTemplate.yaml"));
+    Glue glue = create(TestUtils.loadGlue("/glue/ResourceTemplate.yaml"));
 
     await().timeout(Duration.ofSeconds(120)).untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, "templconfigmap1");
@@ -188,7 +188,7 @@ class GlueTest extends TestBase {
 
   @Test
   void changingWorkflow() {
-    Glue glue = create(TestUtils.loadResoureFlow("/glue/ChanginResources.yaml"));
+    Glue glue = create(TestUtils.loadGlue("/glue/ChanginResources.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, "configmap1");
@@ -226,7 +226,7 @@ class GlueTest extends TestBase {
 
   @Test
   void nonUniqueNameResultsInErrorMessageOnStatus() {
-    Glue glue = create(TestUtils.loadResoureFlow("/glue/NonUniqueName.yaml"));
+    Glue glue = create(TestUtils.loadGlue("/glue/NonUniqueName.yaml"));
 
     await().untilAsserted(() -> {
       var actualGlue = get(Glue.class, glue.getMetadata().getName());
@@ -271,7 +271,7 @@ class GlueTest extends TestBase {
     List<Glue> res = new ArrayList<>();
     IntStream.range(0, num).forEach(index -> {
       Glue w =
-          TestUtils.loadResoureFlow("/glue/TemplateForConcurrency.yaml");
+          TestUtils.loadGlue("/glue/TemplateForConcurrency.yaml");
       w.getMetadata().setName(w.getMetadata().getName() + index);
       res.add(w);
     });

@@ -16,7 +16,7 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClientBuilder;
 import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 
-import static io.csviri.operator.glue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
+import static io.csviri.operator.glue.TestUtils.GC_WAIT_TIMEOUT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
@@ -55,7 +55,7 @@ public class MutationWebhookDeploymentE2E {
 
     client.resource(glue).delete();
 
-    await().timeout(GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
+    await().timeout(GC_WAIT_TIMEOUT).untilAsserted(() -> {
       var deployment = client.apps().deployments().withName("pod-mutating-hook").get();
       assertThat(deployment).isNull();
     });

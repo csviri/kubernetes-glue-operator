@@ -34,7 +34,7 @@ public class GlueRelatedResourcesTest extends TestBase {
   void simpleRelatedResourceUsage() {
     create(secret());
     Glue glue =
-        TestUtils.loadResoureFlow("/glue/RelatedResourceSimpleWithCondition.yaml");
+        TestUtils.loadGlue("/glue/RelatedResourceSimpleWithCondition.yaml");
 
     create(glue);
 
@@ -64,7 +64,7 @@ public class GlueRelatedResourcesTest extends TestBase {
     create(secret("test-secret2", BASE64_VALUE_2));
 
     Glue glue =
-        create(TestUtils.loadResoureFlow("/glue/MultiNameRelatedResource.yaml"));
+        create(TestUtils.loadGlue("/glue/MultiNameRelatedResource.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, "cm1");
@@ -85,7 +85,7 @@ public class GlueRelatedResourcesTest extends TestBase {
   void managedAndRelatedResourceOfSameTypeAndTriggering() {
     var relatedConfigMap = create(configMap());
     Glue glue =
-        create(TestUtils.loadResoureFlow("/glue/RelatesResourceSameType.yaml"));
+        create(TestUtils.loadGlue("/glue/RelatesResourceSameType.yaml"));
 
     await().untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, "cm1");

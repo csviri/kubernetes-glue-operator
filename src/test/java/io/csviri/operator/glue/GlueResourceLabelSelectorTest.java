@@ -18,7 +18,7 @@ public class GlueResourceLabelSelectorTest extends TestBase {
 
   @Test
   void showCreatingResourceWithLabelSelectorAndLabel() {
-    var glue = create(TestUtils.loadResoureFlow("/glue/SimpleGlueWithLabeledResource.yaml"));
+    var glue = create(TestUtils.loadGlue("/glue/SimpleGlueWithLabeledResource.yaml"));
 
     // this serves more like a sample, hard to test here if the label selector is on informer
     await().untilAsserted(() -> {
