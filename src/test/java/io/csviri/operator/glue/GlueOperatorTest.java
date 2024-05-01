@@ -19,7 +19,7 @@ import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.quarkus.test.junit.QuarkusTest;
 
 import static io.csviri.operator.glue.TestData.*;
-import static io.csviri.operator.glue.TestUtils.GC_WAIT_TIMEOUT_SECOND;
+import static io.csviri.operator.glue.TestUtils.GC_WAIT_TIMEOUT;
 import static io.csviri.operator.glue.customresource.TestCustomResource.CR_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -78,7 +78,7 @@ class GlueOperatorTest extends TestBase {
 
     delete(cr);
 
-    await().timeout(Duration.ofMinutes(5)).untilAsserted(() -> {
+    await().timeout(GC_WAIT_TIMEOUT).untilAsserted(() -> {
       var cm1 = get(ConfigMap.class, name);
       var actualCR = get(TestCustomResource.class, name);
       assertThat(cm1).isNull();
@@ -137,7 +137,7 @@ class GlueOperatorTest extends TestBase {
     crs.forEach(this::delete);
     cr2s.forEach(this::delete);
 
-    await().timeout(GC_WAIT_TIMEOUT_SECOND)
+    await().timeout(GC_WAIT_TIMEOUT)
         .untilAsserted(() -> IntStream.range(0, num).forEach(n -> {
           var cm = get(ConfigMap.class, TEST_RESOURCE_PREFIX + n);
           assertThat(cm).isNull();

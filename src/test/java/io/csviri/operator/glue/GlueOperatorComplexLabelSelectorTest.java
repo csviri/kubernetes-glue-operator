@@ -49,7 +49,7 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
     });
 
     delete(testCR);
-    await().timeout(TestUtils.GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT).untilAsserted(() -> {
       var glue = get(Glue.class, GlueOperatorReconciler.glueName(testCR.getMetadata().getName(),
           testCR.getKind()));
       assertThat(glue).isNull();
