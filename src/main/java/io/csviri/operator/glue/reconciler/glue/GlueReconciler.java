@@ -242,7 +242,7 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   }
 
   private void removeFinalizerForParent(Glue primary, Context<Glue> context) {
-    if (isGlueOfAGlueOperator(primary)) {
+    if (!isGlueOfAGlueOperator(primary)) {
       return;
     }
     var parent = getParentRelatedResource(primary, context);
