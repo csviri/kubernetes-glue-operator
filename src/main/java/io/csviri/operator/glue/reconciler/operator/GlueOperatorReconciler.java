@@ -37,8 +37,8 @@ public class GlueOperatorReconciler
 
   private static final Logger log = LoggerFactory.getLogger(GlueOperatorReconciler.class);
 
-  public static final String GLUE_LABEL_KEY = "foroperator";
-  public static final String GLUE_LABEL_VALUE = "true";
+  public static final String FOR_GLUE_OPERATOR_LABEL_KEY = "for-glue-operator";
+  public static final String FOR_GLUE_OPERATOR_LABEL_VALUE = "true";
   public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
   public static final String GLUE_OPERATOR_RECONCILER_NAME = "glue-operator";
 
@@ -98,7 +98,7 @@ public class GlueOperatorReconciler
         .withName(
             glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
         .withNamespace(targetParentResource.getMetadata().getNamespace())
-        .withLabels(Map.of(GLUE_LABEL_KEY, GLUE_LABEL_VALUE))
+        .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE))
         .build());
     glue.setSpec(toWorkflowSpec(glueOperator.getSpec()));
 
@@ -160,7 +160,7 @@ public class GlueOperatorReconciler
       EventSourceContext<GlueOperator> eventSourceContext) {
     glueEventSource = new InformerEventSource<>(
         InformerConfiguration.from(Glue.class, eventSourceContext)
-            .withLabelSelector(GLUE_LABEL_KEY + "=" + GLUE_LABEL_VALUE)
+            .withLabelSelector(FOR_GLUE_OPERATOR_LABEL_KEY + "=" + FOR_GLUE_OPERATOR_LABEL_VALUE)
             .build(),
         eventSourceContext);
     return EventSourceInitializer.nameEventSources(glueEventSource);

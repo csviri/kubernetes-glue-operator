@@ -18,6 +18,7 @@ import io.csviri.operator.glue.dependent.GCGenericDependentResource;
 import io.csviri.operator.glue.dependent.GenericDependentResource;
 import io.csviri.operator.glue.dependent.GenericResourceDiscriminator;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
+import io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler;
 import io.csviri.operator.glue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.HasMetadata;
@@ -30,6 +31,7 @@ import io.javaoperatorsdk.operator.processing.dependent.workflow.KubernetesResou
 import io.javaoperatorsdk.operator.processing.dependent.workflow.WorkflowBuilder;
 
 import static io.csviri.operator.glue.Utils.getResourceForSSAFrom;
+import static io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler.FOR_GLUE_OPERATOR_LABEL_VALUE;
 import static io.csviri.operator.glue.reconciler.operator.GlueOperatorReconciler.PARENT_RELATED_RESOURCE_NAME;
 
 @ControllerConfiguration(name = GlueReconciler.GLUE_RECONCILER_NAME)
@@ -222,6 +224,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   }
 
   private void addFinalizersToParentResource(Glue primary, Context<Glue> context) {
+    if (!isGlueOfAGlueOperator(primary)) {
+      return;
+    }
     var parent = getParentRelatedResource(primary, context);
 
     parent.ifPresent(p -> {
@@ -237,6 +242,9 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   }
 
   private void removeFinalizerForParent(Glue primary, Context<Glue> context) {
+    if (isGlueOfAGlueOperator(primary)) {
+      return;
+    }
     var parent = getParentRelatedResource(primary, context);
     parent.ifPresentOrElse(p -> {
       log.debug("Removing finalizer from parent. Glue name: {} namespace: {}",
@@ -295,4 +303,12 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
     }
     return validationAndErrorHandler.updateStatusErrorMessage(e, resource);
   }
+
+  public static boolean isGlueOfAGlueOperator(Glue glue) {
+    var labelValue =
+        glue.getMetadata().getLabels().get(GlueOperatorReconciler.FOR_GLUE_OPERATOR_LABEL_KEY);
+    return FOR_GLUE_OPERATOR_LABEL_VALUE.equals(labelValue);
+
+  }
+
 }

@@ -33,7 +33,7 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
 
   @Test
   void testGlueOperatorLabelSelector() {
-    var go = create(TestUtils
+    create(TestUtils
         .loadResourceFlowOperator("/glueoperator/SimpleGlueOperator.yaml"));
 
     var testCR = create(TestData.testCustomResource());
@@ -49,7 +49,7 @@ public class GlueOperatorComplexLabelSelectorTest extends TestBase {
     });
 
     delete(testCR);
-    await().untilAsserted(() -> {
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT_SECOND).untilAsserted(() -> {
       var glue = get(Glue.class, GlueOperatorReconciler.glueName(testCR.getMetadata().getName(),
           testCR.getKind()));
       assertThat(glue).isNull();
