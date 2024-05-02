@@ -308,7 +308,19 @@ class GlueTest extends TestBase {
 
   @Test
   void clusterScopedRelatedResource() {
+    var glue = create(TestUtils.loadGlue("/glue/ClusterScopedRelatedResource.yaml"));
 
+    await().untilAsserted(() -> {
+      var cm = get(ConfigMap.class, "configmap1");
+      assertThat(cm).isNotNull();
+      assertThat(cm.getData()).containsEntry("phase", "Active");
+    });
+
+    delete(glue);
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT).untilAsserted(() -> {
+      var cm = get(ConfigMap.class, "configmap1");
+      assertThat(cm).isNull();
+    });
   }
 
   private List<Glue> testWorkflowList(int num) {

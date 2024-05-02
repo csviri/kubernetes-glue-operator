@@ -53,6 +53,7 @@ See sample usage within `Glue` [here](https://github.com/csviri/kubernetes-glue-
 The following attributes can be defined for a related resource:
 
 - **`name`** - same as for child resource, unique identifier, used to reference the resource.
+- **`clusterScoped`** - if the related resource is cluster scoped. Default is `false`.
 - **`apiVersion`** - Kubernetes resource API Version of the resource
 - **`kind`** - Kubernetes kind property of the resource
 - **`resourceNames`** - list of string of the resource names within the same namespace as `Glue`.  
