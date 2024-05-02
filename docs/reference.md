@@ -25,8 +25,8 @@ It has several attributes:
   It is mandatory to set this for cluster scoped resources.
 - **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
   [qute templating engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
-  There is a restriction, that the child resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
-  (and/or parent for `GlueOperator`), so the `namespace` field in resource **metadata should not be specified**.
+  If the resource is namespace scoped and the namespace attribute is not specified in `.metadata` automatically the namespace of `Glue` 
+  is used.
 - **`dependsOn`** - is a list of names of other child resources (not related resources). The resource is not reconciled until all the resources
    which it depends on are not reconciled and ready (if there is a `readyPostCondition` present). 
    Note that during the cleanup phase (when a `Glue` is deleted) resources are cleaned up in reverse order.
