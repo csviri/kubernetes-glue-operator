@@ -12,7 +12,10 @@ import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
 import io.csviri.operator.glue.customresource.glue.Glue;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
+import io.fabric8.kubernetes.api.model.ConfigMapBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 import io.quarkus.test.junit.QuarkusTest;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -237,35 +240,76 @@ class GlueTest extends TestBase {
     });
   }
 
+  @Test
+  void childInDifferentNamespace() {
+    Glue glue = create(TestUtils.loadGlue("/glue/ResourceInDifferentNamespace.yaml"));
 
-  //
-  // @Disabled("Not supported in current version")
-  // @Test
-  // void childInDifferentNamespaceAsPrimary() {
-  // Glue w = extension
-  // .create(TestUtils.loadResoureFlow("/glue/ResourceInDifferentNamespace.yaml"));
-  //
-  // await().untilAsserted(() -> {
-  // var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
-  // .withName("configmap1");
-  // var cm2 = extension.get(ConfigMap.class, "configmap2");
-  //
-  // assertThat(cmDifferentNS).isNotNull();
-  // assertThat(cm2).isNotNull();
-  // });
-  //
-  // extension.delete(w);
-  //
-  // await().untilAsserted(() -> {
-  // var cmDifferentNS = extension.getKubernetesClient().configMaps().inNamespace("default")
-  // .withName("configmap1");
-  // var cm2 = extension.get(ConfigMap.class, "configmap2");
-  //
-  // assertThat(cmDifferentNS).isNull();
-  // assertThat(cm2).isNull();
-  // });
-  //
-  // }
+    await().untilAsserted(() -> {
+      var cmDifferentNS = client.configMaps().inNamespace("default")
+          .withName("configmap1");
+      var cm2 = get(ConfigMap.class, "configmap2");
+
+      assertThat(cmDifferentNS).isNotNull();
+      assertThat(cm2).isNotNull();
+    });
+
+    delete(glue);
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT).untilAsserted(() -> {
+      var cmDifferentNS = client.configMaps().inNamespace("default")
+          .withName("configmap1").get();
+      var cm2 = get(ConfigMap.class, "configmap2");
+
+      assertThat(cmDifferentNS).isNull();
+      assertThat(cm2).isNull();
+    });
+  }
+
+  @Test
+  void clusterScopedChild() {
+    var glue = create(TestUtils.loadGlue("/glue/ClusterScopedChild.yaml"));
+    await().untilAsserted(() -> {
+      var ns = client.namespaces()
+          .withName("testnamespace");
+      assertThat(ns).isNotNull();
+    });
+
+    delete(glue);
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT).untilAsserted(() -> {
+      var ns = client.namespaces()
+          .withName("testnamespace").get();
+      assertThat(ns).isNull();
+    });
+  }
+
+  @Test
+  void relatedResourceFromDifferentNamespace() {
+    client.resource(new ConfigMapBuilder()
+        .withMetadata(new ObjectMetaBuilder()
+            .withName("related-configmap")
+            .withNamespace("default")
+            .build())
+        .withData(Map.of("key1", "value1"))
+        .build()).createOr(NonDeletingOperation::update);
+
+    var glue = create(TestUtils.loadGlue("/glue/RelatedResourceFromDifferentNamespace.yaml"));
+
+    await().untilAsserted(() -> {
+      var cm = get(ConfigMap.class, "configmap1");
+      assertThat(cm).isNotNull();
+      assertThat(cm.getData()).containsEntry("copy-key", "value1");
+    });
+
+    delete(glue);
+    await().timeout(TestUtils.GC_WAIT_TIMEOUT).untilAsserted(() -> {
+      var cm = get(ConfigMap.class, "configmap1");
+      assertThat(cm).isNull();
+    });
+  }
+
+  @Test
+  void clusterScopedRelatedResource() {
+
+  }
 
   private List<Glue> testWorkflowList(int num) {
     List<Glue> res = new ArrayList<>();
@@ -277,5 +321,7 @@ class GlueTest extends TestBase {
     });
     return res;
   }
+
+
 
 }

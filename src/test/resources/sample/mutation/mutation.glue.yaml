@@ -74,6 +74,7 @@ spec:
                     optional: false
                     secretName: tls-secret
     - name: mutation_hook_config
+      clusterScoped: true
       dependsOn:
         - deployment
         - service

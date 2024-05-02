@@ -10,13 +10,13 @@ public class RelatedResourceSpec {
   // name for referencing the resource from templates and conditions (not name from object metadata)
   @Required
   private String name;
+  private String namespace;
 
   @Required
   private String apiVersion;
   @Required
   private String kind;
   private boolean clusterScoped = Boolean.FALSE;
-  private String namespace;
   private List<String> resourceNames;
 
 
