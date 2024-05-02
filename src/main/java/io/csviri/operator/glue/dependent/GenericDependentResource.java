@@ -22,23 +22,27 @@ public class GenericDependentResource
   private final GenericKubernetesResource desired;
   private final String desiredTemplate;
   private final String name;
+  private final boolean clusterScoped;
 
   // optimize share between instances
   private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
 
-  public GenericDependentResource(GenericKubernetesResource desired, String name) {
+  public GenericDependentResource(GenericKubernetesResource desired, String name,
+      boolean clusterScoped) {
     super(new GroupVersionKind(desired.getApiVersion(), desired.getKind()));
     this.desired = desired;
     this.desiredTemplate = null;
     this.name = name;
+    this.clusterScoped = clusterScoped;
   }
 
-  public GenericDependentResource(String desiredTemplate, String name) {
+  public GenericDependentResource(String desiredTemplate, String name, boolean clusterScoped) {
     super(new GroupVersionKind(Utils.getApiVersionFromTemplate(desiredTemplate),
         Utils.getKindFromTemplate(desiredTemplate)));
     this.name = name;
     this.desiredTemplate = desiredTemplate;
     this.desired = null;
+    this.clusterScoped = clusterScoped;
   }
 
   @Override
@@ -53,8 +57,7 @@ public class GenericDependentResource
     resultDesired.getMetadata().getAnnotations()
         .put(GlueReconciler.DEPENDENT_NAME_ANNOTATION_KEY, name);
 
-    // set only for cluster scoped when detection is ready
-    if (resultDesired.getMetadata().getNamespace() == null) {
+    if (resultDesired.getMetadata().getNamespace() == null && !clusterScoped) {
       resultDesired.getMetadata().setNamespace(primary.getMetadata().getNamespace());
     }
     return resultDesired;

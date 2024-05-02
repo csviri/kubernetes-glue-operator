@@ -202,14 +202,19 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
 
   private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
       boolean leafDependent, Boolean resourceInSameNamespaceAsPrimary) {
-    if (leafDependent && resourceInSameNamespaceAsPrimary) {
+
+    if (leafDependent && resourceInSameNamespaceAsPrimary && !spec.isClusterScoped()) {
       return spec.getResourceTemplate() != null
-          ? new GCGenericDependentResource(spec.getResourceTemplate(), spec.getName())
-          : new GCGenericDependentResource(spec.getResource(), spec.getName());
+          ? new GCGenericDependentResource(spec.getResourceTemplate(), spec.getName(),
+              spec.isClusterScoped())
+          : new GCGenericDependentResource(spec.getResource(), spec.getName(),
+              spec.isClusterScoped());
     } else {
       return spec.getResourceTemplate() != null
-          ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName())
-          : new GenericDependentResource(spec.getResource(), spec.getName());
+          ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName(),
+              spec.isClusterScoped())
+          : new GenericDependentResource(spec.getResource(), spec.getName(),
+              spec.isClusterScoped());
     }
   }
 
