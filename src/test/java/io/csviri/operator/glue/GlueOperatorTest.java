@@ -189,6 +189,12 @@ class GlueOperatorTest extends TestBase {
   }
 
 
+  @Test
+  void secretCopySample() {
+
+  }
+
+
   GlueOperator testWorkflowOperator() {
     var wo = new GlueOperator();
     wo.setMetadata(new ObjectMetaBuilder()
