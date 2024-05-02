@@ -31,16 +31,13 @@ public class Utils {
     Map<String, GenericKubernetesResource> res = new HashMap<>();
     secondaryResources.forEach(sr -> {
       var dependentSpec = glue.getSpec().getChildResources().stream()
-          .filter(r -> Utils.getApiVersion(r).equals(sr.getApiVersion())
-              && Utils.getKind(r).equals(sr.getKind())
+          .filter(r ->
       // comparing the name from annotation since the resource name might be templated in spec
       // therefore "Utils.getName(relatedResourceSpec).equals(sr.getMetadata().getName())" would not
       // work
-              && r.getName()
-                  .equals(sr.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY))
-      // namespace not compared here, it should be done it is just not trivial, now it is limited to
-      // have one kind of resource in the workflow with the same resource name
-      ).findFirst();
+      r.getName()
+          .equals(sr.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY)))
+          .findFirst();
       dependentSpec.ifPresent(spec -> res.put(spec.getName(), sr));
     });
 
@@ -70,8 +67,9 @@ public class Utils {
         (InformerEventSource<GenericKubernetesResource, Glue>) context
             .eventSourceRetriever()
             .getResourceEventSourceFor(GenericKubernetesResource.class, gvk.toString());
-    var namespace =
-        relatedResourceSpec.getNamespace() == null ? glue.getMetadata().getNamespace()
+
+    var namespace = relatedResourceSpec.isClusterScoped() ? null
+        : relatedResourceSpec.getNamespace() == null ? glue.getMetadata().getNamespace()
             : relatedResourceSpec.getNamespace();
 
     var res = new HashMap<String, GenericKubernetesResource>();

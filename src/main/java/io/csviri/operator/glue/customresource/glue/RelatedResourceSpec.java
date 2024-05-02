@@ -10,12 +10,13 @@ public class RelatedResourceSpec {
   // name for referencing the resource from templates and conditions (not name from object metadata)
   @Required
   private String name;
+  private String namespace;
 
   @Required
   private String apiVersion;
   @Required
   private String kind;
-  private String namespace;
+  private boolean clusterScoped = Boolean.FALSE;
   private List<String> resourceNames;
 
 
@@ -71,13 +72,22 @@ public class RelatedResourceSpec {
     if (o == null || getClass() != o.getClass())
       return false;
     RelatedResourceSpec that = (RelatedResourceSpec) o;
-    return Objects.equals(name, that.name) && Objects.equals(apiVersion, that.apiVersion)
-        && Objects.equals(kind, that.kind) && Objects.equals(namespace, that.namespace)
+    return clusterScoped == that.clusterScoped && Objects.equals(name, that.name)
+        && Objects.equals(apiVersion, that.apiVersion) && Objects.equals(kind, that.kind)
+        && Objects.equals(namespace, that.namespace)
         && Objects.equals(resourceNames, that.resourceNames);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(name, apiVersion, kind, namespace, resourceNames);
+    return Objects.hash(name, apiVersion, kind, clusterScoped, namespace, resourceNames);
+  }
+
+  public boolean isClusterScoped() {
+    return clusterScoped;
+  }
+
+  public void setClusterScoped(boolean clusterScoped) {
+    this.clusterScoped = clusterScoped;
   }
 }

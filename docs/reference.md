@@ -21,6 +21,8 @@ It has several attributes:
 - **`name`** - is a mandatory unique (unique also regarding related resources) attribute.
   The resource is referenced by this name from other places, typically other resource templates and `JSCondition`.
   If it is used in a `JSCondition` the `name` must be a valid JavaScript variable name.
+- **`clusterScoped`** - a flag to indicate if the resource is cluster scoped. Default value is `false`. 
+  It is mandatory to set this for cluster scoped resources.
 - **`resource`** - is the desired state of the resource applied by default using Server Side Apply. The resource is templated using
   [qute templating engine](https://quarkus.io/guides/qute-reference), other resources can be referenced from the templates, see below.  
   There is a restriction, that the child resource is namespaced, and the namespace is always the same as the namespace of the `Glue`
@@ -51,6 +53,7 @@ See sample usage within `Glue` [here](https://github.com/csviri/kubernetes-glue-
 The following attributes can be defined for a related resource:
 
 - **`name`** - same as for child resource, unique identifier, used to reference the resource.
+- **`clusterScoped`** - if the related resource is cluster scoped. Default is `false`.
 - **`apiVersion`** - Kubernetes resource API Version of the resource
 - **`kind`** - Kubernetes kind property of the resource
 - **`resourceNames`** - list of string of the resource names within the same namespace as `Glue`.  
@@ -174,17 +177,6 @@ resources containing the same resource type.
 
 The templating and some of the Javascript condition is probably the most time-consuming and resource-intensive part which will 
 be continuously improved in the follow-up releases. 
-
-## Current limitations
-
-Note that none of the limitations are unsolvable, and will be continuously removed in the coming releases.
-
-1. Child resources and related resources are always namespace scoped resources, and in the same namespace as the
-   primary resource (`Glue` or the parent in the case of `GlueOperator`)
-
-2. ~~Related resource changes are not triggering the reconciliation.
-   Due to a bug in fabric8 client, after that is fixed, this is trivial to fix too:
-   https://github.com/fabric8io/kubernetes-client/issues/5729~~
 
 ## Samples
 

@@ -1,0 +1,22 @@
+apiVersion: io.csviri.operator.glue/v1beta1
+kind: Glue
+metadata:
+  name: "testglue"
+spec:
+  childResources:
+    - name: configMap
+      resource:
+        apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: "configmap1"
+        data:
+          copy-key: "{related.data.key1}"
+  relatedResources:
+    - name: related
+      apiVersion: v1
+      kind: ConfigMap
+      namespace: default
+      resourceNames: ["related-configmap"]
+
+

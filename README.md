@@ -169,6 +169,7 @@ spec:
                       protocol: TCP
                         
     - name: mutation_hook_config
+      clusterScoped: true
       # dependsOn relation means, that the resource will be reconciled only if all
       # the listed resources are already reconciled and ready (if ready post-condition is present).
       # This resource will be applied after the service and deployment are applied,

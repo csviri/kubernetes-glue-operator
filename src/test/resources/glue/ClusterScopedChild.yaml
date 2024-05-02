@@ -1,0 +1,18 @@
+apiVersion: io.csviri.operator.glue/v1beta1
+kind: Glue
+metadata:
+  name: "testglue"
+spec:
+  childResources:
+    - name: namespace
+      clusterScoped: true
+      resource:
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: "testnamespace"
+
+
+
+
+
