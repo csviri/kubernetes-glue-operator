@@ -6,7 +6,9 @@ public class Parent {
 
   private String apiVersion;
   private String kind;
+  private boolean clusterScoped = false;
   private String labelSelector;
+
 
   public Parent() {}
 
@@ -41,6 +43,14 @@ public class Parent {
     this.labelSelector = labelSelector;
   }
 
+  public boolean isClusterScoped() {
+    return clusterScoped;
+  }
+
+  public void setClusterScoped(boolean clusterScoped) {
+    this.clusterScoped = clusterScoped;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o)
@@ -48,12 +58,12 @@ public class Parent {
     if (o == null || getClass() != o.getClass())
       return false;
     Parent parent = (Parent) o;
-    return Objects.equals(apiVersion, parent.apiVersion) && Objects.equals(kind, parent.kind)
-        && Objects.equals(labelSelector, parent.labelSelector);
+    return clusterScoped == parent.clusterScoped && Objects.equals(apiVersion, parent.apiVersion)
+        && Objects.equals(kind, parent.kind) && Objects.equals(labelSelector, parent.labelSelector);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(apiVersion, kind, labelSelector);
+    return Objects.hash(apiVersion, kind, clusterScoped, labelSelector);
   }
 }

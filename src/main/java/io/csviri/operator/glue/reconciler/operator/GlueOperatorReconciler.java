@@ -118,9 +118,9 @@ public class GlueOperatorReconciler
     parentRelatedSpec.setKind(parent.getKind());
     parentRelatedSpec.setResourceNames(List.of(targetParentResource.getMetadata().getName()));
     parentRelatedSpec.setNamespace(targetParentResource.getMetadata().getNamespace());
+    parentRelatedSpec.setClusterScoped(glueOperator.getSpec().getParent().isClusterScoped());
 
     glue.getSpec().getRelatedResources().add(parentRelatedSpec);
-
     glue.addOwnerReference(targetParentResource);
     return glue;
   }

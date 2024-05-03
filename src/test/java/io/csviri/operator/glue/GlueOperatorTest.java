@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.glue.customresource.TestCustomResource;
@@ -191,8 +190,6 @@ class GlueOperatorTest extends TestBase {
     });
   }
 
-
-  @Disabled
   @Test
   void secretCopySample() {
     var secret = TestUtils.load("/sample/secretcopy/secret-to-copy.yaml", Secret.class);
@@ -205,12 +202,23 @@ class GlueOperatorTest extends TestBase {
       var namespaces = client.namespaces().list().getItems();
       namespaces.forEach(ns -> {
         var copiedSecret =
-            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret");
+            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret")
+                .get();
         assertThat(copiedSecret).isNotNull();
+        assertThat(copiedSecret.getData().get("shared-password"))
+            .isEqualTo(secret.getData().get("password"));
       });
     });
 
-
+    delete(go);
+    await().untilAsserted(() -> {
+      var namespaces = client.namespaces().list().getItems();
+      namespaces.forEach(ns -> {
+        var copiedSecret =
+            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret");
+        assertThat(copiedSecret).isNull();
+      });
+    });
   }
 
 
