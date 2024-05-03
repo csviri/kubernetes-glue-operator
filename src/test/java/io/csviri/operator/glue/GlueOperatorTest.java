@@ -17,6 +17,8 @@ import io.csviri.operator.glue.customresource.operator.Parent;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.ConfigMap;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
+import io.fabric8.kubernetes.api.model.Secret;
+import io.fabric8.kubernetes.client.dsl.NonDeletingOperation;
 import io.quarkus.test.junit.QuarkusTest;
 
 import static io.csviri.operator.glue.TestData.*;
@@ -193,8 +195,22 @@ class GlueOperatorTest extends TestBase {
   @Disabled
   @Test
   void secretCopySample() {
-    create(TestUtils
-        .loadGlueOperator("/glueoperator/ParentLabelSelector.yaml"));
+    var secret = TestUtils.load("/sample/secretcopy/secret-to-copy.yaml", Secret.class);
+    client.resource(secret).createOr(NonDeletingOperation::update);
+
+    var go = create(TestUtils
+        .loadGlueOperator("/sample/secretcopy/secret-copy.operator.yaml"));
+
+    await().untilAsserted(() -> {
+      var namespaces = client.namespaces().list().getItems();
+      namespaces.forEach(ns -> {
+        var copiedSecret =
+            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret");
+        assertThat(copiedSecret).isNotNull();
+      });
+    });
+
+
   }
 
 
