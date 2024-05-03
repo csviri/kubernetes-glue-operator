@@ -131,7 +131,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Glue> context,
       Glue primary) {
-
     context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
       String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
       // dependent name is null for related resources

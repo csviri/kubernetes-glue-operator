@@ -16,6 +16,7 @@ import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
@@ -94,12 +95,10 @@ public class GlueOperatorReconciler
       GlueOperator glueOperator) {
     var glue = new Glue();
 
-    glue.setMetadata(new ObjectMetaBuilder()
-        .withName(
-            glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
-        .withNamespace(targetParentResource.getMetadata().getNamespace())
-        .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE))
-        .build());
+    ObjectMeta glueMetadata = glueMetadata(glueOperator, targetParentResource);
+
+
+    glue.setMetadata(glueMetadata);
     glue.setSpec(toWorkflowSpec(glueOperator.getSpec()));
 
     if (!defaultGlueLabels.isEmpty()) {
@@ -118,6 +117,20 @@ public class GlueOperatorReconciler
 
     glue.addOwnerReference(targetParentResource);
     return glue;
+  }
+
+  private ObjectMeta glueMetadata(GlueOperator glueOperator,
+      GenericKubernetesResource targetParentResource) {
+
+    ObjectMetaBuilder objectMetaBuilder = new ObjectMetaBuilder();
+
+    objectMetaBuilder.withName(
+        glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
+        .withNamespace(targetParentResource.getMetadata().getNamespace());
+
+    objectMetaBuilder
+        .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE));
+    return objectMetaBuilder.build();
   }
 
   private GlueSpec toWorkflowSpec(GlueOperatorSpec spec) {
