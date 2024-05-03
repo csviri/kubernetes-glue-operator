@@ -15,6 +15,7 @@ import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
+import io.csviri.operator.glue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
@@ -27,7 +28,6 @@ import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
 
 import static io.csviri.operator.glue.reconciler.glue.GlueReconciler.GLUE_RECONCILER_NAME;
 
@@ -43,18 +43,24 @@ public class GlueOperatorReconciler
   public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
   public static final String GLUE_OPERATOR_RECONCILER_NAME = "glue-operator";
 
-  @Inject
-  ValidationAndErrorHandler validationAndErrorHandler;
-
   @ConfigProperty(name = "quarkus.operator-sdk.controllers." + GLUE_RECONCILER_NAME + ".selector")
   Optional<String> glueLabelSelector;
 
-  @Inject
-  ControllerConfig controllerConfig;
+  private final ControllerConfig controllerConfig;
+  private final ValidationAndErrorHandler validationAndErrorHandler;
+  private final GenericTemplateHandler genericTemplateHandler;
 
   private Map<String, String> defaultGlueLabels;
 
   private InformerEventSource<Glue, GlueOperator> glueEventSource;
+
+  public GlueOperatorReconciler(ControllerConfig controllerConfig,
+      ValidationAndErrorHandler validationAndErrorHandler,
+      GenericTemplateHandler genericTemplateHandler) {
+    this.controllerConfig = controllerConfig;
+    this.validationAndErrorHandler = validationAndErrorHandler;
+    this.genericTemplateHandler = genericTemplateHandler;
+  }
 
   @PostConstruct
   void init() {
@@ -120,13 +126,24 @@ public class GlueOperatorReconciler
   }
 
   private ObjectMeta glueMetadata(GlueOperator glueOperator,
-      GenericKubernetesResource targetParentResource) {
+      GenericKubernetesResource parent) {
 
     ObjectMetaBuilder objectMetaBuilder = new ObjectMetaBuilder();
 
-    objectMetaBuilder.withName(
-        glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
-        .withNamespace(targetParentResource.getMetadata().getNamespace());
+    var glueMeta = glueOperator.getSpec().getGlueMetadata();
+    if (glueMeta != null) {
+      // todo optimize
+      var data = Map.of(PARENT_RELATED_RESOURCE_NAME, parent);
+      var glueName = genericTemplateHandler.processInputAndTemplate(data, glueMeta.getName());
+      var glueNamespace =
+          genericTemplateHandler.processInputAndTemplate(data, glueMeta.getNamespace());
+      objectMetaBuilder.withName(glueName);
+      objectMetaBuilder.withName(glueNamespace);
+    } else {
+      objectMetaBuilder.withName(
+          glueName(parent.getMetadata().getName(), parent.getKind()))
+          .withNamespace(parent.getMetadata().getNamespace());
+    }
 
     objectMetaBuilder
         .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE));

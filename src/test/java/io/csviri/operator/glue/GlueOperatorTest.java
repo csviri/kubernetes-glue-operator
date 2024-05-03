@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import io.csviri.operator.glue.customresource.TestCustomResource;
@@ -189,9 +190,11 @@ class GlueOperatorTest extends TestBase {
   }
 
 
+  @Disabled
   @Test
   void secretCopySample() {
-
+    create(TestUtils
+        .loadGlueOperator("/glueoperator/ParentLabelSelector.yaml"));
   }
 
 

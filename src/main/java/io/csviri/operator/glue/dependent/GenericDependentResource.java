@@ -25,20 +25,24 @@ public class GenericDependentResource
   private final boolean clusterScoped;
 
   // optimize share between instances
-  private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
+  private final GenericTemplateHandler genericTemplateHandler;
 
-  public GenericDependentResource(GenericKubernetesResource desired, String name,
+  public GenericDependentResource(GenericTemplateHandler genericTemplateHandler,
+      GenericKubernetesResource desired, String name,
       boolean clusterScoped) {
     super(new GroupVersionKind(desired.getApiVersion(), desired.getKind()));
     this.desired = desired;
     this.desiredTemplate = null;
     this.name = name;
     this.clusterScoped = clusterScoped;
+    this.genericTemplateHandler = genericTemplateHandler;
   }
 
-  public GenericDependentResource(String desiredTemplate, String name, boolean clusterScoped) {
+  public GenericDependentResource(GenericTemplateHandler genericTemplateHandler,
+      String desiredTemplate, String name, boolean clusterScoped) {
     super(new GroupVersionKind(Utils.getApiVersionFromTemplate(desiredTemplate),
         Utils.getKindFromTemplate(desiredTemplate)));
+    this.genericTemplateHandler = genericTemplateHandler;
     this.name = name;
     this.desiredTemplate = desiredTemplate;
     this.desired = null;

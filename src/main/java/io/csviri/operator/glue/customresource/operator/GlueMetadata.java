@@ -4,8 +4,8 @@ import java.util.Objects;
 
 public class GlueMetadata {
 
-  String name;
-  String namespace;
+  private String name;
+  private String namespace;
 
   public String getName() {
     return name;
