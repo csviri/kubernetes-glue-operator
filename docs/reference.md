@@ -91,9 +91,9 @@ The specs of `GlueOperator` are almost identical to `Glue`, it just adds some ad
    - **`apiVersion`** and **`kind`** - of the target custom resources.
    - **`labelSelector`** - optional label selector for the target resources.
    - **`clusterScoped`** - optional boolean value, if the parent resource is cluster scoped. Default is `false`.
- - **`glueMetadata`** - you can customize the `Glue` resource created for each parent resource. 
-    This is especially important when the parent is a cluster scoped resource. Using this
-    you can specify the **`name`** and **`namespace`** of the created `Glue`.
+ - **`glueMetadata`** - optionally, you can customize the `Glue` resource created for each parent resource. 
+    This is especially important when the parent is a cluster scoped resource - in that case it is mandatory to set. 
+    Using this you can specify the **`name`** and **`namespace`** of the created `Glue`.
     See usage on the sample [secret-copy-operator](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/sample/secretcopy/secret-copy.operator.yaml#L10-L12). 
 
 See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/SimpleGlueOperator.yaml).
