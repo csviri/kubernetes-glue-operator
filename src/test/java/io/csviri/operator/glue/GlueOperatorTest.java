@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import io.csviri.operator.glue.customresource.TestCustomResource;
 import io.csviri.operator.glue.customresource.TestCustomResource2;
 import io.csviri.operator.glue.customresource.glue.DependentResourceSpec;
+import io.csviri.operator.glue.customresource.glue.Glue;
 import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.Parent;
@@ -28,6 +29,8 @@ import static org.awaitility.Awaitility.await;
 
 @QuarkusTest
 class GlueOperatorTest extends TestBase {
+
+  public static final String COPIED_SECRET_NAME = "copied-secret";
 
   @BeforeEach
   void applyCRD() {
@@ -202,7 +205,7 @@ class GlueOperatorTest extends TestBase {
       var namespaces = client.namespaces().list().getItems();
       namespaces.forEach(ns -> {
         var copiedSecret =
-            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret")
+            client.secrets().inNamespace(ns.getMetadata().getName()).withName(COPIED_SECRET_NAME)
                 .get();
         assertThat(copiedSecret).isNotNull();
         assertThat(copiedSecret.getData().get("shared-password"))
@@ -211,12 +214,17 @@ class GlueOperatorTest extends TestBase {
     });
 
     delete(go);
+    client.namespaces().list().getItems().forEach(ns -> {
+      client.resources(Glue.class)
+          .inNamespace(ns.getMetadata().getName()).withName("copied-secret-glue").delete();
+      client.secrets()
+          .inNamespace(ns.getMetadata().getName()).withName(COPIED_SECRET_NAME).delete();
+    });
     await().untilAsserted(() -> {
-      var namespaces = client.namespaces().list().getItems();
-      namespaces.forEach(ns -> {
-        var copiedSecret =
-            client.secrets().inNamespace(ns.getMetadata().getName()).withName("copied-secret");
-        assertThat(copiedSecret).isNull();
+      client.namespaces().list().getItems().forEach(ns -> {
+        var g = client.resources(Glue.class)
+            .inNamespace(ns.getMetadata().getName()).withName("copied-glue-secret").get();
+        assertThat(g).isNull();
       });
     });
   }

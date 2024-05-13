@@ -132,13 +132,13 @@ public class GlueOperatorReconciler
 
     var glueMeta = glueOperator.getSpec().getGlueMetadata();
     if (glueMeta != null) {
-      // todo optimize
+      // optimize
       var data = Map.of(PARENT_RELATED_RESOURCE_NAME, parent);
       var glueName = genericTemplateHandler.processInputAndTemplate(data, glueMeta.getName());
       var glueNamespace =
           genericTemplateHandler.processInputAndTemplate(data, glueMeta.getNamespace());
       objectMetaBuilder.withName(glueName);
-      objectMetaBuilder.withName(glueNamespace);
+      objectMetaBuilder.withNamespace(glueNamespace);
     } else {
       objectMetaBuilder.withName(
           glueName(parent.getMetadata().getName(), parent.getKind()))
