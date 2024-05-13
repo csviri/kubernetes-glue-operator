@@ -15,7 +15,9 @@ import io.csviri.operator.glue.customresource.operator.GlueOperator;
 import io.csviri.operator.glue.customresource.operator.GlueOperatorSpec;
 import io.csviri.operator.glue.customresource.operator.ResourceFlowOperatorStatus;
 import io.csviri.operator.glue.reconciler.ValidationAndErrorHandler;
+import io.csviri.operator.glue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.ObjectMetaBuilder;
 import io.fabric8.kubernetes.client.utils.KubernetesResourceUtil;
 import io.javaoperatorsdk.operator.api.config.informer.InformerConfiguration;
@@ -26,7 +28,6 @@ import io.javaoperatorsdk.operator.processing.event.source.EventSource;
 import io.javaoperatorsdk.operator.processing.event.source.informer.InformerEventSource;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.inject.Inject;
 
 import static io.csviri.operator.glue.reconciler.glue.GlueReconciler.GLUE_RECONCILER_NAME;
 
@@ -42,18 +43,24 @@ public class GlueOperatorReconciler
   public static final String PARENT_RELATED_RESOURCE_NAME = "parent";
   public static final String GLUE_OPERATOR_RECONCILER_NAME = "glue-operator";
 
-  @Inject
-  ValidationAndErrorHandler validationAndErrorHandler;
-
   @ConfigProperty(name = "quarkus.operator-sdk.controllers." + GLUE_RECONCILER_NAME + ".selector")
   Optional<String> glueLabelSelector;
 
-  @Inject
-  ControllerConfig controllerConfig;
+  private final ControllerConfig controllerConfig;
+  private final ValidationAndErrorHandler validationAndErrorHandler;
+  private final GenericTemplateHandler genericTemplateHandler;
 
   private Map<String, String> defaultGlueLabels;
 
   private InformerEventSource<Glue, GlueOperator> glueEventSource;
+
+  public GlueOperatorReconciler(ControllerConfig controllerConfig,
+      ValidationAndErrorHandler validationAndErrorHandler,
+      GenericTemplateHandler genericTemplateHandler) {
+    this.controllerConfig = controllerConfig;
+    this.validationAndErrorHandler = validationAndErrorHandler;
+    this.genericTemplateHandler = genericTemplateHandler;
+  }
 
   @PostConstruct
   void init() {
@@ -94,12 +101,10 @@ public class GlueOperatorReconciler
       GlueOperator glueOperator) {
     var glue = new Glue();
 
-    glue.setMetadata(new ObjectMetaBuilder()
-        .withName(
-            glueName(targetParentResource.getMetadata().getName(), targetParentResource.getKind()))
-        .withNamespace(targetParentResource.getMetadata().getNamespace())
-        .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE))
-        .build());
+    ObjectMeta glueMetadata = glueMetadata(glueOperator, targetParentResource);
+
+
+    glue.setMetadata(glueMetadata);
     glue.setSpec(toWorkflowSpec(glueOperator.getSpec()));
 
     if (!defaultGlueLabels.isEmpty()) {
@@ -113,11 +118,36 @@ public class GlueOperatorReconciler
     parentRelatedSpec.setKind(parent.getKind());
     parentRelatedSpec.setResourceNames(List.of(targetParentResource.getMetadata().getName()));
     parentRelatedSpec.setNamespace(targetParentResource.getMetadata().getNamespace());
+    parentRelatedSpec.setClusterScoped(glueOperator.getSpec().getParent().isClusterScoped());
 
     glue.getSpec().getRelatedResources().add(parentRelatedSpec);
-
     glue.addOwnerReference(targetParentResource);
     return glue;
+  }
+
+  private ObjectMeta glueMetadata(GlueOperator glueOperator,
+      GenericKubernetesResource parent) {
+
+    ObjectMetaBuilder objectMetaBuilder = new ObjectMetaBuilder();
+
+    var glueMeta = glueOperator.getSpec().getGlueMetadata();
+    if (glueMeta != null) {
+      // optimize
+      var data = Map.of(PARENT_RELATED_RESOURCE_NAME, parent);
+      var glueName = genericTemplateHandler.processInputAndTemplate(data, glueMeta.getName());
+      var glueNamespace =
+          genericTemplateHandler.processInputAndTemplate(data, glueMeta.getNamespace());
+      objectMetaBuilder.withName(glueName);
+      objectMetaBuilder.withNamespace(glueNamespace);
+    } else {
+      objectMetaBuilder.withName(
+          glueName(parent.getMetadata().getName(), parent.getKind()))
+          .withNamespace(parent.getMetadata().getNamespace());
+    }
+
+    objectMetaBuilder
+        .withLabels(Map.of(FOR_GLUE_OPERATOR_LABEL_KEY, FOR_GLUE_OPERATOR_LABEL_VALUE));
+    return objectMetaBuilder.build();
   }
 
   private GlueSpec toWorkflowSpec(GlueOperatorSpec spec) {

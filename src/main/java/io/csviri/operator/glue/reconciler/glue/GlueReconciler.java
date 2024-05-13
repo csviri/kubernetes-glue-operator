@@ -49,13 +49,14 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   private final KubernetesResourceDeletedCondition deletePostCondition =
       new KubernetesResourceDeletedCondition();
 
-  private final GenericTemplateHandler genericTemplateHandler = new GenericTemplateHandler();
-
+  private final GenericTemplateHandler genericTemplateHandler;
 
   public GlueReconciler(ValidationAndErrorHandler validationAndErrorHandler,
-      InformerRegister informerRegister) {
+      InformerRegister informerRegister,
+      GenericTemplateHandler genericTemplateHandler) {
     this.validationAndErrorHandler = validationAndErrorHandler;
     this.informerRegister = informerRegister;
+    this.genericTemplateHandler = genericTemplateHandler;
   }
 
   /**
@@ -131,7 +132,6 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
   // todo test
   private void cleanupRemovedResourcesFromWorkflow(Context<Glue> context,
       Glue primary) {
-
     context.getSecondaryResources(GenericKubernetesResource.class).forEach(r -> {
       String dependentName = r.getMetadata().getAnnotations().get(DEPENDENT_NAME_ANNOTATION_KEY);
       // dependent name is null for related resources
@@ -200,21 +200,23 @@ public class GlueReconciler implements Reconciler<Glue>, Cleaner<Glue>, ErrorSta
         .ifPresent(c -> builder.withReconcilePrecondition(toCondition(c)));
   }
 
-  private static GenericDependentResource createDependentResource(DependentResourceSpec spec,
+  private GenericDependentResource createDependentResource(DependentResourceSpec spec,
       boolean leafDependent, Boolean resourceInSameNamespaceAsPrimary) {
 
     if (leafDependent && resourceInSameNamespaceAsPrimary && !spec.isClusterScoped()) {
       return spec.getResourceTemplate() != null
-          ? new GCGenericDependentResource(spec.getResourceTemplate(), spec.getName(),
+          ? new GCGenericDependentResource(genericTemplateHandler, spec.getResourceTemplate(),
+              spec.getName(),
               spec.isClusterScoped())
-          : new GCGenericDependentResource(spec.getResource(), spec.getName(),
+          : new GCGenericDependentResource(genericTemplateHandler, spec.getResource(),
+              spec.getName(),
               spec.isClusterScoped());
     } else {
       return spec.getResourceTemplate() != null
-          ? new GenericDependentResource(spec.getResourceTemplate(), spec.getName(),
-              spec.isClusterScoped())
-          : new GenericDependentResource(spec.getResource(), spec.getName(),
-              spec.isClusterScoped());
+          ? new GenericDependentResource(genericTemplateHandler,
+              spec.getResourceTemplate(), spec.getName(), spec.isClusterScoped())
+          : new GenericDependentResource(genericTemplateHandler,
+              spec.getResource(), spec.getName(), spec.isClusterScoped());
     }
   }
 

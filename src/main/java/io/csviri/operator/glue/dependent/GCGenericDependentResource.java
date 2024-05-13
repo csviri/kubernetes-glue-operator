@@ -1,18 +1,21 @@
 package io.csviri.operator.glue.dependent;
 
 import io.csviri.operator.glue.customresource.glue.Glue;
+import io.csviri.operator.glue.templating.GenericTemplateHandler;
 import io.fabric8.kubernetes.api.model.GenericKubernetesResource;
 import io.javaoperatorsdk.operator.api.reconciler.dependent.GarbageCollected;
 
 public class GCGenericDependentResource extends GenericDependentResource
     implements GarbageCollected<Glue> {
 
-  public GCGenericDependentResource(GenericKubernetesResource desired, String name,
+  public GCGenericDependentResource(GenericTemplateHandler genericTemplateHandler,
+      GenericKubernetesResource desired, String name,
       boolean clusterScoped) {
-    super(desired, name, clusterScoped);
+    super(genericTemplateHandler, desired, name, clusterScoped);
   }
 
-  public GCGenericDependentResource(String desiredTemplate, String name, boolean clusterScoped) {
-    super(desiredTemplate, name, clusterScoped);
+  public GCGenericDependentResource(GenericTemplateHandler genericTemplateHandler,
+      String desiredTemplate, String name, boolean clusterScoped) {
+    super(genericTemplateHandler, desiredTemplate, name, clusterScoped);
   }
 }

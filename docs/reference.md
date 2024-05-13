@@ -84,12 +84,17 @@ The `DependentResource` implementation of JOSDK makes all kinds of optimizations
 
 ## [GlueOperator resource](https://github.com/csviri/kubernetes-glue-operator/releases/latest/download/glueoperators.glue-v1.yml)
 
-The specs of `GlueOperator` are almost identical to `Glue`, it just adds one additional attribute **`parent`**, 
-which has the following sub-attributes: 
- - **`apiVersion`** and **`kind`** - specifies the resources to reconciler according to the spec. 
-   Targets are usually custom resources but not necessarily, it also works with built-in Kubernetes
-   resources.
- - **`labelSelector`** - an optional label selector for the target resources
+The specs of `GlueOperator` are almost identical to `Glue`, it just adds some additional attributes: 
+ 
+ - **`parent`** - specifies the resources handled by the operator. Targets are usually custom resources but not necessarily,
+     it also works with built-in Kubernetes resources. With the following sub-attributes:
+   - **`apiVersion`** and **`kind`** - of the target custom resources.
+   - **`labelSelector`** - optional label selector for the target resources.
+   - **`clusterScoped`** - optional boolean value, if the parent resource is cluster scoped. Default is `false`.
+ - **`glueMetadata`** - optionally, you can customize the `Glue` resource created for each parent resource. 
+    This is especially important when the parent is a cluster scoped resource - in that case it is mandatory to set. 
+    Using this you can specify the **`name`** and **`namespace`** of the created `Glue`.
+    See usage on the sample [secret-copy-operator](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/sample/secretcopy/secret-copy.operator.yaml#L10-L12). 
 
 See minimal `GlueOperator` [here](https://github.com/csviri/kubernetes-glue-operator/blob/main/src/test/resources/glueoperator/SimpleGlueOperator.yaml).
 

@@ -10,6 +10,8 @@ public class GlueOperatorSpec extends GlueSpec {
   @Required
   private Parent parent;
 
+  private GlueMetadata glueMetadata;
+
   public Parent getParent() {
     return parent;
   }
@@ -17,6 +19,14 @@ public class GlueOperatorSpec extends GlueSpec {
   public GlueOperatorSpec setParent(Parent parent) {
     this.parent = parent;
     return this;
+  }
+
+  public GlueMetadata getGlueMetadata() {
+    return glueMetadata;
+  }
+
+  public void setGlueMetadata(GlueMetadata glueMetadata) {
+    this.glueMetadata = glueMetadata;
   }
 
   @Override
@@ -28,12 +38,11 @@ public class GlueOperatorSpec extends GlueSpec {
     if (!super.equals(o))
       return false;
     GlueOperatorSpec that = (GlueOperatorSpec) o;
-    return Objects.equals(parent, that.parent);
+    return Objects.equals(parent, that.parent) && Objects.equals(glueMetadata, that.glueMetadata);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(super.hashCode(), parent);
+    return Objects.hash(super.hashCode(), parent, glueMetadata);
   }
-
 }
