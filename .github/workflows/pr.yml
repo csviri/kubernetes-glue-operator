@@ -47,10 +47,10 @@ jobs:
           java-version: 21
           cache: 'maven'
       - name: Setup minikube for E2E tests
-        uses: manusa/actions-setup-minikube@v2.12.0
+        uses: manusa/actions-setup-minikube@v2.13.0
         with:
-          minikube version: v1.32.0
-          kubernetes version: v1.29.1
+          minikube version: v1.34.0
+          kubernetes version: v1.31.1
           github token: ${{ secrets.GITHUB_TOKEN }}
           driver: docker
       - name: Run E2E tests
